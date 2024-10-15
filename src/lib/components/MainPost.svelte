@@ -61,6 +61,7 @@
 						{#await getImagePromise(content.data)}
 							<p>Loading...</p>
 						{:then src}
+							<!-- svelte-ignore a11y_missing_attribute -->
 							<img class="h-full object-contain" {src} />
 						{:catch}
 							<pre
@@ -75,7 +76,7 @@
 		{#if data.content.length > 1}
 			<div class="flex justify-center w-full">
 				{#each data.content as _, i}
-					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 					<span
 						onclick={() => {
 							const id = data.id + "_" + i;
