@@ -21,7 +21,7 @@
 </script>
 
 <ModeWatcher />
-<div class="flex w-[100vw] h-[100vh] flex-col-reverse md:flex-row">
+<div class="flex w-[100dvw] h-[100dvh] flex-col-reverse md:flex-row">
 	<div class="flex flex-col-reverse md:flex-col justify-between">
 		<ActionBar />
 		<ConnectDialog />
