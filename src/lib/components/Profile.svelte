@@ -30,8 +30,8 @@
 	};
 </script>
 
-<div class="flex flex-col">
-	<div class="flex my-3 w-full max-w-[600px] justify-between items-baseline">
+<div class="flex flex-col w-full items-center m-3">
+	<div class="flex my-3 w-full max-w-[500px] justify-between items-baseline">
 		<Button
 			variant="outline"
 			size="icon"
@@ -49,7 +49,7 @@
 			<span class="sr-only">Toggle theme</span>
 		</Button>
 	</div>
-	<div class="w-full">
+	<div class="w-full max-w-[500px]">
 		<Card class="my-5 w-full">
 			<CardHeader class="flex items-center">
 				<Avatar>
@@ -61,7 +61,7 @@
 			</CardContent>
 		</Card>
 	</div>
-	<div class="w-full">
+	<div class="w-full max-w-[500px]">
 		{#if postIds}
 			{#each postIds as id}
 				{#await fetchData(id)}

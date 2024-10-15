@@ -43,7 +43,7 @@
 			>
 		{/if}
 		<div
-			class="inline-flex w-full overflow-x-scroll scroll-smooth snap-x snap-mandatory max-h-[70vh]"
+			class="inline-flex w-full overflow-x-scroll scroll-smooth snap-x snap-mandatory max-h-[60vh]"
 		>
 			{#each data.content as content, i}
 				<div
