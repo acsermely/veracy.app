@@ -1,0 +1,21 @@
+{
+	"svelte.plugin.svelte.compilerWarnings": {
+		"a11y_missing_attribute": "ignore",
+		"a11y_click_events_have_key_events": "ignore",
+		"a11y_interactive_supports_focus": "ignore",
+	},
+	"[svelte]": {
+		"editor.defaultFormatter": "svelte.svelte-vscode",
+		"editor.tabSize": 4
+	},
+	"[javascript]": {
+		"editor.tabSize": 4
+	},
+	"editor.formatOnSave": true,
+	"editor.codeActionsOnSave": {
+		"source.organizeImports": "always"
+	},
+	"editor.tabSize": 4,
+	"editor.insertSpaces": false,
+	"editor.detectIndentation": false,
+}
