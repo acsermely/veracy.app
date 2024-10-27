@@ -1,21 +1,25 @@
 import Arweave from "arweave";
-import type { State } from "arweave-wallet-connector";
-import { ArweaveWebWallet } from "arweave-wallet-connector";
+import { ArweaveWebWallet, type State } from "arweave-wallet-connector";
 import { getContext, setContext } from "svelte";
 
 export class WalletState {
   isConnected = $state<boolean>(false);
   address = $state<string>("");
 
+  wallet = $state<any>();
+
   state = $state<Partial<State>>({
     url: "arweave.app",
   });
-  wallet = $state<any>();
+
+  constructor() {
+    this.address = localStorage.getItem(PREV_WALLET_ADDRESS) || "";
+  }
 
   connectWeb = async (): Promise<void> => {
     const wallet = new ArweaveWebWallet(
       {
-        name: "Permit_v0",
+        name: "Veracy",
       },
       {
         state: this.state,
@@ -27,6 +31,8 @@ export class WalletState {
         this.wallet = wallet;
         this.address = this.wallet.address;
         this.isConnected = true;
+        localStorage.setItem(PREV_WALLET_ADDRESS, this.address);
+        return;
       });
       wallet.on("disconnect", () => {
         console.log("disconnect");
@@ -67,6 +73,7 @@ export class WalletState {
 }
 
 const WALLET_STATE_KEY = "wallet-state-key";
+const PREV_WALLET_ADDRESS = "previous-wallet-address";
 
 export function setWalletState(): WalletState {
   return setContext(WALLET_STATE_KEY, new WalletState());
