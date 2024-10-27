@@ -139,6 +139,28 @@ export class ContentNode {
       })
       .then((data) => data.text());
   };
+
+  uploadImage = async (
+	id: string,
+	walletId: string,
+	imageDataURL: string,
+): Promise<string> => {
+	const formData = new FormData();
+	formData.append("id", id);
+	formData.append("walletId", walletId);
+	formData.append("image", imageDataURL);
+
+	return fetch(`${this.url}/upload`, {
+		method: "POST",
+		credentials: "include",
+		body: formData,
+	}).then((response) => {
+		if (!response.ok) {
+			throw new Error("Failed to upload image.");
+		}
+		return response.text();
+	});
+};
 }
 
 const NODE_STATE_KEY = "node-state-key";

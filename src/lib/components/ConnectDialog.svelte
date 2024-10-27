@@ -114,7 +114,6 @@
       challange = await response
         .arrayBuffer()
         .then((challange) => {
-          console.log(challange);
           return walletState.wallet.decrypt(new Uint8Array(challange), {
             name: "RSA-OAEP",
           });

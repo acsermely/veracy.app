@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Loader } from "lucide-svelte";
   import { link } from "svelte-routing";
   import type { Post } from "../model/post.model";
   import { setContentNodeState } from "../state/node.svelte";
@@ -41,19 +42,27 @@
         >
           {#if content.type === "TEXT"}
             <pre
-              class="min-w-full p-5 border-y-2"
+              class="min-w-full p-5 border-y-2 text-wrap"
               class:text-left={content.align === "left"}
               class:text-center={content.align === "center"}
               class:text-right={content.align ===
                 "right"}>{content.data.trim()}</pre>
           {:else}
             {#await getImagePromise(content.data)}
-              <p>Loading...</p>
+              <div
+                class="flex-1 flex w-full h-full items-center justify-center"
+              >
+                <Loader class="size-10 animate-spin text-secondary" />
+              </div>
             {:then src}
               <img class="h-full object-contain" {src} alt={"image_" + i} />
-            {:catch}
-              <pre
-                class="min-w-full p-5 flex items-center justify-center">ERROR</pre>
+            {:catch e}
+              <div
+                class="min-w-full p-5 flex items-center justify-center text-destructive"
+              >
+                {e} <br />
+                Check your connection!
+              </div>
             {/await}
           {/if}
         </div>

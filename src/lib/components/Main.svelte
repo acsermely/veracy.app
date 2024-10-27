@@ -4,6 +4,7 @@
   import type { Post } from "../model/post.model";
   import { getFeedState } from "../state/feed.svelte";
   import MainPost from "./MainPost.svelte";
+  import Button from "./ui/button/button.svelte";
   import CardContent from "./ui/card/card-content.svelte";
   import CardHeader from "./ui/card/card-header.svelte";
   import Card from "./ui/card/card.svelte";
@@ -42,4 +43,7 @@
       <Loader class="size-10 animate-spin" />
     </div>
   {/if}
+  <div class="my-3 w-full flex flex-col">
+    <Button variant="ghost" class="w-full" disabled>More...</Button>
+  </div>
 </div>
