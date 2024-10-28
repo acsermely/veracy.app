@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { Server } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
+	import { getDialogsState } from "../state/dialogs.svelte";
 	import { getFeedState } from "../state/feed.svelte";
 	import { getContentNodeState } from "../state/node.svelte";
 	import { getWalletState } from "../state/wallet.svelte";
@@ -16,14 +18,49 @@
 	const feedState = getFeedState();
 	const walletState = getWalletState();
 	const nodeState = getContentNodeState();
+	const dialogsState = getDialogsState();
 
 	$effect(() => {
 		url = nodeState.url;
 	});
-	let open = $state(false);
 	let url = $state("");
 
 	let errorMessage = $state("");
+
+	async function onWalletConnect() {
+		let failed: "token" | "login" | undefined;
+		try {
+			await walletState.connectWeb();
+			console.log("Connect: Wallet Connected");
+		} catch {
+			errorMessage = "Couldn't connect wallet";
+			return;
+		}
+		try {
+			await nodeState.loginCheck();
+			console.log("Connect: Login check");
+			return;
+		} catch {
+			failed = "token";
+		}
+		if (!failed) {
+			return;
+		}
+		try {
+			await loginKey();
+			console.log("Connect: Login key");
+			return;
+		} catch {
+			failed = "login";
+		}
+		if (!failed) {
+			return;
+		}
+
+		errorMessage = "No Registered Account";
+		toast.warning("Create an Account!", { description: errorMessage });
+		walletState.needRegistraion = true;
+	}
 
 	async function registerKey(): Promise<void> {
 		errorMessage = "";
@@ -36,7 +73,7 @@
 		} catch (e) {
 			errorMessage = "Failed to get your key! Try again!";
 			console.error(e);
-			return;
+			throw errorMessage;
 		}
 
 		let challange = "";
@@ -57,14 +94,14 @@
 				errorMessage = "Failed to Register Wallet! Try again!";
 			}
 			console.error(e);
-			return;
+			throw errorMessage;
 		}
-
+		toast.success("Successful registration!");
 		try {
 			challange = await response
 				.arrayBuffer()
 				.then((challange) => {
-					toast.info("Approve Login in your Wallet!", {
+					toast.warning("Approve Login in your Wallet!", {
 						description: "Switch to the Wallet Browser Tab",
 					});
 					return walletState.wallet.decrypt(
@@ -84,7 +121,7 @@
 		} catch (e) {
 			errorMessage = "Failed to get your key! Try again!";
 			console.error(e);
-			return;
+			throw errorMessage;
 		}
 
 		try {
@@ -96,7 +133,7 @@
 		} catch (e) {
 			errorMessage = "Unauthorized!";
 			console.error(e);
-			return;
+			throw errorMessage;
 		}
 
 		feedState.queryData();
@@ -105,7 +142,7 @@
 	async function loginKey(): Promise<void> {
 		errorMessage = "";
 		if (!url || !walletState.address) {
-			return;
+			throw "No URL or Wallet Address";
 		}
 
 		let response: Response;
@@ -124,7 +161,7 @@
 				errorMessage = "Couldn't get challange!";
 			}
 			console.error(e);
-			return;
+			throw errorMessage;
 		}
 
 		let challange: string;
@@ -149,7 +186,7 @@
 		} catch (e) {
 			errorMessage = "Couldn't decode challange!";
 			console.error(e);
-			return;
+			throw errorMessage;
 		}
 
 		try {
@@ -164,20 +201,22 @@
 		} catch (e) {
 			errorMessage = "Unauthorized!";
 			console.error(e);
-			return;
+			throw errorMessage;
 		}
-
+		toast.success("Logged in!");
 		feedState.queryData();
 	}
 </script>
 
 {#if !walletState.isConnected || !nodeState.isConnected}
-	<Dialog bind:open>
+	<Dialog bind:open={dialogsState.connectDialog}>
 		{#if !walletState.isConnected}
 			<DialogTrigger
-				class={buttonVariants({ variant: "destructive" }) + " h-[10vh]"}
-				>Connect</DialogTrigger
+				class={buttonVariants({ variant: "destructive" }) + " gap-2"}
 			>
+				<Server />
+				Connect
+			</DialogTrigger>
 		{:else}
 			<DialogTrigger
 				class={buttonVariants({ variant: "secondary" }) + " h-[10vh]"}
@@ -188,18 +227,25 @@
 			<DialogHeader>
 				<DialogTitle>Connect</DialogTitle>
 				<DialogDescription>
-					Connect to your Wallet and Content Node
+					User you wallet to login to you account.
 				</DialogDescription>
 			</DialogHeader>
 			<div class="flex w-full flex-col">
 				<Button
-					class="m-3 mx-6"
+					class="my-3"
 					disabled={walletState.isConnected}
-					onclick={() => walletState.connectWeb()}
-					>Connect Wallet</Button
+					onclick={() => onWalletConnect()}>Connect</Button
 				>
+				{#if !walletState.address}
+					<Button
+						class="my-3"
+						disabled={walletState.isConnected}
+						onclick={() => onWalletConnect()}
+						>Create New Wallet</Button
+					>
+				{/if}
 				<div>
-					<h1>Node: <span class="text-green-500">Connected</span></h1>
+					<h1>Server</h1>
 					<Input
 						class="my-3 w-full"
 						placeholder="Server Address"
@@ -207,27 +253,30 @@
 						bind:value={url}
 					/>
 				</div>
-			</div>
-			<div class="flex items-center w-full">
-				<Button onclick={() => registerKey()} class="m-3 w-full"
-					>Register</Button
-				>
-				<Button onclick={() => loginKey()} class="m-3 w-full"
-					>Login</Button
-				>
-			</div>
-			<div class="flex items-center w-full">
-				<span>
-					{#if errorMessage}
+				{#if errorMessage}
+					<div
+						class="flex bg-destructive bg-opacity-50 items-center justify-center rounded-md my-2 py-3 text-destructive-foreground w-full"
+					>
 						Error: {errorMessage}
-					{/if}
-				</span>
+					</div>
+				{/if}
+				{#if walletState.needRegistraion}
+					<div class="flex items-center w-full my-3 mt-6">
+						Would you like to Register:
+					</div>
+					<div class="flex items-center w-full">
+						<Button onclick={() => registerKey()} class="m-3 w-full"
+							>One-Click Registration</Button
+						>
+					</div>
+				{/if}
 			</div>
 			<DialogFooter>
 				<Button
 					class="m-3"
 					variant="secondary"
-					onclick={() => (open = false)}>Close</Button
+					onclick={() => (dialogsState.connectDialog = false)}
+					>Close</Button
 				>
 			</DialogFooter>
 		</DialogContent>

@@ -1,17 +1,16 @@
 <script lang="ts">
+	import { ChevronLeft, Settings } from "lucide-svelte";
 	import { navigate } from "svelte-routing";
 	import { ArweaveUtils } from "../data/Arweave.data";
 	import type { Post } from "../model/post.model";
 	import MainPost from "./MainPost.svelte";
+	import AvatarFallback from "./ui/avatar/avatar-fallback.svelte";
+	import Avatar from "./ui/avatar/avatar.svelte";
+	import Button from "./ui/button/button.svelte";
 	import CardContent from "./ui/card/card-content.svelte";
 	import CardHeader from "./ui/card/card-header.svelte";
 	import Card from "./ui/card/card.svelte";
 	import Skeleton from "./ui/skeleton/skeleton.svelte";
-	import Button from "./ui/button/button.svelte";
-	import Avatar from "./ui/avatar/avatar.svelte";
-	import AvatarFallback from "./ui/avatar/avatar-fallback.svelte";
-	import { toggleMode } from "mode-watcher";
-	import { ChevronLeft, Moon, Sun } from "lucide-svelte";
 
 	const { walletId }: { walletId: string } = $props();
 
@@ -42,10 +41,8 @@
 				}
 			}}><ChevronLeft /></Button
 		>
-		<Button onclick={toggleMode} variant="outline" size="icon">
-			<Sun class="block dark:hidden" />
-			<Moon class="hidden dark:block" />
-			<span class="sr-only">Toggle theme</span>
+		<Button variant="outline" size="icon" disabled>
+			<Settings />
 		</Button>
 	</div>
 	<div class="w-full max-w-[500px]">

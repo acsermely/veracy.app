@@ -8,6 +8,7 @@
 		type Post,
 		type PostContent,
 	} from "../model/post.model";
+	import { getDialogsState } from "../state/dialogs.svelte";
 	import { getContentNodeState } from "../state/node.svelte";
 	import { getWalletState } from "../state/wallet.svelte";
 	import CreateContent from "./CreateContent.svelte";
@@ -22,6 +23,7 @@
 
 	const walletState = getWalletState();
 	const nodeState = getContentNodeState();
+	const dialogsState = getDialogsState();
 
 	let title = $state(undefined);
 	let price = $state(undefined);
@@ -121,7 +123,13 @@
 </script>
 
 <div class="flex-1 flex flex-col items-center w-full max-h-full">
-	{#if currentStep < 3}
+	{#if !walletState.isConnected}
+		<Button
+			class="max-w-[500px] w-full m-5 mb-0"
+			variant="destructive"
+			onclick={() => (dialogsState.connectDialog = true)}>Connect</Button
+		>
+	{:else if currentStep < 3}
 		<div class="max-w-[500px] w-full m-5 mb-0 flex justify-between">
 			{#if currentStep < 1}
 				<a

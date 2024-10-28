@@ -12,34 +12,36 @@ export class WalletState {
 		url: "arweave.app",
 	});
 
+	needRegistraion = $state(false);
+
 	constructor() {
 		this.address = localStorage.getItem(PREV_WALLET_ADDRESS) || "";
 	}
 
 	connectWeb = async (): Promise<void> => {
-		const wallet = new ArweaveWebWallet(
-			{
-				name: "Veracy",
-			},
-			{
-				state: this.state,
-			},
-		);
-		try {
+		return new Promise((resolve, reject) => {
+			const wallet = new ArweaveWebWallet(
+				{
+					name: "Veracy",
+				},
+				{
+					state: this.state,
+				},
+			);
 			wallet.on("connect", () => {
 				console.log("connect");
 				this.wallet = wallet;
 				this.address = this.wallet.address;
 				this.isConnected = true;
 				localStorage.setItem(PREV_WALLET_ADDRESS, this.address);
-				return;
+				resolve();
 			});
 			wallet.on("disconnect", () => {
 				console.log("disconnect");
 				this.isConnected = false;
-				return;
+				reject();
 			});
-			await wallet.connect([
+			wallet.connect([
 				"DISPATCH",
 				"ACCESS_ADDRESS",
 				"ACCESS_PUBLIC_KEY",
@@ -47,10 +49,7 @@ export class WalletState {
 				"DECRYPT",
 				"SIGN_TRANSACTION",
 			]);
-		} catch (e) {
-			console.error("sub", e);
-			this.isConnected = false;
-		}
+		});
 	};
 
 	getPublicKey = async (): Promise<JsonWebKey> => {
