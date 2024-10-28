@@ -58,7 +58,7 @@
 <Card class="max-w-[500px] w-full m-5 border-none">
 	<CardContent class="p-0">
 		<div
-			class="inline-flex w-full border-2 overflow-x-scroll scroll-smooth snap-x snap-mandatory max-h-[70vh]"
+			class="inline-flex w-full border-2 overflow-x-scroll overflow-y-hidden scroll-smooth snap-x snap-mandatory max-h-[70vh]"
 		>
 			{#each data as content, i}
 				<div
