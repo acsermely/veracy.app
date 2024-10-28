@@ -16,7 +16,6 @@
 	const { walletId }: { walletId: string } = $props();
 
 	$effect(() => {
-		console.log(walletId);
 		queryData();
 	});
 

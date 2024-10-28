@@ -16,4 +16,5 @@ export enum TxType {
 export const TX_APP_NAME = "Test123";
 export const TX_APP_VERSION = "0.0.3";
 export const TX_APP_CONTENT_TYPE = "application/json";
-export const ARWEAVE_URL = "https://arweave.net";
+// export const ARWEAVE_URL = "https://arweave.net";
+export const ARWEAVE_URL = "https://node2.bundlr.network";
