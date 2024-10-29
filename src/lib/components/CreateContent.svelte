@@ -56,9 +56,10 @@
 </script>
 
 <Card class="max-w-[500px] w-full m-5 border-none">
-	<CardContent class="p-0">
+	<CardContent class="p-0 border-2">
 		<div
-			class="inline-flex w-full border-2 overflow-x-scroll overflow-y-hidden scroll-smooth snap-x snap-mandatory max-h-[70vh]"
+			class="inline-flex w-full overflow-x-scroll overflow-y-hidden scroll-smooth snap-x snap-mandatory max-h-[70vh]"
+			style="scrollbar-color: rgba(128, 128, 128, .5) rgba(0, 0, 0, 0); scrollbar-width: thin;"
 		>
 			{#each data as content, i}
 				<div
@@ -202,7 +203,7 @@
 						block: "center",
 					});
 				}}
-				class="p-3 w-6 h-6 flex items-center justify-center hover:bg-neutral-500 opacity-50 rounded-full cursor-pointer mx-2"
+				class="px-2 w-6 h-6 flex items-center text-xs font-extrabold justify-center hover:bg-slate-500 opacity-50 rounded-full cursor-pointer mx-2"
 			>
 				{i + 1}
 			</span>

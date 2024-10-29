@@ -60,7 +60,7 @@
 
 	<CardContent class="p-0 border-2">
 		<div
-			class="inline-flex w-full overflow-x-scroll scroll-smooth snap-x snap-mandatory max-h-[70vh]"
+			class="inline-flex w-full overflow-x-scroll overflow-y-hidden scroll-smooth snap-x snap-mandatory max-h-[70vh]"
 			style="scrollbar-color: rgba(128, 128, 128, .5) rgba(0, 0, 0, 0); scrollbar-width: thin;"
 		>
 			{#each data.content as content, i}
@@ -100,8 +100,8 @@
 							<div
 								class="min-w-full p-5 flex items-center justify-center text-destructive"
 							>
-								{e} <br />
-								Check your connection!
+								{e} <br /><br />
+								Are you Logged In?
 							</div>
 						{/await}
 					{/if}
@@ -110,7 +110,7 @@
 		</div>
 	</CardContent>
 	{#if data.content.length > 1}
-		<CardFooter class="p-1 flex justify-center w-full">
+		<CardFooter class="p-3 flex justify-center w-full flex-wrap">
 			{#each data.content as _, i}
 				<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 				<span
