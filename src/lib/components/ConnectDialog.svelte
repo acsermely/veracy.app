@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Server, Settings } from "lucide-svelte";
+	import { Settings, User } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
 	import { slide } from "svelte/transition";
 	import { getDialogsState } from "../state/dialogs.svelte";
@@ -69,7 +69,12 @@
 
 	async function registerKey(): Promise<void> {
 		errorMessage = "";
-		if (!url || !walletState.address) {
+		if (!url) {
+			errorMessage = "No Server URL!";
+			return;
+		}
+		if (!walletState.isConnected) {
+			onConnect();
 			return;
 		}
 		let pubKey: JsonWebKey;
@@ -135,11 +140,11 @@
 				url,
 			);
 		} catch (e) {
-			errorMessage = "Unauthorized!";
+			errorMessage = "Couldn't login!";
 			console.error(e);
 			throw errorMessage;
 		}
-
+		dialogsState.connectDialog = false;
 		feedState.queryData();
 	}
 
@@ -160,7 +165,7 @@
 			}
 		} catch (e) {
 			if (e === 401) {
-				errorMessage = "Unauthorized!";
+				errorMessage = "Couldn't login!";
 			} else {
 				errorMessage = "Server Unavailable!";
 			}
@@ -203,7 +208,7 @@
 				throw response.status;
 			}
 		} catch (e) {
-			errorMessage = "Unauthorized!";
+			errorMessage = "Couldn't login!";
 			console.error(e);
 			throw errorMessage;
 		}
@@ -217,8 +222,12 @@
 		<DialogTrigger
 			class={buttonVariants({ variant: "destructive" }) + " gap-4"}
 		>
-			<Server />
-			Login
+			<User />
+			{#if !walletState.address}
+				Register
+			{:else}
+				Login
+			{/if}
 		</DialogTrigger>
 	{:else}
 		<DialogTrigger
@@ -252,7 +261,8 @@
 				<Button
 					class="my-3"
 					disabled={walletState.isConnected}
-					onclick={() => onConnect()}>Create New Wallet</Button
+					onclick={() => onConnect()}
+					>Create Wallet and Register</Button
 				>
 			{/if}
 			<div>
@@ -270,7 +280,11 @@
 			</div>
 			{#if errorMessage}
 				<div
-					class="flex bg-destructive bg-opacity-50 items-center justify-center rounded-md my-2 py-3 text-destructive-foreground w-full"
+					in:slide
+					out:slide
+					class="flex bg-destructive bg-opacity-50 items-center
+					justify-center rounded-md my-2 py-3
+					text-destructive-foreground w-full"
 				>
 					Error: {errorMessage}
 				</div>

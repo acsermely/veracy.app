@@ -22,9 +22,7 @@
 
 	let url = $state("");
 
-	$effect(() => {
-		nodeState.loginCheck();
-	});
+	nodeState.loginCheck();
 </script>
 
 <ModeWatcher />

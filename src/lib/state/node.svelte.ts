@@ -2,7 +2,7 @@ import { getContext, setContext } from "svelte";
 import { STORAGE_NODE_URL } from "../constants";
 
 export class ContentNode {
-	public url = $state("");
+	public url = $state("https://veracy.app:8080");
 	public isConnected = $state(false);
 
 	constructor() {
@@ -82,10 +82,7 @@ export class ContentNode {
 		publicJWK: JsonWebKey,
 		url?: string,
 	): Promise<Response> => {
-		if (url) {
-			this.url = url;
-		}
-		const response = await fetch(`${this.url}/registerKey`, {
+		const response = await fetch(`${url || this.url}/registerKey`, {
 			method: "POST",
 			body: JSON.stringify({
 				wallet: walletId,
@@ -100,6 +97,7 @@ export class ContentNode {
 		challange: string,
 		url?: string,
 	): Promise<Response> => {
+		this.isConnected = false;
 		if (url) {
 			this.url = url;
 		}
@@ -111,8 +109,10 @@ export class ContentNode {
 				challange: challange,
 			}),
 		});
-		localStorage.setItem(STORAGE_NODE_URL, this.url);
-		this.isConnected = true;
+		if (response.ok) {
+			localStorage.setItem(STORAGE_NODE_URL, this.url);
+			this.isConnected = true;
+		}
 		return response;
 	};
 
@@ -120,10 +120,7 @@ export class ContentNode {
 		walletId: string,
 		url?: string,
 	): Promise<Response> => {
-		if (url) {
-			this.url = url;
-		}
-		let getUrl = `${this.url}/challange?walletId=${walletId}`;
+		let getUrl = `${url || this.url}/challange?walletId=${walletId}`;
 		return fetch(getUrl);
 	};
 
