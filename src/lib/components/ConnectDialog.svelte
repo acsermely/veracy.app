@@ -26,22 +26,11 @@
 		url = nodeState.url;
 	});
 
-	$effect(() => {
-		if (
-			walletState.isConnected &&
-			nodeState.isConnected &&
-			dialogsState.connectDialog
-		) {
-			dialogsState.connectDialog = false;
-		}
-	});
-
 	let url = $state("");
 
 	let errorMessage = $state("");
 
-	async function onWalletConnect() {
-		let failed: "token" | "login" | undefined;
+	async function onConnect() {
 		try {
 			await walletState.connectWeb();
 			console.log("Connect: Wallet Connected");
@@ -52,25 +41,28 @@
 		try {
 			await nodeState.loginCheck();
 			console.log("Connect: Login check");
+			dialogsState.connectDialog = false;
 			return;
 		} catch {
-			failed = "token";
+			console.info("Connect: Not logged in!");
 		}
 
 		try {
 			await loginKey();
 			console.log("Connect: Login key");
+			dialogsState.connectDialog = false;
 			return;
 		} catch {
-			failed = "login";
+			console.info("Connect: Need registration!");
 		}
 
 		try {
 			await registerKey();
 			console.log("Connect: Register key");
+			dialogsState.connectDialog = false;
 			return;
 		} catch {
-			failed = "login";
+			console.info("Connect: Registration failed!");
 		}
 	}
 
@@ -253,13 +245,13 @@
 			<Button
 				class="my-3"
 				disabled={walletState.isConnected}
-				onclick={() => onWalletConnect()}>Connect</Button
+				onclick={() => onConnect()}>Connect</Button
 			>
 			{#if !walletState.address}
 				<Button
 					class="my-3"
 					disabled={walletState.isConnected}
-					onclick={() => onWalletConnect()}>Create New Wallet</Button
+					onclick={() => onConnect()}>Create New Wallet</Button
 				>
 			{/if}
 			<div>
