@@ -213,7 +213,7 @@
 </script>
 
 <Dialog bind:open={dialogsState.connectDialog}>
-	{#if !walletState.isConnected || !nodeState.isConnected}
+	{#if !walletState.address || !nodeState.isConnected}
 		<DialogTrigger
 			class={buttonVariants({ variant: "destructive" }) + " gap-4"}
 		>
