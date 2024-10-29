@@ -43,9 +43,7 @@
 		} catch {
 			failed = "token";
 		}
-		if (!failed) {
-			return;
-		}
+
 		try {
 			await loginKey();
 			console.log("Connect: Login key");
@@ -53,13 +51,14 @@
 		} catch {
 			failed = "login";
 		}
-		if (!failed) {
-			return;
-		}
 
-		errorMessage = "No Registered Account";
-		toast.warning("Create an Account!", { description: errorMessage });
-		walletState.needRegistraion = true;
+		try {
+			await registerKey();
+			console.log("Connect: Register key");
+			return;
+		} catch {
+			failed = "login";
+		}
 	}
 
 	async function registerKey(): Promise<void> {
@@ -96,7 +95,6 @@
 			console.error(e);
 			throw errorMessage;
 		}
-		toast.success("Successful registration!");
 		try {
 			challange = await response
 				.arrayBuffer()

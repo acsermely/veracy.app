@@ -45,7 +45,7 @@
 			</Button>
 		</div>
 	</div>
-	<div class="flex-1 flex justify-center overflow-scroll">
+	<div class="flex-1 flex justify-center overflow-x-auto">
 		<Router {url}>
 			<Route path="/">
 				<Main />
