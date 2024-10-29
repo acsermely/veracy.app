@@ -32,7 +32,10 @@
 			use:link
 		>
 			<Avatar class="inline-flex">
-				<AvatarFallback>{data.uploader.slice(0, 2)}</AvatarFallback>
+				<AvatarFallback
+					class="bg-gradient-to-bl from-blue-500 to-accent font-extrabold"
+					>{data.uploader.slice(0, 2)}</AvatarFallback
+				>
 			</Avatar>
 			<CardHeader class="inline-flex p-3 py-0">
 				{#if data.title}

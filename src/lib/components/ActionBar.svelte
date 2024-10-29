@@ -9,7 +9,9 @@
 <div
 	class="w-full flex justify-evenly p-2 md:max-w-[200px] md:justify-start md:flex-col"
 >
-	<h1 class="hidden md:block text-2xl p-5 w-full text-center cursor-default">
+	<h1
+		class="hidden md:block text-2xl p-5 w-full text-center cursor-default bg-gradient-to-r from-primary via-blue-500 to-orange-500 text-transparent bg-clip-text font-extrabold"
+	>
 		Veracy<span class="text-xs">.app</span>
 	</h1>
 	<a href="/" use:link class="flex md:gap-4 md:p-5">
