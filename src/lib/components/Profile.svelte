@@ -3,6 +3,7 @@
 	import { navigate } from "svelte-routing";
 	import { ArweaveUtils } from "../data/Arweave.data";
 	import type { Post } from "../model/post.model";
+	import { getDialogsState } from "../state/dialogs.svelte";
 	import MainPost from "./MainPost.svelte";
 	import AvatarFallback from "./ui/avatar/avatar-fallback.svelte";
 	import Avatar from "./ui/avatar/avatar.svelte";
@@ -13,6 +14,8 @@
 	import Skeleton from "./ui/skeleton/skeleton.svelte";
 
 	const { walletId }: { walletId: string } = $props();
+
+	const dialogsState = getDialogsState();
 
 	$effect(() => {
 		queryData();
@@ -41,7 +44,11 @@
 				}
 			}}><ChevronLeft /></Button
 		>
-		<Button variant="outline" size="icon" disabled>
+		<Button
+			variant="outline"
+			size="icon"
+			onclick={() => (dialogsState.connectDialog = true)}
+		>
 			<Settings />
 		</Button>
 	</div>

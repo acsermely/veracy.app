@@ -2,7 +2,7 @@
 	import { Ellipsis, Loader } from "lucide-svelte";
 	import { link } from "svelte-routing";
 	import type { Post } from "../model/post.model";
-	import { setContentNodeState } from "../state/node.svelte";
+	import { getContentNodeState } from "../state/node.svelte";
 	import AvatarFallback from "./ui/avatar/avatar-fallback.svelte";
 	import Avatar from "./ui/avatar/avatar.svelte";
 	import CardContent from "./ui/card/card-content.svelte";
@@ -16,7 +16,7 @@
 
 	const { data, isPreview }: { data: Post; isPreview?: boolean } = $props();
 
-	const nodeState = setContentNodeState();
+	const nodeState = getContentNodeState();
 
 	const getImagePromise = async (id: string): Promise<string> => {
 		return data?.id && nodeState.getImage(id);
@@ -31,9 +31,10 @@
 			class:pointer-events-none={isPreview}
 			use:link
 		>
-			<Avatar class="inline-flex">
-				<AvatarFallback
-					class="bg-gradient-to-bl from-blue-500 to-accent font-extrabold"
+			<Avatar
+				class="inline-flex bg-gradient-to-bl from-amber-500 via-blue-500 to-teal-500 bg-opacity-50"
+			>
+				<AvatarFallback class="font-extrabold bg-transparent"
 					>{data.uploader.slice(0, 2)}</AvatarFallback
 				>
 			</Avatar>
@@ -109,7 +110,7 @@
 		</div>
 	</CardContent>
 	{#if data.content.length > 1}
-		<CardFooter class="p-3 flex justify-center w-full">
+		<CardFooter class="p-1 flex justify-center w-full">
 			{#each data.content as _, i}
 				<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 				<span
@@ -121,7 +122,7 @@
 							block: "center",
 						});
 					}}
-					class="px-2 w-6 h-6 flex items-center justify-center hover:bg-slate-500 opacity-50 rounded-full cursor-pointer mx-2"
+					class="px-2 w-6 h-6 flex items-center text-xs font-extrabold justify-center hover:bg-slate-500 opacity-50 rounded-full cursor-pointer mx-2"
 				>
 					{i + 1}
 				</span>

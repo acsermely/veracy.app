@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Server } from "lucide-svelte";
+	import { Server, Settings } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
 	import { getDialogsState } from "../state/dialogs.svelte";
 	import { getFeedState } from "../state/feed.svelte";
@@ -14,6 +14,8 @@
 	import DialogHeader from "./ui/dialog/dialog-header.svelte";
 	import DialogTitle from "./ui/dialog/dialog-title.svelte";
 	import Input from "./ui/input/input.svelte";
+	import { Label } from "./ui/label";
+	import { Switch } from "./ui/switch";
 
 	const feedState = getFeedState();
 	const walletState = getWalletState();
@@ -156,7 +158,7 @@
 			if (e === 401) {
 				errorMessage = "Unauthorized!";
 			} else {
-				errorMessage = "Couldn't get challange!";
+				errorMessage = "Server Unavailable!";
 			}
 			console.error(e);
 			throw errorMessage;
@@ -167,7 +169,7 @@
 			challange = await response
 				.arrayBuffer()
 				.then((challange) => {
-					toast.info("Approve Login in your Wallet!", {
+					toast.warning("Approve Login in your Wallet!", {
 						description: "Switch to the Wallet Browser Tab",
 					});
 					return walletState.wallet.decrypt(
@@ -206,77 +208,92 @@
 	}
 </script>
 
-{#if !walletState.isConnected || !nodeState.isConnected}
-	<Dialog bind:open={dialogsState.connectDialog}>
-		{#if !walletState.isConnected}
-			<DialogTrigger
-				class={buttonVariants({ variant: "destructive" }) + " gap-2"}
+<Dialog bind:open={dialogsState.connectDialog}>
+	{#if !walletState.isConnected || !nodeState.isConnected}
+		<DialogTrigger
+			class={buttonVariants({ variant: "destructive" }) + " gap-4"}
+		>
+			<Server />
+			Login
+		</DialogTrigger>
+	{:else}
+		<DialogTrigger
+			class={buttonVariants({ variant: "ghost" }) +
+				" gap-4 hidden md:flex"}
+		>
+			<Settings />
+		</DialogTrigger>
+	{/if}
+	<DialogContent class="w-full max-w-[500px]">
+		<DialogHeader>
+			<DialogTitle>Connect</DialogTitle>
+			<DialogDescription>
+				Your Wallet will open in a different tab!
+			</DialogDescription>
+		</DialogHeader>
+		<div class="flex w-full flex-col">
+			<div class="flex items-center gap-4">
+				<Label for="auto-login-switch">Auto Login:</Label>
+				<Switch
+					id="auto-login-switch"
+					bind:checked={walletState.autoLogin}
+				/>
+			</div>
+			<Button
+				class="my-3"
+				disabled={walletState.isConnected}
+				onclick={() => onWalletConnect()}>Connect</Button
 			>
-				<Server />
-				Connect
-			</DialogTrigger>
-		{:else}
-			<DialogTrigger
-				class={buttonVariants({ variant: "secondary" }) + " h-[10vh]"}
-				>Connect Node</DialogTrigger
-			>
-		{/if}
-		<DialogContent class="w-full max-w-[500px]">
-			<DialogHeader>
-				<DialogTitle>Connect</DialogTitle>
-				<DialogDescription>
-					User you wallet to login to you account.
-				</DialogDescription>
-			</DialogHeader>
-			<div class="flex w-full flex-col">
+			{#if !walletState.address}
 				<Button
 					class="my-3"
 					disabled={walletState.isConnected}
-					onclick={() => onWalletConnect()}>Connect</Button
+					onclick={() => onWalletConnect()}>Create New Wallet</Button
 				>
-				{#if !walletState.address}
-					<Button
-						class="my-3"
-						disabled={walletState.isConnected}
-						onclick={() => onWalletConnect()}
-						>Create New Wallet</Button
+			{/if}
+			<div>
+				<h1>
+					Server<span class:hidden={!nodeState.isConnected}
+						>: <span class="text-green-500">connected</span></span
 					>
-				{/if}
-				<div>
-					<h1>Server</h1>
-					<Input
-						class="my-3 w-full"
-						placeholder="Server Address"
-						type="text"
-						bind:value={url}
-					/>
-				</div>
-				{#if errorMessage}
-					<div
-						class="flex bg-destructive bg-opacity-50 items-center justify-center rounded-md my-2 py-3 text-destructive-foreground w-full"
-					>
-						Error: {errorMessage}
-					</div>
-				{/if}
-				{#if walletState.needRegistraion}
-					<div class="flex items-center w-full my-3 mt-6">
-						Would you like to Register:
-					</div>
-					<div class="flex items-center w-full">
-						<Button onclick={() => registerKey()} class="m-3 w-full"
-							>One-Click Registration</Button
-						>
-					</div>
-				{/if}
+				</h1>
+				<Input
+					class="my-3 w-full"
+					placeholder="Server Address"
+					type="text"
+					bind:value={url}
+				/>
 			</div>
-			<DialogFooter>
-				<Button
-					class="m-3"
-					variant="secondary"
-					onclick={() => (dialogsState.connectDialog = false)}
-					>Close</Button
+			{#if errorMessage}
+				<div
+					class="flex bg-destructive bg-opacity-50 items-center justify-center rounded-md my-2 py-3 text-destructive-foreground w-full"
 				>
-			</DialogFooter>
-		</DialogContent>
-	</Dialog>
-{/if}
+					Error: {errorMessage}
+				</div>
+			{/if}
+			{#if (walletState.isConnected && !nodeState.isConnected) || (nodeState.url !== url)}
+				<div class="flex items-center w-full">
+					<Button onclick={() => loginKey()} class="m-3 w-full"
+						>Login</Button
+					>
+				</div>
+				<div class="flex items-center w-full my-3 mt-6">
+					Would you like to Register:
+				</div>
+				<div class="flex items-center w-full">
+					<Button onclick={() => registerKey()} class="m-3 w-full"
+						>One-Click Registration</Button
+					>
+				</div>
+			{/if}
+		</div>
+		<DialogFooter>
+			<Button
+				class="m-3"
+				variant="secondary"
+				onclick={() => (dialogsState.connectDialog = false)}
+				>Close</Button
+			>
+		</DialogFooter>
+	</DialogContent>
+</Dialog>

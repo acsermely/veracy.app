@@ -12,10 +12,19 @@ export class WalletState {
 		url: "arweave.app",
 	});
 
-	needRegistraion = $state(false);
+	autoLogin = $state(false);
 
 	constructor() {
 		this.address = localStorage.getItem(PREV_WALLET_ADDRESS) || "";
+		this.autoLogin =
+			localStorage.getItem(AUTO_LOGIN_WALLET) === "true" || false;
+		if (this.autoLogin) {
+			this.connectWeb();
+		}
+
+		$effect(() => {
+			localStorage.setItem(AUTO_LOGIN_WALLET, this.autoLogin.toString());
+		});
 	}
 
 	connectWeb = async (): Promise<void> => {
@@ -77,6 +86,7 @@ export class WalletState {
 
 const WALLET_STATE_KEY = "wallet-state-key";
 const PREV_WALLET_ADDRESS = "previous-wallet-address";
+const AUTO_LOGIN_WALLET = "auto-login-wallet-";
 
 export function setWalletState(): WalletState {
 	return setContext(WALLET_STATE_KEY, new WalletState());
