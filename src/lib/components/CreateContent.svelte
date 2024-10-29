@@ -190,7 +190,7 @@
 			{/each}
 		</div>
 	</CardContent>
-	<CardFooter class="p-3 flex justify-center w-full">
+	<CardFooter class="p-3 flex justify-center w-full flex-wrap">
 		{#each data as _, i}
 			<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 			<span
@@ -210,6 +210,9 @@
 		<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 		<span
 			onclick={() => {
+				if (data.length >= 20) {
+					return;
+				}
 				data.push({});
 				runDelayed(() => {
 					const id = "content_" + (data.length - 1);

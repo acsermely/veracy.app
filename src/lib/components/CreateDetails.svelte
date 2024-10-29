@@ -33,6 +33,7 @@
 	<div class="flex items-baseline justify-between">
 		<span class="text-lg p-3">Title: </span>
 		<Input
+			maxlength={40}
 			class="w-9/12 mr-2"
 			bind:value={title}
 			placeholder="Post Title..."
@@ -43,6 +44,7 @@
 			>Price:
 		</span>
 		<Input
+			maxlength={10}
 			bind:value={price}
 			class={(needPrice && !price ? "border-destructive " : "") +
 				"w-9/12 mr-2"}
@@ -56,6 +58,7 @@
 		{#each tags as _, i}
 			<div class="mb-3 mx-5">
 				<Input
+					maxlength={30}
 					class="w-full"
 					placeholder="Search Tag..."
 					bind:value={tags[i]}

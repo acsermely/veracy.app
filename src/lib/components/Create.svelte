@@ -123,11 +123,12 @@
 </script>
 
 <div class="flex-1 flex flex-col items-center w-full max-h-full">
-	{#if !walletState.isConnected}
+	{#if !walletState.isConnected && currentStep == 2}
 		<Button
 			class="max-w-[500px] w-full m-5 mb-0"
 			variant="destructive"
-			onclick={() => (dialogsState.connectDialog = true)}>Connect</Button
+			onclick={() => (dialogsState.connectDialog = true)}
+			>Login to continue</Button
 		>
 	{:else if currentStep < 3}
 		<div class="max-w-[500px] w-full m-5 mb-0 flex justify-between">
