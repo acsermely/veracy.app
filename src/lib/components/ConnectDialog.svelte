@@ -25,6 +25,17 @@
 	$effect(() => {
 		url = nodeState.url;
 	});
+
+	$effect(() => {
+		if (
+			walletState.isConnected &&
+			nodeState.isConnected &&
+			dialogsState.connectDialog
+		) {
+			dialogsState.connectDialog = false;
+		}
+	});
+
 	let url = $state("");
 
 	let errorMessage = $state("");
@@ -271,7 +282,7 @@
 					Error: {errorMessage}
 				</div>
 			{/if}
-			{#if (walletState.isConnected && !nodeState.isConnected) || (nodeState.url !== url)}
+			{#if (walletState.isConnected && !nodeState.isConnected) || nodeState.url !== url}
 				<div class="flex items-center w-full">
 					<Button onclick={() => loginKey()} class="m-3 w-full"
 						>Login</Button
