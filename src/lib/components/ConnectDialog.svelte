@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Server, Settings } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
+	import { slide } from "svelte/transition";
 	import { getDialogsState } from "../state/dialogs.svelte";
 	import { getFeedState } from "../state/feed.svelte";
 	import { getContentNodeState } from "../state/node.svelte";
@@ -275,18 +276,20 @@
 				</div>
 			{/if}
 			{#if (walletState.isConnected && !nodeState.isConnected) || nodeState.url !== url}
-				<div class="flex items-center w-full">
-					<Button onclick={() => loginKey()} class="m-3 w-full"
-						>Login</Button
-					>
-				</div>
-				<div class="flex items-center w-full my-3 mt-6">
-					Would you like to Register:
-				</div>
-				<div class="flex items-center w-full">
-					<Button onclick={() => registerKey()} class="m-3 w-full"
-						>One-Click Registration</Button
-					>
+				<div class="flex flex-col w-full" in:slide out:slide>
+					<div class="flex items-center w-full">
+						<Button onclick={() => loginKey()} class="m-3 w-full"
+							>Login</Button
+						>
+					</div>
+					<div class="flex items-center w-full my-3 mt-6">
+						Would you like to Register:
+					</div>
+					<div class="flex items-center w-full">
+						<Button onclick={() => registerKey()} class="m-3 w-full"
+							>One-Click Registration</Button
+						>
+					</div>
 				</div>
 			{/if}
 		</div>
