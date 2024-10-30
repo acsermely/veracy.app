@@ -51,7 +51,7 @@
 				<PopoverContent class="w-fit" side="left">
 					<small>Tags:</small>
 					{#each data.tags as tag}
-						<br /><small class="m-2">- {tag}</small>
+						<br /><small class="m-2">{tag}</small>
 					{/each}
 				</PopoverContent>
 			</Popover>
