@@ -239,10 +239,19 @@
 	{/if}
 	<DialogContent class="w-full max-w-[500px]">
 		<DialogHeader>
-			<DialogTitle>Connect</DialogTitle>
-			<DialogDescription>
-				Your Wallet will open in a different tab!
-			</DialogDescription>
+			<div class="flex">
+				<img
+					class="h-[2rem] mr-3"
+					src="veracy-icon.svg"
+					alt="app-icon"
+				/>
+				<div class="flex flex-col items-start">
+					<DialogTitle>Connect</DialogTitle>
+					<DialogDescription>
+						Your Wallet will open in a different tab!
+					</DialogDescription>
+				</div>
+			</div>
 		</DialogHeader>
 		<div class="flex w-full flex-col">
 			<div class="flex items-center gap-4">
