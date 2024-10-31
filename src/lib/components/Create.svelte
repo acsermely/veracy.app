@@ -96,7 +96,10 @@
 			}
 			uploading = true;
 			toast.info("Approve it in your Wallet!", {
-				description: "Switch to the Wallet Browser Tab",
+				action: {
+					label: "Open Wallet",
+					onClick: () => walletState.connectWeb(),
+				},
 			});
 			uploadPost()
 				.then(() => {
