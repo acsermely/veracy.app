@@ -5,8 +5,12 @@
 	import Main from "./lib/components/Main.svelte";
 	import Profile from "./lib/components/Profile.svelte";
 
+	import { Loader } from "lucide-svelte";
 	import Create from "./lib/components/Create.svelte";
+	import MainPost from "./lib/components/MainPost.svelte";
 	import { Toaster } from "./lib/components/ui/sonner";
+	import { ArweaveUtils } from "./lib/data/Arweave.data";
+	import type { Post } from "./lib/model/post.model";
 	import { setDialogsState } from "./lib/state/dialogs.svelte";
 	import { setFeedState } from "./lib/state/feed.svelte";
 	import { setLocalWalletState } from "./lib/state/local-wallet.svelte";
@@ -37,6 +41,17 @@
 			</Route>
 			<Route path="/create">
 				<Create />
+			</Route>
+			<Route path="/post/:id" let:params>
+				<div
+					class="flex-1 flex w-full h-full items-center justify-center"
+				>
+					{#await ArweaveUtils.getTxById<Post>(params.id)}
+						<Loader class="size-10 animate-spin" />
+					{:then data}
+						<MainPost {data} txId={params.id} />
+					{/await}
+				</div>
 			</Route>
 		</Router>
 	</div>

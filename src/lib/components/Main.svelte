@@ -35,7 +35,7 @@
 					</CardContent>
 				</Card>
 			{:then data}
-				<MainPost {data} />
+				<MainPost {data} txId={id} />
 			{/await}
 		{/each}
 		<div class="my-3 w-full flex flex-col">

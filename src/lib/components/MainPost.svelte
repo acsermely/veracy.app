@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { Ellipsis, Loader } from "lucide-svelte";
 	import { link } from "svelte-routing";
+	import { toast } from "svelte-sonner";
 	import type { Post } from "../model/post.model";
 	import { getContentNodeState } from "../state/node.svelte";
 	import AvatarFallback from "./ui/avatar/avatar-fallback.svelte";
 	import Avatar from "./ui/avatar/avatar.svelte";
+	import Button from "./ui/button/button.svelte";
 	import CardContent from "./ui/card/card-content.svelte";
 	import CardDescription from "./ui/card/card-description.svelte";
 	import CardFooter from "./ui/card/card-footer.svelte";
@@ -14,9 +16,15 @@
 	import { Popover, PopoverTrigger } from "./ui/popover";
 	import PopoverContent from "./ui/popover/popover-content.svelte";
 
-	const { data, isPreview }: { data: Post; isPreview?: boolean } = $props();
+	const {
+		data,
+		isPreview,
+		txId,
+	}: { data: Post; isPreview?: boolean; txId?: string } = $props();
 
 	const nodeState = getContentNodeState();
+
+	const shareUrl = $derived(`${location.origin}/post/${txId}`);
 
 	const getImagePromise = async (id: string): Promise<string> => {
 		return data?.id && nodeState.getImage(id);
@@ -45,14 +53,25 @@
 				<CardDescription>{data.uploader.slice(0, 30)}</CardDescription>
 			</CardHeader>
 		</a>
-		{#if data.tags?.length}
+		{#if data.tags?.length || txId}
 			<Popover>
 				<PopoverTrigger class="mr-2"><Ellipsis /></PopoverTrigger>
 				<PopoverContent class="w-fit" side="left">
-					<small>Tags:</small>
-					{#each data.tags as tag}
-						<br /><small class="m-2">{tag}</small>
-					{/each}
+					{#if txId}
+						<Button
+							variant="ghost"
+							onclick={() => {
+								navigator.clipboard.writeText(shareUrl);
+								toast.success("Link Copied");
+							}}>Share</Button
+						>
+					{/if}
+					{#if data.tags?.length}
+						<small>Tags:</small>
+						{#each data.tags as tag}
+							<br /><small class="m-2">{tag}</small>
+						{/each}
+					{/if}
 				</PopoverContent>
 			</Popover>
 		{/if}
