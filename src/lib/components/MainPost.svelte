@@ -59,12 +59,13 @@
 				<PopoverContent class="w-fit" side="left">
 					{#if txId}
 						<Button
-							variant="ghost"
+							variant="outline"
+							size="sm"
 							onclick={() => {
 								navigator.clipboard.writeText(shareUrl);
 								toast.success("Link Copied");
 							}}>Share</Button
-						>
+						> <br />
 					{/if}
 					{#if data.tags?.length}
 						<small>Tags:</small>
