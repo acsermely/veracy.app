@@ -23,6 +23,18 @@ export default defineConfig({
 						sizes: "any",
 						purpose: "monochrome any",
 					},
+					{
+						src: "veracy-icon-512.png",
+						type: "image/png",
+						sizes: "any",
+						purpose: "monochrome any",
+					},
+					{
+						src: "veracy-icon-192.png",
+						type: "image/png",
+						sizes: "any",
+						purpose: "monochrome any",
+					},
 				],
 			},
 		}),
