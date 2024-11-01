@@ -33,7 +33,6 @@
 		"vite-plugin-pwa": "^0.20.5"
 	},
 	"dependencies": {
-		"arweave": "^1.15.1",
-		"arweave-wallet-connector": "^1.0.2"
+		"arweave": "^1.15.1"
 	}
 }

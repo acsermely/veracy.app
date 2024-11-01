@@ -9,8 +9,8 @@
 		type PostContent,
 	} from "../model/post.model";
 	import { getDialogsState } from "../state/dialogs.svelte";
+	import { getLocalWalletState } from "../state/local-wallet.svelte";
 	import { getContentNodeState } from "../state/node.svelte";
-	import { getWalletState } from "../state/wallet.svelte";
 	import CreateContent from "./CreateContent.svelte";
 	import CreateDetails from "./CreateDetails.svelte";
 	import CreateUpload from "./CreateUpload.svelte";
@@ -21,7 +21,7 @@
 	let uploading = $state(false);
 	let uploadMessage = $state("");
 
-	const walletState = getWalletState();
+	const walletState = getLocalWalletState();
 	const nodeState = getContentNodeState();
 	const dialogsState = getDialogsState();
 
@@ -32,7 +32,7 @@
 
 	async function uploadPost(): Promise<void> {
 		const id = genPostId();
-		if (!id || !walletState.address) {
+		if (!id || !walletState.wallet) {
 			return;
 		}
 		const content: PostContent[] = [];
@@ -95,12 +95,6 @@
 				return;
 			}
 			uploading = true;
-			toast.info("Approve it in your Wallet!", {
-				action: {
-					label: "Open Wallet",
-					onClick: () => walletState.connectWeb(),
-				},
-			});
 			uploadPost()
 				.then(() => {
 					uploadMessage = "Uploaded Successfully!";

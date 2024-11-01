@@ -4,22 +4,19 @@
 	import { slide } from "svelte/transition";
 	import { getDialogsState } from "../state/dialogs.svelte";
 	import { getFeedState } from "../state/feed.svelte";
+	import { getLocalWalletState } from "../state/local-wallet.svelte";
 	import { getContentNodeState } from "../state/node.svelte";
-	import { getWalletState } from "../state/wallet.svelte";
 	import { buttonVariants } from "./ui/button";
 	import Button from "./ui/button/button.svelte";
 	import { Dialog, DialogTrigger } from "./ui/dialog";
 	import DialogContent from "./ui/dialog/dialog-content.svelte";
-	import DialogDescription from "./ui/dialog/dialog-description.svelte";
 	import DialogFooter from "./ui/dialog/dialog-footer.svelte";
 	import DialogHeader from "./ui/dialog/dialog-header.svelte";
 	import DialogTitle from "./ui/dialog/dialog-title.svelte";
 	import Input from "./ui/input/input.svelte";
-	import { Label } from "./ui/label";
-	import { Switch } from "./ui/switch";
 
 	const feedState = getFeedState();
-	const walletState = getWalletState();
+	const walletState = getLocalWalletState();
 	const nodeState = getContentNodeState();
 	const dialogsState = getDialogsState();
 
@@ -31,12 +28,23 @@
 
 	let errorMessage = $state("");
 
+	async function onRegister() {
+		try {
+			await walletState.register();
+		} catch {
+			errorMessage = "Couldn't create wallet";
+			return;
+		}
+		onConnect();
+	}
+
 	async function onConnect() {
 		try {
-			await walletState.connectWeb();
+			await walletState.connect();
 			console.log("Connect: Wallet Connected");
-		} catch {
-			errorMessage = "Couldn't connect wallet";
+		} catch (e) {
+			console.error(e);
+			errorMessage = e as string;
 			return;
 		}
 		try {
@@ -73,7 +81,7 @@
 			errorMessage = "No Server URL!";
 			return;
 		}
-		if (!walletState.isConnected) {
+		if (!walletState.wallet) {
 			onConnect();
 			return;
 		}
@@ -110,19 +118,11 @@
 			challange = await response
 				.arrayBuffer()
 				.then((challange) => {
-					toast.warning("Approve Login in your Wallet!", {
-						description: "Switch to the Wallet Browser Tab",
-					});
-					return walletState.wallet.decrypt(
-						new Uint8Array(challange),
-						{
-							name: "RSA-OAEP",
-						},
-					);
-				})
-				.then((buff: ArrayBufferView) => {
-					const decoder = new TextDecoder();
-					return decoder.decode(buff);
+					if (!walletState.wallet) {
+						toast.error("No Wallet");
+						throw "No wallet connected!";
+					}
+					return walletState.wallet.decrypt(challange);
 				})
 				.finally(() => {
 					feedState.queryData();
@@ -175,23 +175,13 @@
 
 		let challange: string;
 		try {
-			challange = await response
-				.arrayBuffer()
-				.then((challange) => {
-					toast.warning("Approve Login in your Wallet!", {
-						description: "Switch to the Wallet Browser Tab",
-					});
-					return walletState.wallet.decrypt(
-						new Uint8Array(challange),
-						{
-							name: "RSA-OAEP",
-						},
-					);
-				})
-				.then((buff: ArrayBufferView) => {
-					const decoder = new TextDecoder();
-					return decoder.decode(buff);
-				});
+			challange = await response.arrayBuffer().then((challange) => {
+				if (!walletState.wallet) {
+					toast.error("No Wallet");
+					throw "No wallet connected!";
+				}
+				return walletState.wallet.decrypt(challange);
+			});
 		} catch (e) {
 			errorMessage = "Couldn't decode challange!";
 			console.error(e);
@@ -242,38 +232,15 @@
 			<div class="flex">
 				<img
 					class="h-[2rem] mr-3"
-					src="veracy-icon.svg"
+					src="/veracy-icon.svg"
 					alt="app-icon"
 				/>
 				<div class="flex flex-col items-start">
 					<DialogTitle>Connect</DialogTitle>
-					<DialogDescription>
-						Your Wallet will open in a different tab!
-					</DialogDescription>
 				</div>
 			</div>
 		</DialogHeader>
 		<div class="flex w-full flex-col">
-			<div class="flex items-center gap-4">
-				<Label for="auto-login-switch">Auto Login:</Label>
-				<Switch
-					id="auto-login-switch"
-					bind:checked={walletState.autoLogin}
-				/>
-			</div>
-			<Button
-				class="my-3"
-				disabled={walletState.isConnected}
-				onclick={() => onConnect()}>Connect</Button
-			>
-			{#if !walletState.address}
-				<Button
-					class="my-3"
-					disabled={walletState.isConnected}
-					onclick={() => onConnect()}
-					>Create Wallet and Register</Button
-				>
-			{/if}
 			<div>
 				<h1>
 					Server<span class:hidden={!nodeState.isConnected}
@@ -287,6 +254,29 @@
 					bind:value={url}
 				/>
 			</div>
+
+			{#if !walletState.hasKeys}
+				<div
+					in:slide
+					out:slide
+					class="flex bg-yellow-500 bg-opacity-50 items-center
+					justify-center rounded-md my-2 py-3
+					text-destructive-foreground w-full"
+				>
+					No availabel Wallet
+				</div>
+				<Button class="my-3" disabled>Import Key</Button>
+				<Button class="my-3" onclick={() => onRegister()}
+					>Create Wallet and Register</Button
+				>
+			{:else}
+				<Button
+					class="my-3"
+					disabled={walletState.isConnected || !walletState.hasKeys}
+					onclick={() => onConnect()}>Connect</Button
+				>
+			{/if}
+
 			{#if errorMessage}
 				<div
 					in:slide

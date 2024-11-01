@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { type Post, type PostContent } from "../model/post.model";
-	import { getWalletState } from "../state/wallet.svelte";
+	import { getLocalWalletState } from "../state/local-wallet.svelte";
 	import MainPost from "./MainPost.svelte";
 
-	const walletState = getWalletState();
+	const walletState = getLocalWalletState();
 
 	const {
 		data,

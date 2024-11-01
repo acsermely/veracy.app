@@ -1,9 +1,12 @@
 <script>
-	import { Home, PlusCircle, User } from "lucide-svelte";
+	import { Home, Moon, PlusCircle, Sun, User } from "lucide-svelte";
+	import { toggleMode } from "mode-watcher";
 	import { link } from "svelte-routing";
-	import { getWalletState } from "../state/wallet.svelte";
+	import { getLocalWalletState } from "../state/local-wallet.svelte";
+	import ConnectDialog from "./ConnectDialog.svelte";
+	import { Button } from "./ui/button";
 
-	const walletState = getWalletState();
+	const walletState = getLocalWalletState();
 </script>
 
 <div
@@ -32,4 +35,17 @@
 			<span class="hidden md:block">Profile</span>
 		</a>
 	{/if}
+</div>
+<div class="flex flex-col w-full gap-2">
+	<ConnectDialog />
+	<Button
+		class="hidden md:flex w-full"
+		onclick={toggleMode}
+		variant="ghost"
+		size="icon"
+	>
+		<Sun class="block dark:hidden" />
+		<Moon class="hidden dark:block" />
+		<span class="sr-only">Theme</span>
+	</Button>
 </div>
