@@ -265,7 +265,6 @@
 				>
 					No availabel Wallet
 				</div>
-				<Button class="my-3" disabled>Import Key</Button>
 				<Button class="my-3" onclick={() => onRegister()}
 					>Create Wallet and Register</Button
 				>
