@@ -1,5 +1,5 @@
 import { getContext, setContext } from "svelte";
-import { ArweaveUtils } from "../data/Arweave.data";
+import { ArweaveUtils } from "../utils/arweave.utils";
 
 export class FeedState {
 	public postIds = $state<string[]>([]);

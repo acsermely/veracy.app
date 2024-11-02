@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Loader } from "lucide-svelte";
-	import { ArweaveUtils } from "../data/Arweave.data";
+	import { ArweaveUtils } from "../utils/arweave.utils";
 	import type { Post } from "../model/post.model";
 	import { getFeedState } from "../state/feed.svelte";
 	import MainPost from "./MainPost.svelte";

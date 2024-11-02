@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ChevronLeft, Settings } from "lucide-svelte";
 	import { navigate } from "svelte-routing";
-	import { ArweaveUtils } from "../data/Arweave.data";
+	import { ArweaveUtils } from "../utils/arweave.utils";
 	import type { Post } from "../model/post.model";
 	import { getDialogsState } from "../state/dialogs.svelte";
 	import MainPost from "./MainPost.svelte";

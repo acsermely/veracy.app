@@ -2,7 +2,7 @@
 	import { Loader } from "lucide-svelte";
 	import { link } from "svelte-routing";
 	import { toast } from "svelte-sonner";
-	import { ArweaveUtils } from "../data/Arweave.data";
+	import { ArweaveUtils } from "../utils/arweave.utils";
 	import {
 		genPostId,
 		type Post,

@@ -9,7 +9,7 @@
 	import Create from "./lib/components/Create.svelte";
 	import MainPost from "./lib/components/MainPost.svelte";
 	import { Toaster } from "./lib/components/ui/sonner";
-	import { ArweaveUtils } from "./lib/data/Arweave.data";
+	import { ArweaveUtils } from "./lib/utils/arweave.utils";
 	import type { Post } from "./lib/model/post.model";
 	import { setDialogsState } from "./lib/state/dialogs.svelte";
 	import { setFeedState } from "./lib/state/feed.svelte";
