@@ -12,62 +12,25 @@ export class ContentNode {
 			urlHost || localStorage.getItem(STORAGE_NODE_URL) || this.url;
 	}
 
-	public connect = async (
-		username: string,
-		password: string,
-		url?: string,
-	): Promise<void> => {
-		if (url) {
-			this.url = url;
-		}
-		const response = await fetch(`${this.url}/login`, {
-			method: "POST",
-			credentials: "include",
-			body: JSON.stringify({
-				username,
-				password,
-			}),
-		});
-		if (response.status !== 200) {
-			throw "Couldn't connect!";
-		}
-		localStorage.setItem(STORAGE_NODE_URL, this.url);
-		this.isConnected = true;
-	};
-
 	loginCheck = async (url?: string): Promise<Response> => {
 		url = url || this.url;
 		if (!url) {
 			throw new Error("No URL");
 		}
-		const response = await fetch(`${url}/loginCheck`, {
-			credentials: "include",
-			signal: AbortSignal.timeout(5000),
-		});
-		if (response.status === 200) {
-			this.isConnected = true;
-			return response;
+		try {
+			const response = await fetch(`${url}/loginCheck`, {
+				credentials: "include",
+				signal: AbortSignal.timeout(5000),
+			});
+			if (response.status === 200) {
+				this.isConnected = true;
+				return response;
+			}
+			throw response.statusText;
+		} catch (e) {
+			this.isConnected = false;
+			throw e;
 		}
-		throw response.statusText;
-	};
-
-	register = async (
-		username: string,
-		password: string,
-		url?: string,
-	): Promise<Response> => {
-		if (url) {
-			this.url = url;
-		}
-		const response = await fetch(`${this.url}/register`, {
-			method: "POST",
-			body: JSON.stringify({
-				username,
-				password,
-			}),
-		});
-		this.isConnected = true;
-		return response;
 	};
 
 	/**
@@ -124,19 +87,16 @@ export class ContentNode {
 		return fetch(getUrl);
 	};
 
-	getImage = async (id: string, tx?: string): Promise<string> => {
-		let url = `${this.url}/img?id=${id}`;
-		if (tx) {
-			url = url + `&tx=${tx}`;
-		}
-		return fetch(url, { credentials: "include" })
-			.then((response) => {
-				if (response.ok) {
-					return response;
-				}
-				throw new Error("Failed to fetch image.");
-			})
-			.then((data) => data.text());
+	getImage = async (id: string, tx: string): Promise<string> => {
+		let url = `${this.url}/img?id=${id}&tx=${tx}`;
+		return fetch(url, { credentials: "include" }).then((response) => {
+			if (response.ok) {
+				return response.text();
+			} else if (response.status == 402) {
+				throw response.status.toString();
+			}
+			throw new Error(response.statusText);
+		});
 	};
 
 	uploadImage = async (
@@ -154,10 +114,10 @@ export class ContentNode {
 			credentials: "include",
 			body: formData,
 		}).then((response) => {
-			if (!response.ok) {
-				throw new Error("Failed to upload image.");
+			if (response.ok) {
+				return response.text();
 			}
-			return response.text();
+			throw new Error("Failed to upload image.");
 		});
 	};
 }

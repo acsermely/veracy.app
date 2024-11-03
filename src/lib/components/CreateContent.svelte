@@ -11,7 +11,7 @@
 		type PostContentAlign,
 	} from "../model/post.model";
 	import { compressImageInput } from "../utils/image.utils";
-	import { runDelayed } from "../utils/utils";
+	import { runDelayed } from "../utils/common.utils";
 	import Button from "./ui/button/button.svelte";
 	import { Card, CardContent, CardFooter } from "./ui/card";
 	import Input from "./ui/input/input.svelte";

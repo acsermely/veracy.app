@@ -19,15 +19,6 @@ export type PostContent = {
 	align?: PostContentAlign;
 };
 
-export type PostSettings = {
-	disableComments: boolean;
-};
-
-export type PostUploadMedia = {
-	index: number;
-	file: string;
-};
-
 export const genPostId = (): string => {
 	return Date.now().toString(36);
 };

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { ChevronLeft, Settings } from "lucide-svelte";
 	import { navigate } from "svelte-routing";
-	import { ArweaveUtils } from "../utils/arweave.utils";
 	import type { Post } from "../model/post.model";
 	import { getDialogsState } from "../state/dialogs.svelte";
+	import { ArweaveUtils } from "../utils/arweave.utils";
 	import MainPost from "./MainPost.svelte";
 	import AvatarFallback from "./ui/avatar/avatar-fallback.svelte";
 	import Avatar from "./ui/avatar/avatar.svelte";
@@ -78,7 +78,7 @@
 						</CardContent>
 					</Card>
 				{:then data}
-					<MainPost {data} />
+					<MainPost {data} txId={id} />
 				{/await}
 			{/each}
 		{/if}

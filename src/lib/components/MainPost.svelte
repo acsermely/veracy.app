@@ -2,8 +2,11 @@
 	import { Ellipsis, Loader } from "lucide-svelte";
 	import { link } from "svelte-routing";
 	import { toast } from "svelte-sonner";
+	import { SvelteMap } from "svelte/reactivity";
 	import type { Post } from "../model/post.model";
+	import { getLocalWalletState } from "../state/local-wallet.svelte";
 	import { getContentNodeState } from "../state/node.svelte";
+	import { ArweaveUtils } from "../utils/arweave.utils";
 	import AvatarFallback from "./ui/avatar/avatar-fallback.svelte";
 	import Avatar from "./ui/avatar/avatar.svelte";
 	import Button from "./ui/button/button.svelte";
@@ -18,17 +21,46 @@
 
 	const {
 		data,
-		isPreview,
 		txId,
-	}: { data: Post; isPreview?: boolean; txId?: string } = $props();
+		isPreview,
+	}: { data: Post; txId: string; isPreview?: boolean } = $props();
 
 	const nodeState = getContentNodeState();
+	const walletState = getLocalWalletState();
 
 	const shareUrl = $derived(`${location.origin}/post/${txId}`);
+	let buyError = $state("");
 
-	const getImagePromise = async (id: string): Promise<string> => {
-		return data?.id && nodeState.getImage(id);
-	};
+	let dataPromises = $state(
+		new SvelteMap<string, Promise<string>>(
+			data.content
+				.filter((item) => item.type === "IMG")
+				.map((item) => {
+					return [item.data, getImagePromise(item.data)];
+				}),
+		),
+	);
+
+	$effect(() => {
+		console.log(dataPromises);
+	});
+
+	async function getImagePromise(id: string): Promise<string> {
+		return nodeState.getImage(id, txId);
+	}
+
+	async function buyPost(id: string): Promise<void> {
+		if (!walletState.wallet) {
+			return;
+		}
+		const tx = await ArweaveUtils.newPaymentTx(data);
+		try {
+			await walletState.wallet.dispatch(tx);
+		} catch {
+			buyError = "Purchase failed!";
+		}
+		dataPromises.set(id, getImagePromise(id));
+	}
 </script>
 
 <Card class="max-w-[500px] w-full my-10 border-none shadow-none">
@@ -102,7 +134,7 @@
 							alt={"image_" + i}
 						/>
 					{:else}
-						{#await getImagePromise(content.data)}
+						{#await dataPromises.get(content.data)}
 							<div
 								class="flex-1 flex w-full h-full items-center justify-center"
 							>
@@ -117,12 +149,31 @@
 								alt={"image_" + i}
 							/>
 						{:catch e}
-							<div
-								class="min-w-full p-5 flex items-center justify-center text-destructive"
-							>
-								{e} <br /><br />
-								Are you Logged In?
-							</div>
+							{#if e === "402"}
+								<div class="flex flex-col justify-center">
+									<span>
+										<small class="text-primary"
+											>Price:</small
+										>
+										{data.price} AR
+									</span>
+									<Button
+										class="my-5"
+										onclick={() => buyPost(content.data)}
+										>Buy</Button
+									>
+									{#if buyError}
+										<span> {buyError} </span>
+									{/if}
+								</div>
+							{:else}
+								<div
+									class="min-w-full p-5 flex items-center justify-center text-destructive"
+								>
+									{e} <br /><br />
+									Are you Logged In?
+								</div>
+							{/if}
 						{/await}
 					{/if}
 				</div>
