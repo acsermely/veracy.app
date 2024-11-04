@@ -60,7 +60,7 @@
 				</Avatar>
 			</CardHeader>
 			<CardContent class="flex justify-center">
-				<h1>{walletId}</h1>
+				<h1>{walletId.slice(0, 25)}...</h1>
 			</CardContent>
 		</Card>
 	</div>
