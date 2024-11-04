@@ -41,10 +41,6 @@
 		),
 	);
 
-	$effect(() => {
-		console.log(dataPromises);
-	});
-
 	async function getImagePromise(id: string): Promise<string> {
 		return nodeState.getImage(id, txId);
 	}
