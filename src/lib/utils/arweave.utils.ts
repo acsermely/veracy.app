@@ -87,11 +87,14 @@ export class ArweaveUtils {
 		return tx;
 	}
 
-	static async getAllPostsIds(): Promise<string[]> {
+	static async getPostsIds(cursor?: string): Promise<ArPostIdResult[]> {
 		return ArweaveUtils.query<ArQueryResult<ArQueryIds>>(
-			queryAllPosts(),
+			queryPosts(cursor),
 		).then((data) =>
-			data.data.transactions.edges.map((item) => item.node.id),
+			data.data.transactions.edges.map((item) => ({
+				id: item.node.id,
+				cursor: item.cursor,
+			})),
 		);
 		// return Promise.resolve().then(() => {
 		//   let data: ArQueryResult<ArQueryIds> = JSON.parse(allPostsMock);
@@ -114,11 +117,14 @@ export class ArweaveUtils {
 	}
 }
 
-export function queryAllPosts() {
+export function queryPosts(cursor?: string) {
 	return {
 		query: `{
         transactions(
 			order: DESC,
+			limit: 5,
+			timestamp: {from: 1728246095432, to: ${new Date().getTime()}},
+			${cursor ? 'after: "' + cursor + '",' : ""}
             tags: [
                 { name: "App-Name", values: ["${TX_APP_NAME}"]},
                 { name: "Version", values: ["${TX_APP_VERSION}"]},
@@ -129,7 +135,8 @@ export function queryAllPosts() {
             edges {
 					node {
 						id
-					}
+					},
+					cursor
 				}
         }
     }`,
@@ -143,6 +150,7 @@ export function queryPaymentForTxAndSender(
 	return {
 		query: `{
 			transactions(
+				order: DESC,
 				owners: ["${sender}"],
 				tags: [
 					{ name: "App-Name", values: ["${TX_APP_NAME}"]},
@@ -170,6 +178,7 @@ export function queryProfileData(sender: string): { query: string } {
 	return {
 		query: `{
 			transactions(
+				order: DESC,
 				owners: ["${sender}"],
 				tags: [
 					{ name: "App-Name", values: ["${TX_APP_NAME}"]},
@@ -202,6 +211,7 @@ export type ArQueryIds = {
 	node: {
 		id: string;
 	};
+	cursor: string;
 };
 
 export type ArQueryResult<T> = {
@@ -210,4 +220,9 @@ export type ArQueryResult<T> = {
 			edges: Array<T>;
 		};
 	};
+};
+
+export type ArPostIdResult = {
+	id: string;
+	cursor: string;
 };

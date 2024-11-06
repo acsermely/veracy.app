@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Settings, User } from "lucide-svelte";
+	import { Copy, Settings, User } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
 	import { slide } from "svelte/transition";
 	import { getDialogsState } from "../state/dialogs.svelte";
@@ -268,12 +268,25 @@
 				<Button class="my-3" onclick={() => onRegister()}
 					>Create Wallet and Register</Button
 				>
-			{:else}
-				<Button
-					class="my-3"
-					disabled={walletState.isConnected || !walletState.hasKeys}
-					onclick={() => onConnect()}>Connect</Button
+			{:else if !walletState.isConnected}
+				<Button class="my-3" onclick={() => onConnect()}>Connect</Button
 				>
+			{:else}
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
+				<div
+					in:slide
+					out:slide
+					class="flex bg-green-500 bg-opacity-30 items-center cursor-copy
+					justify-center rounded-md my-2 py-3
+					text-destructive-foreground w-full"
+					onclick={() => {
+						navigator.clipboard.writeText(walletState.address);
+						toast.success("Wallet address Copied");
+					}}
+				>
+					Wallet: {walletState.address.slice(0, 20)}...
+					<Copy class="mx-3" />
+				</div>
 			{/if}
 
 			{#if errorMessage}
