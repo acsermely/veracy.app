@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Copy, Settings, User } from "lucide-svelte";
+	import { Copy, Loader, Settings, User } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
 	import { slide } from "svelte/transition";
 	import { getDialogsState } from "../state/dialogs.svelte";
@@ -25,32 +25,38 @@
 	});
 
 	let url = $state("");
-
 	let errorMessage = $state("");
+	let loading = $state(false);
 
 	async function onRegister() {
+		loading = true;
 		try {
 			await walletState.register();
 		} catch {
 			errorMessage = "Couldn't create wallet";
 			return;
+		} finally {
+			loading = false;
 		}
 		onConnect();
 	}
 
 	async function onConnect() {
+		loading = true;
 		try {
 			await walletState.connect();
 			console.log("Connect: Wallet Connected");
 		} catch (e) {
 			console.error(e);
 			errorMessage = e as string;
+			loading = false;
 			return;
 		}
 		try {
 			await nodeState.loginCheck();
 			console.log("Connect: Login check");
-			dialogsState.connectDialog = false;
+			// dialogsState.connectDialog = false;
+			loading = false;
 			return;
 		} catch {
 			console.info("Connect: Not logged in!");
@@ -59,7 +65,8 @@
 		try {
 			await loginKey();
 			console.log("Connect: Login key");
-			dialogsState.connectDialog = false;
+			// dialogsState.connectDialog = false;
+			loading = false;
 			return;
 		} catch {
 			console.info("Connect: Need registration!");
@@ -68,10 +75,12 @@
 		try {
 			await registerKey();
 			console.log("Connect: Register key");
-			dialogsState.connectDialog = false;
+			// dialogsState.connectDialog = false;
 			return;
 		} catch {
 			console.info("Connect: Registration failed!");
+		} finally {
+			loading = false;
 		}
 	}
 
@@ -82,15 +91,17 @@
 			return;
 		}
 		if (!walletState.wallet) {
-			onConnect();
+			errorMessage = "No available Wallet!";
 			return;
 		}
+		loading = true;
 		let pubKey: JsonWebKey;
 		try {
 			pubKey = await walletState.getPublicKey();
 		} catch (e) {
 			errorMessage = "Failed to get your key! Try again!";
 			console.error(e);
+			loading = false;
 			throw errorMessage;
 		}
 
@@ -112,6 +123,7 @@
 				errorMessage = "Failed to Register Wallet! Try again!";
 			}
 			console.error(e);
+			loading = false;
 			throw errorMessage;
 		}
 		try {
@@ -130,6 +142,7 @@
 		} catch (e) {
 			errorMessage = "Failed to get your key! Try again!";
 			console.error(e);
+			loading = false;
 			throw errorMessage;
 		}
 
@@ -142,9 +155,11 @@
 		} catch (e) {
 			errorMessage = "Couldn't login!";
 			console.error(e);
+			loading = false;
 			throw errorMessage;
 		}
-		dialogsState.connectDialog = false;
+		// dialogsState.connectDialog = false;
+		loading = false;
 		feedState.queryData();
 	}
 
@@ -207,7 +222,10 @@
 	}
 </script>
 
-<Dialog bind:open={dialogsState.connectDialog}>
+<Dialog
+	bind:open={dialogsState.connectDialog}
+	openFocus={"#connect-dialog-content"}
+>
 	{#if !walletState.address || !nodeState.isConnected}
 		<DialogTrigger
 			class={buttonVariants({ variant: "destructive" }) + " gap-4"}
@@ -227,7 +245,7 @@
 			<Settings />
 		</DialogTrigger>
 	{/if}
-	<DialogContent class="w-full max-w-[500px]">
+	<DialogContent id="connect-dialog-content" class="w-full max-w-[450px]">
 		<DialogHeader>
 			<div class="flex">
 				<img
@@ -255,19 +273,29 @@
 				/>
 			</div>
 
-			{#if !walletState.hasKeys}
+			{#if loading}
 				<div
 					in:slide
 					out:slide
-					class="flex bg-yellow-500 bg-opacity-50 items-center
+					class="flex bg-blue-500 bg-opacity-50 border-blue-500 border-2 items-center
 					justify-center rounded-md my-2 py-3
 					text-destructive-foreground w-full"
 				>
-					No availabel Wallet
+					<Loader class="animate-spin" />
 				</div>
-				<Button class="my-3" onclick={() => onRegister()}
-					>Create Wallet and Register</Button
-				>
+			{:else if !walletState.hasKeys}
+				<div class="flex flex-col" in:slide out:slide>
+					<div
+						class="flex bg-yellow-500 bg-opacity-50 border-yellow-500 border-2 items-center
+					justify-center rounded-md my-2 py-3
+					text-destructive-foreground w-full"
+					>
+						No availabel Wallet
+					</div>
+					<Button class="my-3" onclick={() => onRegister()}
+						>Create Wallet and Register</Button
+					>
+				</div>
 			{:else if !walletState.isConnected}
 				<Button class="my-3" onclick={() => onConnect()}>Connect</Button
 				>
@@ -276,7 +304,7 @@
 				<div
 					in:slide
 					out:slide
-					class="flex bg-green-500 bg-opacity-30 items-center cursor-copy
+					class="flex bg-green-500 bg-opacity-30 border-green-500 border-2 items-center cursor-copy
 					justify-center rounded-md my-2 py-3
 					text-destructive-foreground w-full"
 					onclick={() => {

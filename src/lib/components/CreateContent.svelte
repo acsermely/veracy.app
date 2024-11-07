@@ -10,8 +10,8 @@
 		type PostContent,
 		type PostContentAlign,
 	} from "../model/post.model";
-	import { compressImageInput } from "../utils/image.utils";
 	import { runDelayed } from "../utils/common.utils";
+	import { compressImageInput } from "../utils/image.utils";
 	import Button from "./ui/button/button.svelte";
 	import { Card, CardContent, CardFooter } from "./ui/card";
 	import Input from "./ui/input/input.svelte";
@@ -55,7 +55,7 @@
 	}
 </script>
 
-<Card class="max-w-[500px] w-full m-5 border-none">
+<Card class="max-w-[450px] w-full m-5 border-none">
 	<CardContent class="p-0 border-2">
 		<div
 			class="inline-flex w-full overflow-x-scroll overflow-y-hidden scroll-smooth snap-x snap-mandatory max-h-[70vh]"
@@ -64,7 +64,7 @@
 			{#each data as content, i}
 				<div
 					id={"content_" + i}
-					class="min-w-full box-content snap-start inline-flex justify-center min-h-[45vh]"
+					class="min-w-full box-content snap-start inline-flex justify-center min-h-[30dvh]"
 				>
 					<div class="flex-1 flex flex-col">
 						<div

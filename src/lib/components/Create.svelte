@@ -2,7 +2,6 @@
 	import { Loader } from "lucide-svelte";
 	import { link } from "svelte-routing";
 	import { toast } from "svelte-sonner";
-	import { ArweaveUtils } from "../utils/arweave.utils";
 	import {
 		genPostId,
 		type Post,
@@ -11,6 +10,7 @@
 	import { getDialogsState } from "../state/dialogs.svelte";
 	import { getLocalWalletState } from "../state/local-wallet.svelte";
 	import { getContentNodeState } from "../state/node.svelte";
+	import { ArweaveUtils } from "../utils/arweave.utils";
 	import CreateContent from "./CreateContent.svelte";
 	import CreateDetails from "./CreateDetails.svelte";
 	import CreateUpload from "./CreateUpload.svelte";
@@ -122,13 +122,13 @@
 <div class="flex-1 flex flex-col items-center w-full max-h-full">
 	{#if !walletState.isConnected && currentStep == 2}
 		<Button
-			class="max-w-[500px] w-full m-5 mb-0"
+			class="max-w-[450px] w-full m-5 mb-0"
 			variant="destructive"
 			onclick={() => (dialogsState.connectDialog = true)}
 			>Login to continue</Button
 		>
 	{:else if currentStep < 3}
-		<div class="max-w-[500px] w-full m-5 mb-0 flex justify-between">
+		<div class="max-w-[450px] w-full m-5 mb-0 flex justify-between">
 			{#if currentStep < 1}
 				<a
 					href="/"

@@ -29,7 +29,7 @@
 	}
 </script>
 
-<div class="max-w-[500px] w-full m-5 flex flex-col">
+<div class="max-w-[450px] w-full m-5 flex flex-col">
 	<div class="flex items-baseline justify-between">
 		<span class="text-lg p-3">Title: </span>
 		<Input

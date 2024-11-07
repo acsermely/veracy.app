@@ -34,7 +34,7 @@
 	{#if postIds.length}
 		{#each postIds as id}
 			{#await fetchData(id)}
-				<Card class="max-w-[500px] w-full m-5">
+				<Card class="max-w-[450px] w-full m-5">
 					<CardHeader class="flex flex-row pb-3">
 						<Skeleton class="w-40 h-12"></Skeleton>
 					</CardHeader>

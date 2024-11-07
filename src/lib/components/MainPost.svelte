@@ -59,7 +59,7 @@
 	}
 </script>
 
-<Card class="max-w-[500px] w-full my-10 border-none shadow-none">
+<Card class="max-w-[450px] w-full my-10 border-none shadow-none">
 	<div class="flex w-full">
 		<a
 			class="flex-1 flex p-3 pb-2 cursor-pointer items-center"
@@ -108,13 +108,13 @@
 
 	<CardContent class="p-0 border-2">
 		<div
-			class="inline-flex w-full overflow-x-scroll overflow-y-hidden scroll-smooth snap-x snap-mandatory max-h-[70vh]"
+			class="inline-flex w-full overflow-x-scroll overflow-y-hidden scroll-smooth snap-x snap-mandatory max-h-[60dvh]"
 			style="scrollbar-color: rgba(128, 128, 128, .5) rgba(0, 0, 0, 0); scrollbar-width: thin;"
 		>
 			{#each data.content as content, i}
 				<div
 					id={data.id + "_" + i}
-					class="min-w-full box-content snap-start inline-flex justify-center min-h-[45vh]"
+					class="min-w-full box-content snap-start inline-flex justify-center min-h-[30dvh]"
 				>
 					{#if content.type === "TEXT"}
 						<pre

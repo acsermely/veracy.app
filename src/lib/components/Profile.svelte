@@ -31,8 +31,8 @@
 	};
 </script>
 
-<div class="flex flex-col w-full items-center m-3">
-	<div class="flex my-3 w-full max-w-[500px] justify-between items-baseline">
+<div class="flex flex-col w-full max-w-[450px] items-center m-3">
+	<div class="flex my-3 w-full justify-between items-baseline">
 		<Button
 			variant="outline"
 			size="icon"
@@ -52,7 +52,7 @@
 			<Settings />
 		</Button>
 	</div>
-	<div class="w-full max-w-[500px]">
+	<div class="w-full">
 		<Card class="my-5 w-full">
 			<CardHeader class="flex items-center">
 				<Avatar>
@@ -64,11 +64,11 @@
 			</CardContent>
 		</Card>
 	</div>
-	<div class="w-full max-w-[500px]">
+	<div class="w-full">
 		{#if postIds}
 			{#each postIds as id}
 				{#await fetchData(id)}
-					<Card class="max-w-[500px] w-full my-5">
+					<Card class="w-full my-5">
 						<CardHeader class="flex flex-row pb-3">
 							<Skeleton class="w-40 h-12"></Skeleton>
 						</CardHeader>
