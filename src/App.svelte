@@ -9,12 +9,12 @@
 	import Create from "./lib/components/Create.svelte";
 	import MainPost from "./lib/components/MainPost.svelte";
 	import { Toaster } from "./lib/components/ui/sonner";
-	import { ArweaveUtils } from "./lib/utils/arweave.utils";
 	import type { Post } from "./lib/model/post.model";
 	import { setDialogsState } from "./lib/state/dialogs.svelte";
 	import { setFeedState } from "./lib/state/feed.svelte";
 	import { setLocalWalletState } from "./lib/state/local-wallet.svelte";
 	import { setContentNodeState } from "./lib/state/node.svelte";
+	import { ArweaveUtils } from "./lib/utils/arweave.utils";
 
 	setFeedState();
 	setLocalWalletState();
@@ -28,7 +28,9 @@
 
 <ModeWatcher />
 <div class="flex w-[100dvw] h-[100dvh] flex-col-reverse md:flex-row">
-	<div class="flex flex-col-reverse mb-5 md:mb-0 md:flex-col justify-between">
+	<div
+		class="flex flex-col-reverse standalone:mb-5 md:mb-0 md:flex-col justify-between"
+	>
 		<ActionBar />
 	</div>
 	<div class="flex-1 flex justify-center overflow-x-auto">
