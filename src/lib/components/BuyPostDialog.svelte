@@ -1,0 +1,112 @@
+<script lang="ts">
+	import { Loader } from "lucide-svelte";
+	import { toast } from "svelte-sonner";
+	import type { Post } from "../model/post.model";
+	import { getDialogsState } from "../state/dialogs.svelte";
+	import { getLocalWalletState } from "../state/local-wallet.svelte";
+	import { ArweaveUtils } from "../utils/arweave.utils";
+	import { runDelayed } from "../utils/common.utils";
+	import Button from "./ui/button/button.svelte";
+	import { Dialog } from "./ui/dialog";
+	import DialogContent from "./ui/dialog/dialog-content.svelte";
+	import DialogDescription from "./ui/dialog/dialog-description.svelte";
+	import DialogFooter from "./ui/dialog/dialog-footer.svelte";
+	import DialogHeader from "./ui/dialog/dialog-header.svelte";
+	import DialogTitle from "./ui/dialog/dialog-title.svelte";
+
+	const walletState = getLocalWalletState();
+	const dialogsState = getDialogsState();
+
+	let data = $state<Post>();
+	let processing = $state(false);
+
+	$effect(() => {
+		if (dialogsState.buyDialog) {
+			fetchData();
+		}
+	});
+
+	async function fetchData(): Promise<void> {
+		if (!dialogsState.buyDialogContentId) {
+			toast.error("Couldn't find content!");
+			return;
+		}
+		data = await ArweaveUtils.getTxById<Post>(
+			dialogsState.buyDialogContentId,
+		);
+	}
+
+	async function buy(): Promise<void> {
+		if (!data) {
+			toast.error("Post data is not available!");
+			return;
+		}
+		if (!walletState.wallet) {
+			toast.error("No Wallet!");
+			return;
+		}
+		processing = true;
+		const tx = await ArweaveUtils.newPaymentTx(data);
+		let result;
+		try {
+			result = await walletState.wallet.dispatch(tx);
+		} catch {
+			toast.error("Transaction failed!");
+			processing = false;
+			throw "ransaction failed!";
+		}
+		console.log(result);
+		runDelayed(() => {
+			dialogsState.closeBuyDialog();
+			processing = false;
+		}, 300);
+	}
+</script>
+
+<Dialog bind:open={dialogsState.buyDialog} openFocus={"#buy-dialog-content"}>
+	<DialogContent id="buy-dialog-content" class="w-full max-w-[300px]">
+		<DialogHeader>
+			<DialogTitle>Purchase</DialogTitle>
+			<DialogDescription
+				>Confirm you want to buy this post.</DialogDescription
+			>
+		</DialogHeader>
+		<div class="flex w-full px-5 flex-col gap-2">
+			{#if dialogsState.buyDialogContentId}
+				{#if !data}
+					<div class="flex justify-between items-center">
+						<small>Price:</small><Loader class="animate-spin m-2" />
+					</div>
+				{:else}
+					<div class="flex justify-between items-center">
+						<small>Price:</small><b>{data.price} AR</b>
+					</div>
+					<div class="flex justify-between items-center">
+						<small>Recipient:</small><b
+							>{data.uploader.slice(0, 10)}...</b
+						>
+					</div>
+					{#if data.title}
+						<div class="flex justify-between items-center">
+							<small>Title:</small><span>{data.title}</span>
+						</div>
+					{/if}
+				{/if}
+			{/if}
+		</div>
+		<DialogFooter>
+			<Button
+				class="m-3"
+				variant="secondary"
+				onclick={() => (dialogsState.buyDialog = false)}>Cancel</Button
+			>
+			<Button class="m-3" variant="default" onclick={() => buy()}>
+				{#if processing}
+					<Loader class="animate-spin" />
+				{:else}
+					Purchase
+				{/if}
+			</Button>
+		</DialogFooter>
+	</DialogContent>
+</Dialog>

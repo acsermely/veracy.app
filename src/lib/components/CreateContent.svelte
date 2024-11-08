@@ -64,7 +64,7 @@
 			{#each data as content, i}
 				<div
 					id={"content_" + i}
-					class="min-w-full box-content snap-start inline-flex justify-center min-h-[30dvh]"
+					class="min-w-full box-content snap-start inline-flex justify-center min-h-[50dvh]"
 				>
 					<div class="flex-1 flex flex-col">
 						<div

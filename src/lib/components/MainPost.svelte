@@ -4,9 +4,9 @@
 	import { toast } from "svelte-sonner";
 	import { SvelteMap } from "svelte/reactivity";
 	import type { Post } from "../model/post.model";
+	import { getDialogsState } from "../state/dialogs.svelte";
 	import { getLocalWalletState } from "../state/local-wallet.svelte";
 	import { getContentNodeState } from "../state/node.svelte";
-	import { ArweaveUtils } from "../utils/arweave.utils";
 	import AvatarFallback from "./ui/avatar/avatar-fallback.svelte";
 	import Avatar from "./ui/avatar/avatar.svelte";
 	import Button from "./ui/button/button.svelte";
@@ -27,6 +27,7 @@
 
 	const nodeState = getContentNodeState();
 	const walletState = getLocalWalletState();
+	const dialogState = getDialogsState();
 
 	const shareUrl = $derived(`${location.origin}/post/${txId}`);
 	let buyError = $state("");
@@ -45,16 +46,12 @@
 		return nodeState.getImage(id, txId);
 	}
 
-	async function buyPost(id: string): Promise<void> {
+	async function buyPost(id: string, txId: string): Promise<void> {
 		if (!walletState.wallet) {
+			toast.error("No Wallet!");
 			return;
 		}
-		const tx = await ArweaveUtils.newPaymentTx(data);
-		try {
-			await walletState.wallet.dispatch(tx);
-		} catch {
-			buyError = "Purchase failed!";
-		}
+		await dialogState.openBuyDialog(txId);
 		dataPromises.set(id, getImagePromise(id));
 	}
 </script>
@@ -118,7 +115,7 @@
 				>
 					{#if content.type === "TEXT"}
 						<pre
-							class="min-w-full p-5 text-wrap"
+							class="min-w-full p-5 text-wrap break-words"
 							class:text-left={content.align === "left"}
 							class:text-center={content.align === "center"}
 							class:text-right={content.align ===
@@ -155,7 +152,8 @@
 									</span>
 									<Button
 										class="my-5"
-										onclick={() => buyPost(content.data)}
+										onclick={() =>
+											buyPost(content.data, txId)}
 										>Buy</Button
 									>
 									{#if buyError}

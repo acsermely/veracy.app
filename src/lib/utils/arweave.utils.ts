@@ -87,6 +87,23 @@ export class ArweaveUtils {
 		return tx;
 	}
 
+	static async newSetPriceTx(data: Post): Promise<Transaction> {
+		const stringData = JSON.stringify({
+			target: data.id,
+			price: data.price || "0",
+		});
+		let tx = await this.arweave.createTransaction({
+			data: stringData,
+		});
+		tx.addTag("App-Name", TX_APP_NAME);
+		tx.addTag("Content-Type", TX_APP_CONTENT_TYPE);
+		tx.addTag("Version", TX_APP_VERSION);
+		tx.addTag("Type", TxType.PAYMENT);
+		tx.addTag("Target", data.id);
+		tx.addTag("Price", data.price || "0");
+		return tx;
+	}
+
 	static async getPostsIds(cursor?: string): Promise<ArPostIdResult[]> {
 		return ArweaveUtils.query<ArQueryResult<ArQueryIds>>(
 			queryPosts(cursor),

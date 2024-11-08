@@ -3,6 +3,7 @@
 	import { toggleMode } from "mode-watcher";
 	import { link } from "svelte-routing";
 	import { getLocalWalletState } from "../state/local-wallet.svelte";
+	import BuyPostDialog from "./BuyPostDialog.svelte";
 	import ConnectDialog from "./ConnectDialog.svelte";
 	import { Button } from "./ui/button";
 
@@ -38,6 +39,7 @@
 </div>
 <div class="flex flex-col w-full gap-2">
 	<ConnectDialog />
+	<BuyPostDialog />
 	<Button
 		class="hidden md:flex w-full"
 		onclick={toggleMode}

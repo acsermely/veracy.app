@@ -247,7 +247,7 @@
 	{/if}
 	<DialogContent id="connect-dialog-content" class="w-full max-w-[450px]">
 		<DialogHeader>
-			<div class="flex">
+			<div class="flex items-center">
 				<img
 					class="h-[2rem] mr-3"
 					src="/veracy-icon.svg"
