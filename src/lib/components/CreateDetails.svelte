@@ -11,7 +11,7 @@
 	}: {
 		tags: string[];
 		title?: string;
-		price?: string;
+		price?: number;
 		needPrice?: boolean;
 	} = $props();
 
@@ -53,6 +53,11 @@
 			placeholder="Private Content Price..."
 		/>
 	</div>
+	{#if needPrice}
+		<p class="w-full pr-3 text-end text-muted-foreground text-sm">
+			*You need to send this amount ot the Platform as Activation Fee!
+		</p>
+	{/if}
 	<div class="flex flex-col">
 		<p class="text-lg p-3">Tags:</p>
 		{#each tags as _, i}

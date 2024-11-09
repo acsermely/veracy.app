@@ -42,7 +42,6 @@ export class ArweaveUtils {
 	static async getTxById<T>(txId: string): Promise<T> {
 		const response = await fetch(`${ARWEAVE_URL}/${txId}`);
 		return (await response.json().then((data) => {
-			data.id = txId;
 			return data;
 		})) as T;
 	}
@@ -70,10 +69,13 @@ export class ArweaveUtils {
 		return tx;
 	}
 
-	static async newPaymentTx(data: Post): Promise<Transaction> {
+	static async newPaymentTx(
+		postId: string,
+		price: number,
+	): Promise<Transaction> {
 		const stringData = JSON.stringify({
-			target: data.id,
-			price: data.price || "0",
+			target: postId,
+			price: price,
 		});
 		let tx = await this.arweave.createTransaction({
 			data: stringData,
@@ -82,15 +84,21 @@ export class ArweaveUtils {
 		tx.addTag("Content-Type", TX_APP_CONTENT_TYPE);
 		tx.addTag("Version", TX_APP_VERSION);
 		tx.addTag("Type", TxType.PAYMENT);
-		tx.addTag("Target", data.id);
-		tx.addTag("Price", data.price || "0");
+		tx.addTag("Target", postId);
+		tx.addTag("Price", price.toString());
 		return tx;
 	}
 
-	static async newSetPriceTx(data: Post): Promise<Transaction> {
+	static async newSetPriceTx(
+		postId: string,
+		price: number,
+	): Promise<Transaction> {
+		if (!price || price === 0) {
+			throw "No Price";
+		}
 		const stringData = JSON.stringify({
-			target: data.id,
-			price: data.price || "0",
+			target: postId,
+			price: price,
 		});
 		let tx = await this.arweave.createTransaction({
 			data: stringData,
@@ -98,14 +106,14 @@ export class ArweaveUtils {
 		tx.addTag("App-Name", TX_APP_NAME);
 		tx.addTag("Content-Type", TX_APP_CONTENT_TYPE);
 		tx.addTag("Version", TX_APP_VERSION);
-		tx.addTag("Type", TxType.PAYMENT);
-		tx.addTag("Target", data.id);
-		tx.addTag("Price", data.price || "0");
+		tx.addTag("Type", TxType.PRICE);
+		tx.addTag("Target", postId);
+		tx.addTag("Price", price.toString());
 		return tx;
 	}
 
 	static async getPostsIds(cursor?: string): Promise<ArPostIdResult[]> {
-		return ArweaveUtils.query<ArQueryResult<ArQueryIds>>(
+		return ArweaveUtils.query<ArQueryResult<ArQueryCursoredIds>>(
 			queryPosts(cursor),
 		).then((data) =>
 			data.data.transactions.edges.map((item) => ({
@@ -120,8 +128,25 @@ export class ArweaveUtils {
 	}
 
 	static async getAllPostsIdForWallet(walletId: string): Promise<string[]> {
-		return ArweaveUtils.query<ArQueryResult<ArQueryIds>>(
+		return ArweaveUtils.query<ArQueryResult<ArQueryCursoredIds>>(
 			queryProfileData(walletId),
+		).then((data) =>
+			data.data.transactions.edges.map((item) => item.node.id),
+		);
+		// return Promise.resolve().then(() => {
+		//   let data: ArQueryResult<ArQueryNodes> = JSON.parse(allPostsForWallet);
+		//   return data.data.transactions.edges
+		//     .filter((item) => item.node.owner.address === walletId)
+		//     .map((item) => item.node.id);
+		// });
+	}
+
+	static async getPriceForPost(
+		tx: string,
+		uploader: string,
+	): Promise<string[]> {
+		return ArweaveUtils.query<ArQueryResult<ArQueryIds>>(
+			queryPriceForTx(tx, uploader),
 		).then((data) =>
 			data.data.transactions.edges.map((item) => item.node.id),
 		);
@@ -139,7 +164,7 @@ export function queryPosts(cursor?: string) {
 		query: `{
         transactions(
 			order: DESC,
-			limit: 5,
+			limit: 10,
 			timestamp: {from: 1728246095432, to: ${new Date().getTime()}},
 			${cursor ? 'after: "' + cursor + '",' : ""}
             tags: [
@@ -150,13 +175,38 @@ export function queryPosts(cursor?: string) {
         ) 
         {
             edges {
-					node {
-						id
-					},
-					cursor
-				}
+				node {
+					id
+				},
+				cursor
+			}
         }
     }`,
+	};
+}
+
+export function queryPriceForTx(tx: string, sender: string): { query: string } {
+	return {
+		query: `{
+			transactions(
+				order: DESC,
+				owners: ["${sender}"],
+				timestamp: {from: 1728246095432, to: ${new Date().getTime()}},
+				tags: [
+					{ name: "App-Name", values: ["${TX_APP_NAME}"]},
+					{ name: "Version", values: ["${TX_APP_VERSION}"]},
+					{ name: "Type", values: ["${TxType.PRICE}"]},
+					{ name: "Target", values: ["${tx}"]}
+				]
+			)
+			{
+				edges {
+					node {
+						id
+					}
+				}
+			}
+		}`,
 	};
 }
 
@@ -167,8 +217,8 @@ export function queryPaymentForTxAndSender(
 	return {
 		query: `{
 			transactions(
-				order: DESC,
 				owners: ["${sender}"],
+				timestamp: {from: 1728246095432, to: ${new Date().getTime()}},
 				tags: [
 					{ name: "App-Name", values: ["${TX_APP_NAME}"]},
 					{ name: "Version", values: ["${TX_APP_VERSION}"]},
@@ -180,10 +230,6 @@ export function queryPaymentForTxAndSender(
 				edges {
 					node {
 						id
-						recipient
-						owner {
-							address
-						}
 					}
 				}
 			}
@@ -197,6 +243,7 @@ export function queryProfileData(sender: string): { query: string } {
 			transactions(
 				order: DESC,
 				owners: ["${sender}"],
+				timestamp: {from: 1728246095432, to: ${new Date().getTime()}},
 				tags: [
 					{ name: "App-Name", values: ["${TX_APP_NAME}"]},
 					{ name: "Version", values: ["${TX_APP_VERSION}"]},
@@ -214,21 +261,17 @@ export function queryProfileData(sender: string): { query: string } {
 	};
 }
 
-export type ArQueryNodes = {
+export type ArQueryCursoredIds = {
 	node: {
 		id: string;
-		recipient: string;
-		owner: {
-			address: string;
-		};
 	};
+	cursor: string;
 };
 
 export type ArQueryIds = {
 	node: {
 		id: string;
 	};
-	cursor: string;
 };
 
 export type ArQueryResult<T> = {
@@ -242,4 +285,9 @@ export type ArQueryResult<T> = {
 export type ArPostIdResult = {
 	id: string;
 	cursor: string;
+};
+
+export type ArPaymentResult = {
+	target: string;
+	price: number;
 };

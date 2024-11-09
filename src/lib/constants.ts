@@ -10,6 +10,7 @@ export enum Context {
 export enum TxType {
 	POST = "post",
 	PAYMENT = "payment",
+	PRICE = "set-price",
 	PROFILE = "profile",
 }
 

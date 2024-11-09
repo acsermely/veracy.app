@@ -8,7 +8,6 @@ export type Post = {
 	title?: string;
 	tags?: string[];
 	uploader: string;
-	price?: string;
 	// settings?: PostSettings;
 };
 

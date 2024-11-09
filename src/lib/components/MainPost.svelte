@@ -7,6 +7,8 @@
 	import { getDialogsState } from "../state/dialogs.svelte";
 	import { getLocalWalletState } from "../state/local-wallet.svelte";
 	import { getContentNodeState } from "../state/node.svelte";
+	import { ArweaveUtils, type ArPaymentResult } from "../utils/arweave.utils";
+	import { hasPrivateContent } from "../utils/common.utils";
 	import AvatarFallback from "./ui/avatar/avatar-fallback.svelte";
 	import Avatar from "./ui/avatar/avatar.svelte";
 	import Button from "./ui/button/button.svelte";
@@ -23,7 +25,7 @@
 		data,
 		txId,
 		isPreview,
-	}: { data: Post; txId: string; isPreview?: boolean } = $props();
+	}: { data: Post; txId?: string; isPreview?: boolean } = $props();
 
 	const nodeState = getContentNodeState();
 	const walletState = getLocalWalletState();
@@ -31,6 +33,22 @@
 
 	const shareUrl = $derived(`${location.origin}/post/${txId}`);
 	let buyError = $state("");
+	let postActive = $state(false);
+	let postPrice = $state<number>();
+
+	$effect(() => {
+		if (!hasPrivateContent(data.content) || !data.id || isPreview) {
+			postActive = true;
+			return;
+		}
+		getPrice(data.id, data.uploader).then((price) => {
+			if (price === undefined) {
+				return;
+			}
+			postPrice = price;
+			postActive = true;
+		});
+	});
 
 	let dataPromises = $state(
 		new SvelteMap<string, Promise<string>>(
@@ -42,16 +60,41 @@
 		),
 	);
 
+	async function getPrice(
+		postId: string,
+		uploader: string,
+	): Promise<number | undefined> {
+		const result = await ArweaveUtils.getPriceForPost(postId, uploader);
+		if (result.length < 1) {
+			return undefined;
+		}
+		const priceData = await ArweaveUtils.getTxById<ArPaymentResult>(
+			result[0],
+		);
+		return priceData.price;
+	}
+
 	async function getImagePromise(id: string): Promise<string> {
+		if (isPreview || !txId) {
+			return Promise.resolve("");
+		}
 		return nodeState.getImage(id, txId);
 	}
 
-	async function buyPost(id: string, txId: string): Promise<void> {
+	async function buyPost(id: string, txId?: string): Promise<void> {
 		if (!walletState.wallet) {
 			toast.error("No Wallet!");
 			return;
 		}
-		await dialogState.openBuyDialog(txId);
+		if (!txId) {
+			toast.error("Can't buy without Transaction ID!");
+			return;
+		}
+		if (!postPrice) {
+			toast.error("Can't buy without Price!");
+			return;
+		}
+		await dialogState.openBuyDialog(txId, postPrice);
 		dataPromises.set(id, getImagePromise(id));
 	}
 </script>
@@ -144,14 +187,20 @@
 						{:catch e}
 							{#if e === "402"}
 								<div class="flex flex-col justify-center">
-									<span>
-										<small class="text-primary"
-											>Price:</small
-										>
-										{data.price} AR
-									</span>
+									{#if postActive}
+										<span>
+											<small class="text-primary"
+												>Price:</small
+											>
+											{postPrice} AR
+										</span>
+									{:else}
+										<span>Can't buy Content!</span>
+										<small>Error: Not activated yet.</small>
+									{/if}
 									<Button
 										class="my-5"
+										disabled={!postActive}
 										onclick={() =>
 											buyPost(content.data, txId)}
 										>Buy</Button

@@ -4,18 +4,21 @@ export class DialogsState {
 	public connectDialog = $state(false);
 
 	public buyDialog = $state(false);
-	public buyDialogContentId = $state<string>();
+	public buyDialogContent = $state<{
+		id: string;
+		price: number;
+	}>();
 
 	private _buyResolver!: () => void;
 
-	public openBuyDialog(id: string): Promise<void> {
-		this.buyDialogContentId = id;
+	public openBuyDialog(id: string, price: number): Promise<void> {
+		this.buyDialogContent = { id, price };
 		this.buyDialog = true;
 		return new Promise((resolve) => (this._buyResolver = resolve));
 	}
 
 	public closeBuyDialog(): void {
-		this.buyDialogContentId = undefined;
+		this.buyDialogContent = undefined;
 		this.buyDialog = false;
 		if (this._buyResolver) {
 			this._buyResolver();

@@ -27,17 +27,17 @@
 	});
 
 	async function fetchData(): Promise<void> {
-		if (!dialogsState.buyDialogContentId) {
+		if (!dialogsState.buyDialogContent) {
 			toast.error("Couldn't find content!");
 			return;
 		}
 		data = await ArweaveUtils.getTxById<Post>(
-			dialogsState.buyDialogContentId,
+			dialogsState.buyDialogContent.id,
 		);
 	}
 
 	async function buy(): Promise<void> {
-		if (!data) {
+		if (!data || !dialogsState.buyDialogContent) {
 			toast.error("Post data is not available!");
 			return;
 		}
@@ -46,7 +46,10 @@
 			return;
 		}
 		processing = true;
-		const tx = await ArweaveUtils.newPaymentTx(data);
+		const tx = await ArweaveUtils.newPaymentTx(
+			dialogsState.buyDialogContent.id,
+			dialogsState.buyDialogContent.price,
+		);
 		let result;
 		try {
 			result = await walletState.wallet.dispatch(tx);
@@ -55,7 +58,6 @@
 			processing = false;
 			throw "ransaction failed!";
 		}
-		console.log(result);
 		runDelayed(() => {
 			dialogsState.closeBuyDialog();
 			processing = false;
@@ -72,14 +74,16 @@
 			>
 		</DialogHeader>
 		<div class="flex w-full px-5 flex-col gap-2">
-			{#if dialogsState.buyDialogContentId}
+			{#if dialogsState.buyDialogContent}
 				{#if !data}
 					<div class="flex justify-between items-center">
 						<small>Price:</small><Loader class="animate-spin m-2" />
 					</div>
 				{:else}
 					<div class="flex justify-between items-center">
-						<small>Price:</small><b>{data.price} AR</b>
+						<small>Price:</small><b
+							>{dialogsState.buyDialogContent.price} AR</b
+						>
 					</div>
 					<div class="flex justify-between items-center">
 						<small>Recipient:</small><b

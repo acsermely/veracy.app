@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Loader } from "lucide-svelte";
 	import { link } from "svelte-routing";
 	import { toast } from "svelte-sonner";
 	import {
@@ -11,8 +10,10 @@
 	import { getLocalWalletState } from "../state/local-wallet.svelte";
 	import { getContentNodeState } from "../state/node.svelte";
 	import { ArweaveUtils } from "../utils/arweave.utils";
+	import { hasPrivateContent } from "../utils/common.utils";
 	import CreateContent from "./CreateContent.svelte";
 	import CreateDetails from "./CreateDetails.svelte";
+	import CreateFinish from "./CreateFinish.svelte";
 	import CreateUpload from "./CreateUpload.svelte";
 	import { buttonVariants } from "./ui/button";
 	import Button from "./ui/button/button.svelte";
@@ -26,9 +27,10 @@
 	const dialogsState = getDialogsState();
 
 	let title = $state(undefined);
-	let price = $state(undefined);
+	let price = $state<number>();
 	let tags = $state<string[]>([""]);
 	let data = $state<Partial<PostContent>[]>([{}]);
+	let fullPostData = $state<Post>();
 
 	async function uploadPost(): Promise<void> {
 		const id = genPostId();
@@ -70,10 +72,11 @@
 			title,
 			uploader: walletState.address,
 			content,
-			price,
 		};
+		fullPostData = postData;
 		const tx = await ArweaveUtils.newPostTx(postData);
 		await walletState.wallet.dispatch(tx);
+
 		return;
 	}
 
@@ -110,12 +113,6 @@
 
 	function prevStep(): void {
 		currentStep -= 1;
-	}
-
-	function hasPrivateContent(data: Partial<PostContent>[]): boolean {
-		return !!data.filter((content) => {
-			return content?.privacy === "PRIVATE";
-		}).length;
 	}
 </script>
 
@@ -159,20 +156,12 @@
 	{:else if currentStep == 2}
 		<CreateUpload {data} {title} {tags} />
 	{:else if currentStep == 3}
-		<div class="flex flex-col w-full justify-center items-center h-40">
-			{#if uploading}
-				<span class="text-xl m-10">Uploading...</span>
-				<Loader class="size-10 animate-spin" />
-			{:else}
-				<span class="text-xl m-10">{uploadMessage}</span>
-				<a
-					class={buttonVariants({ variant: "default" })}
-					href="/"
-					use:link
-				>
-					Home Page
-				</a>
-			{/if}
-		</div>
+		<CreateFinish
+			bind:data={fullPostData}
+			bind:uploading
+			bind:uploadMessage
+			bind:price
+			needPayment={hasPrivateContent(data)}
+		/>
 	{/if}
 </div>
