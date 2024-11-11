@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
-	import { fade, slide } from "svelte/transition";
+	import { fade } from "svelte/transition";
 
 	const {
 		onRefresh,
@@ -65,17 +65,17 @@
 	ontouchend={touchEnd}
 	class="flex-1 flex flex-col items-center w-full"
 >
-	<div
-		transition:slide
-		class="text-accent animate-bounce transition-all mt-5"
-		class:hidden={!pulling}
-		class:text-primary={shouldRefresh}
-	>
-		Refresh
-	</div>
+	{#if pulling}
+		<div
+			class="text-accent animate-bounce transition-all mt-5"
+			class:text-primary={shouldRefresh}
+		>
+			Refresh
+		</div>
+	{/if}
 	<div
 		transition:fade
-		class="flex-1 flex flex-col items-center w-full transition-transform"
+		class="flex-1 flex flex-col items-center w-full transition-transform scroll-"
 		style="transform: translateY({translateY}px)"
 	>
 		{@render children()}

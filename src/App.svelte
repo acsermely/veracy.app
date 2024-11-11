@@ -35,7 +35,10 @@
 	>
 		<ActionBar />
 	</div>
-	<div class="flex-1 flex justify-center overflow-x-auto">
+	<div
+		class="flex-1 flex justify-center overflow-x-auto"
+		style="scrollbar-width: none;"
+	>
 		<Router {url}>
 			<Route path="/">
 				<Main />
