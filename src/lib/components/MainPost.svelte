@@ -102,7 +102,7 @@
 <Card class="max-w-[450px] w-full my-10 border-none shadow-none">
 	<div class="flex w-full">
 		<a
-			class="flex-1 flex p-3 pb-2 cursor-pointer items-center"
+			class="flex-1 flex p-3 pb-2 pr-0 cursor-pointer items-center"
 			href={"/p/" + data.uploader}
 			class:pointer-events-none={isPreview}
 			use:link
@@ -118,7 +118,9 @@
 				{#if data.title}
 					<CardTitle>{data.title}</CardTitle>
 				{/if}
-				<CardDescription>{data.uploader.slice(0, 30)}</CardDescription>
+				<CardDescription
+					>{data.uploader.slice(0, 25)}...</CardDescription
+				>
 			</CardHeader>
 		</a>
 		{#if data.tags?.length || txId}

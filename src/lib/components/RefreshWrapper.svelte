@@ -12,8 +12,8 @@
 		children: Snippet;
 	} = $props();
 
-	let startY = 0;
-	let currentY = 0;
+	let startY = $state(0);
+	let currentY = $state(0);
 	let pulling = $state(false);
 	let shouldRefresh = $state(false);
 	let translateY = $state(0);
@@ -25,10 +25,10 @@
 	const touchMove = (event: TouchEvent) => {
 		currentY = event.touches[0].clientY;
 
-		if (currentY - startY > 20) {
+		if (currentY - startY > 5) {
 			pulling = true;
 			translateY = (currentY - startY) * resistance;
-			if (currentY - startY > 180) {
+			if ((currentY - startY) * 1 > 200) {
 				shouldRefresh = true;
 			} else {
 				shouldRefresh = false;
@@ -55,7 +55,7 @@
 			translateY = 0;
 			pulling = false;
 			shouldRefresh = false;
-		}, 0);
+		}, 300);
 	};
 </script>
 
@@ -69,23 +69,18 @@
 		<div
 			in:slide
 			out:slide
-			class="text-primary animate-bounce mt-5 transition-colors"
-			class:text-accent={!shouldRefresh}
+			class="text-accent animate-bounce mt-5 transition-colors"
+			class:text-primary={shouldRefresh}
 		>
 			Refresh
 		</div>
 	{/if}
 	<div
 		in:slide
-		class="content-wrapper"
+		out:slide
+		class="flex-1 flex flex-col items-center w-full"
 		style="transform: translateY({translateY}px)"
 	>
 		{@render children()}
 	</div>
 </div>
-
-<style>
-	.content-wrapper {
-		transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-	}
-</style>
