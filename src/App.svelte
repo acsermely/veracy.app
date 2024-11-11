@@ -18,12 +18,14 @@
 
 	setFeedState();
 	setLocalWalletState();
-	setDialogsState();
+	const dialogState = setDialogsState();
 	const nodeState = setContentNodeState();
 
 	let url = $state("");
 
-	nodeState.loginCheck();
+	nodeState.loginCheck().catch(() => {
+		dialogState.connectDialog = true;
+	});
 </script>
 
 <ModeWatcher />

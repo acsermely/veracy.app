@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Loader } from "lucide-svelte";
-	import { fade } from "svelte/transition";
 	import type { Post } from "../model/post.model";
 	import { getFeedState } from "../state/feed.svelte";
 	import { ArweaveUtils } from "../utils/arweave.utils";
@@ -68,9 +67,7 @@
 		</div>
 	{:else}
 		<div
-			in:fade
-			out:fade
-			class="flex-1 flex w-full h-full items-center justify-center"
+			class="flex-1 flex w-full h-full items-center transition-all justify-center"
 		>
 			<Loader class="size-8 m-5 animate-spin" />
 		</div>

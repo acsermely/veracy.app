@@ -28,7 +28,7 @@
 		if (currentY - startY > 5) {
 			pulling = true;
 			translateY = (currentY - startY) * resistance;
-			if ((currentY - startY) * 1 > 150) {
+			if (currentY - startY > 100) {
 				shouldRefresh = true;
 			} else {
 				shouldRefresh = false;
@@ -41,7 +41,7 @@
 	const touchEnd = () => {
 		if (shouldRefresh) {
 			refresh();
-			translateY = 60;
+			translateY = 50;
 		} else {
 			translateY = 0;
 			pulling = false;
@@ -55,7 +55,7 @@
 			translateY = 0;
 			pulling = false;
 			shouldRefresh = false;
-		}, 300);
+		}, 1200);
 	};
 </script>
 
