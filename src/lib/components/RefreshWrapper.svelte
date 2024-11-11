@@ -4,7 +4,7 @@
 
 	const {
 		onRefresh,
-		resistance = 0.3,
+		resistance = 0.2,
 		children,
 	}: {
 		onRefresh: () => void;
@@ -28,7 +28,7 @@
 		if (currentY - startY > 5) {
 			pulling = true;
 			translateY = (currentY - startY) * resistance;
-			if ((currentY - startY) * 1 > 200) {
+			if ((currentY - startY) * 1 > 150) {
 				shouldRefresh = true;
 			} else {
 				shouldRefresh = false;
