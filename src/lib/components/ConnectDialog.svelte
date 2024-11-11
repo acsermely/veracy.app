@@ -55,7 +55,7 @@
 		try {
 			await nodeState.loginCheck();
 			console.log("Connect: Login check");
-			// dialogsState.connectDialog = false;
+			dialogsState.connectDialog = false;
 			loading = false;
 			return;
 		} catch {
@@ -65,7 +65,7 @@
 		try {
 			await loginKey();
 			console.log("Connect: Login key");
-			// dialogsState.connectDialog = false;
+			dialogsState.connectDialog = false;
 			loading = false;
 			return;
 		} catch {
@@ -75,7 +75,7 @@
 		try {
 			await registerKey();
 			console.log("Connect: Register key");
-			// dialogsState.connectDialog = false;
+			dialogsState.connectDialog = false;
 			return;
 		} catch {
 			console.info("Connect: Registration failed!");
@@ -158,7 +158,7 @@
 			loading = false;
 			throw errorMessage;
 		}
-		// dialogsState.connectDialog = false;
+		dialogsState.connectDialog = false;
 		loading = false;
 		feedState.queryData();
 	}
