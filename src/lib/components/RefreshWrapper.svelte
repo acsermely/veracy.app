@@ -75,7 +75,7 @@
 	{/if}
 	<div
 		transition:fade
-		class="flex-1 flex flex-col items-center w-full transition-transform scroll-"
+		class="flex-1 flex flex-col items-center w-full transition-transform"
 		style="transform: translateY({translateY}px)"
 	>
 		{@render children()}
