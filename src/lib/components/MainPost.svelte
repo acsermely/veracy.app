@@ -3,6 +3,7 @@
 	import { link } from "svelte-routing";
 	import { toast } from "svelte-sonner";
 	import { SvelteMap } from "svelte/reactivity";
+	import { fade } from "svelte/transition";
 	import type { Post } from "../model/post.model";
 	import { getDialogsState } from "../state/dialogs.svelte";
 	import { getLocalWalletState } from "../state/local-wallet.svelte";
@@ -100,7 +101,7 @@
 </script>
 
 <Card class="max-w-[450px] w-full my-10 border-none shadow-none">
-	<div class="flex w-full">
+	<div transition:fade class="flex w-full">
 		<a
 			class="flex-1 flex p-3 pb-2 pr-0 cursor-pointer items-center"
 			href={"/p/" + data.uploader}
