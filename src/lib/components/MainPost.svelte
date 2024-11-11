@@ -211,10 +211,23 @@
 								</div>
 							{:else}
 								<div
-									class="min-w-full p-5 flex items-center justify-center text-destructive"
+									class="min-w-full p-5 flex flex-col gap-4 items-center justify-center"
 								>
-									{e} <br /><br />
-									Are you Logged In?
+									{#if nodeState.isConnected}
+										<span class="text-destructive">{e}</span
+										>
+										Please feel free to contact us!
+										<small class="text-secondary"
+											>(somehow)</small
+										>
+									{:else}
+										Login to see images!
+										<Button
+											onclick={() =>
+												(dialogState.connectDialog = true)}
+											>Login</Button
+										>
+									{/if}
 								</div>
 							{/if}
 						{/await}

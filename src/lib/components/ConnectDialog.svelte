@@ -279,7 +279,7 @@
 					out:slide
 					class="flex bg-blue-500 bg-opacity-50 border-blue-500 border-2 items-center
 					justify-center rounded-md my-2 py-3
-					text-destructive-foreground w-full"
+					text-primary w-full"
 				>
 					<Loader class="animate-spin" />
 				</div>
@@ -288,9 +288,9 @@
 					<div
 						class="flex bg-yellow-500 bg-opacity-50 border-yellow-500 border-2 items-center
 					justify-center rounded-md my-2 py-3
-					text-destructive-foreground w-full"
+					text-primary w-full"
 					>
-						No availabel Wallet
+						No available Wallet
 					</div>
 					<Button class="my-3" onclick={() => onRegister()}
 						>Create Wallet and Register</Button
@@ -306,7 +306,7 @@
 					out:slide
 					class="flex bg-green-500 bg-opacity-30 border-green-500 border-2 items-center cursor-copy
 					justify-center rounded-md my-2 py-3
-					text-destructive-foreground w-full"
+					text-primary w-full"
 					onclick={() => {
 						navigator.clipboard.writeText(walletState.address);
 						toast.success("Wallet address Copied");
@@ -323,7 +323,7 @@
 					out:slide
 					class="flex bg-destructive bg-opacity-50 items-center
 					justify-center rounded-md my-2 py-3
-					text-destructive-foreground w-full"
+					text-primary w-full"
 				>
 					Error: {errorMessage}
 				</div>
