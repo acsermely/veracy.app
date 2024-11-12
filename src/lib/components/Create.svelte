@@ -117,7 +117,7 @@
 </script>
 
 <div
-	class="flex-1 flex flex-col items-center w-full max-h-full overflow-y-auto"
+	class="flex-1 flex flex-col items-center w-full max-h-full overflow-y-auto no-scrollbar no-scrollbar::-webkit-scrollbar"
 >
 	{#if !walletState.isConnected && currentStep == 2}
 		<Button
