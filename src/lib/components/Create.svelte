@@ -116,7 +116,9 @@
 	}
 </script>
 
-<div class="flex-1 flex flex-col items-center w-full max-h-full">
+<div
+	class="flex-1 flex flex-col items-center w-full max-h-full overflow-y-auto"
+>
 	{#if !walletState.isConnected && currentStep == 2}
 		<Button
 			class="max-w-[450px] w-full m-5 mb-0"
