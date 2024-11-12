@@ -31,7 +31,7 @@
 		if (currentY - startY > 10) {
 			pulling = true;
 			translateY = (currentY - startY) * resistance;
-			if (currentY - startY > 100) {
+			if (currentY - startY > 50) {
 				shouldRefresh = true;
 			} else {
 				shouldRefresh = false;
@@ -83,7 +83,7 @@
 		onscroll={(event: UIEvent) => {
 			const target = event.target;
 			if (target) {
-				atTop = (target as HTMLElement).scrollTop === 0;
+				atTop = (target as HTMLElement).scrollTop < 5;
 			}
 		}}
 	>
