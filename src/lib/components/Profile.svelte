@@ -31,8 +31,11 @@
 	};
 </script>
 
-<div class="flex flex-col w-full max-w-[450px] items-center m-3">
-	<div class="flex my-3 w-full justify-between items-baseline">
+<div
+	class="flex flex-col w-full max-w-[450px] items-center m-3 overflow-y-auto"
+	style="scrollbar-width: none;"
+>
+	<div class="flex mb-3 w-full justify-between items-baseline">
 		<Button
 			variant="outline"
 			size="icon"
@@ -53,7 +56,7 @@
 		</Button>
 	</div>
 	<div class="w-full">
-		<Card class="my-5 w-full">
+		<Card class="w-full">
 			<CardHeader class="flex items-center">
 				<Avatar>
 					<AvatarFallback>{walletId.slice(0, 2)}</AvatarFallback>

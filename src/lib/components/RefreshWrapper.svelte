@@ -4,7 +4,7 @@
 
 	const {
 		onRefresh,
-		resistance = 0.5,
+		resistance = 0.1,
 		children,
 	}: {
 		onRefresh: () => void;
@@ -17,15 +17,18 @@
 	let pulling = $state(false);
 	let shouldRefresh = $state(false);
 	let translateY = $state(0);
+	let atTop = $state(true);
 
 	const touchStart = (event: TouchEvent) => {
 		startY = event.touches[0].clientY;
 	};
 
 	const touchMove = (event: TouchEvent) => {
+		if (!atTop) {
+			return;
+		}
 		currentY = event.touches[0].clientY;
-
-		if (currentY - startY > 5) {
+		if (currentY - startY > 10) {
 			pulling = true;
 			translateY = (currentY - startY) * resistance;
 			if (currentY - startY > 100) {
@@ -55,7 +58,7 @@
 			translateY = 0;
 			pulling = false;
 			shouldRefresh = false;
-		}, 1200);
+		}, 1000);
 	};
 </script>
 
@@ -67,7 +70,7 @@
 >
 	{#if pulling}
 		<div
-			class="text-accent animate-bounce transition-all mt-5"
+			class="fixed md:pl-[200px] top-0 left-0 w-full text-center text-accent animate-bounce transition-all mt-5"
 			class:text-primary={shouldRefresh}
 		>
 			Refresh
@@ -75,8 +78,14 @@
 	{/if}
 	<div
 		transition:fade
-		class="flex-1 flex flex-col items-center w-full transition-transform"
+		class="overflow-x-hidden overflow-y-auto flex-1 flex flex-col items-center w-full transition-transform ease-linear"
 		style="transform: translateY({translateY}px)"
+		onscroll={(event: UIEvent) => {
+			const target = event.target;
+			if (target) {
+				atTop = (target as HTMLElement).scrollTop === 0;
+			}
+		}}
 	>
 		{@render children()}
 	</div>
