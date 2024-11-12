@@ -32,8 +32,7 @@
 </script>
 
 <div
-	class="flex flex-col w-full max-w-[450px] items-center m-3 overflow-y-auto"
-	style="scrollbar-width: none;"
+	class="flex flex-col w-full max-w-[450px] items-center m-3 overflow-y-auto no-scrollbar no-scrollbar::-webkit-scrollbar"
 >
 	<div class="flex mb-3 w-full justify-between items-baseline">
 		<Button
