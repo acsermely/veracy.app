@@ -30,16 +30,14 @@
 
 <ModeWatcher />
 <div
-	class="flex w-[100dvw] h-[100dvh] flex-col-reverse md:flex-row overflow-hidden"
+	class="bg-inherit flex w-[100dvw] h-[100dvh] flex-col-reverse md:flex-row overflow-hidden"
 >
 	<div
 		class="flex flex-col-reverse standalone:mb-5 md:mb-0 md:flex-col justify-between"
 	>
 		<ActionBar />
 	</div>
-	<div
-		class="flex-1 flex justify-center overflow-hidden"
-	>
+	<div class="flex-1 flex justify-center overflow-hidden">
 		<Router {url}>
 			<Route path="/">
 				<Main />

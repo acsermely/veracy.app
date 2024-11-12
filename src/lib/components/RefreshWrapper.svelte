@@ -70,7 +70,7 @@
 >
 	{#if pulling}
 		<div
-			class="fixed md:pl-[200px] top-0 left-0 w-full text-center text-accent animate-bounce transition-all mt-5"
+			class="bg-inherit fixed md:pl-[200px] top-0 left-0 w-full text-center text-accent animate-bounce transition-all mt-5"
 			class:text-primary={shouldRefresh}
 		>
 			Refresh
