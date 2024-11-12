@@ -31,7 +31,7 @@
 		if (currentY - startY > 10) {
 			pulling = true;
 			translateY = (currentY - startY) * resistance;
-			if (currentY - startY > 100) {
+			if (currentY - startY > 150) {
 				shouldRefresh = true;
 			} else {
 				shouldRefresh = false;
