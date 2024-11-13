@@ -36,6 +36,7 @@
 		feedState.queryData();
 	}}
 >
+	<div id="top" class="w-0 h-0"></div>
 	{#if postIds.length}
 		{#each postIds as id}
 			{#await fetchData(id)}
