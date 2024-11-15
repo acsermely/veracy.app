@@ -13,10 +13,6 @@
 
 	const feedState = getFeedState();
 
-	$effect(() => {
-		feedState.queryData();
-	});
-
 	let postIds = $derived(feedState.postIds.map((item) => item.id));
 	let loadingMore = $state(false);
 

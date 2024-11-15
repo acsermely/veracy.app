@@ -15,7 +15,7 @@
 	import { setContentNodeState } from "./lib/state/node.svelte";
 	import { setUserStorageState } from "./lib/state/user-storage.svelte";
 
-	setFeedState();
+	const feedState = setFeedState();
 	setLocalWalletState();
 	setUserStorageState();
 	const dialogState = setDialogsState();
@@ -26,6 +26,8 @@
 	nodeState.loginCheck().catch(() => {
 		dialogState.connectDialog = true;
 	});
+
+	feedState.queryData();
 </script>
 
 <ModeWatcher />
