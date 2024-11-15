@@ -34,9 +34,9 @@ export class ArweaveUtils {
 			.then((data) => {
 				return data as T;
 			});
-		return this.arweave.api
-			.post<T>("/graphql", query)
-			.then((data) => data.data);
+		// return this.arweave.api
+		// 	.post<T>("/graphql", query)
+		// 	.then((data) => data.data);
 	}
 
 	static async getTxById<T>(txId: string): Promise<T> {
@@ -150,12 +150,19 @@ export class ArweaveUtils {
 		).then((data) =>
 			data.data.transactions.edges.map((item) => item.node.id),
 		);
-		// return Promise.resolve().then(() => {
-		//   let data: ArQueryResult<ArQueryNodes> = JSON.parse(allPostsForWallet);
-		//   return data.data.transactions.edges
-		//     .filter((item) => item.node.owner.address === walletId)
-		//     .map((item) => item.node.id);
-		// });
+	}
+
+	static async getAllUserAddresses(): Promise<Set<string>> {
+		return ArweaveUtils.query<ArQueryResult<ArQueryAddresses>>(
+			queryAllUserAddresses(),
+		).then(
+			(data) =>
+				new Set(
+					data.data.transactions.edges.map(
+						(item) => item.node.address,
+					),
+				),
+		);
 	}
 }
 
@@ -261,6 +268,28 @@ export function queryProfileData(sender: string): { query: string } {
 	};
 }
 
+export function queryAllUserAddresses(): { query: string } {
+	return {
+		query: `{
+			transactions(
+				order: DESC,
+				timestamp: {from: 1728246095432, to: ${new Date().getTime()}},
+				tags: [
+					{ name: "App-Name", values: ["${TX_APP_NAME}"]},
+					{ name: "Version", values: ["${TX_APP_VERSION}"]},
+				]
+			)
+			{
+				edges {
+					node {
+						address
+					}
+				}
+			}
+		}`,
+	};
+}
+
 export type ArQueryCursoredIds = {
 	node: {
 		id: string;
@@ -271,6 +300,12 @@ export type ArQueryCursoredIds = {
 export type ArQueryIds = {
 	node: {
 		id: string;
+	};
+};
+
+export type ArQueryAddresses = {
+	node: {
+		address: string;
 	};
 };
 

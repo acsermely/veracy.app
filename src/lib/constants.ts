@@ -1,5 +1,6 @@
 export const STORAGE_NODE_URL = "node_url";
 export const STORAGE_REG_DONE = "reg_done";
+export const STORAGE_SEARCH_HISTORY = "search_history";
 
 export enum Context {
 	NODE = "node",

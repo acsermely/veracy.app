@@ -1,5 +1,5 @@
 <script>
-	import { Home, Moon, PlusCircle, Sun, User } from "lucide-svelte";
+	import { Home, Moon, PlusCircle, Search, Sun, User } from "lucide-svelte";
 	import { toggleMode } from "mode-watcher";
 	import { link } from "svelte-routing";
 	import { getLocalWalletState } from "../state/local-wallet.svelte";
@@ -11,7 +11,7 @@
 </script>
 
 <div
-	class="w-full flex justify-evenly py-3 md:max-w-[200px] md:justify-start md:flex-col"
+	class="w-full flex justify-evenly py-2 md:max-w-[200px] md:justify-start md:flex-col"
 >
 	<h1
 		class="hidden md:block text-2xl p-5 w-full text-center cursor-default bg-gradient-to-r from-amber-500 via-blue-500 to-teal-500 text-transparent bg-clip-text font-extrabold"
@@ -30,11 +30,11 @@
 			console.log(elem);
 		}}
 	>
-		<Home size="30" />
+		<Home size="28" />
 		<span class="hidden md:block">Home</span>
 	</a>
 	<a href="/create" use:link class="flex md:gap-4 md:p-5">
-		<PlusCircle size="30" />
+		<PlusCircle size="28" />
 		<span class="hidden md:block">New</span>
 	</a>
 	{#if walletState.address}
@@ -43,10 +43,14 @@
 			use:link
 			class="flex md:gap-4 md:p-5"
 		>
-			<User size="30" />
+			<User size="28" />
 			<span class="hidden md:block">Profile</span>
 		</a>
 	{/if}
+	<a href="/search" use:link class="flex md:gap-4 md:p-5">
+		<Search size="28" />
+		<span class="hidden md:block">Search</span>
+	</a>
 </div>
 <div class="flex flex-col w-full gap-2">
 	<ConnectDialog />
