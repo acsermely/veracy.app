@@ -149,7 +149,7 @@
 		{/if}
 	</div>
 
-	<CardContent class="p-0 border-2">
+	<CardContent class="flex p-0 border-2">
 		<div
 			class="inline-flex w-full overflow-x-scroll overflow-y-hidden scroll-smooth snap-x snap-mandatory max-h-[65dvh]"
 			style="scrollbar-color: rgba(128, 128, 128, .5) rgba(0, 0, 0, 0); scrollbar-width: thin;"
