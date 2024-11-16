@@ -218,6 +218,7 @@
 			throw errorMessage;
 		}
 		toast.success("Logged in!");
+		dialogsState.connectDialog = false;
 		feedState.queryData();
 	}
 </script>

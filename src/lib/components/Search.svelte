@@ -12,7 +12,7 @@
 		if (searchHistory.includes(id)) {
 			return;
 		}
-		searchHistory.push(id);
+		searchHistory.unshift(id);
 		localStorage.setItem(
 			STORAGE_SEARCH_HISTORY,
 			searchHistory.filter((item) => item).join(" "),
@@ -69,7 +69,7 @@
 		<Avatar
 			class="inline-flex bg-gradient-to-bl from-amber-500 via-blue-500 to-teal-500 bg-opacity-50"
 		>
-			<AvatarFallback class="font-extrabold bg-transparent"
+			<AvatarFallback class="font-extrabold bg-transparent text-white"
 				>{id.slice(0, 2)}</AvatarFallback
 			>
 		</Avatar>

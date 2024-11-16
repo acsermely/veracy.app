@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Loader } from "lucide-svelte";
+	import { HandCoins, Loader } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
 	import type { Post } from "../model/post.model";
 	import { getDialogsState } from "../state/dialogs.svelte";
@@ -66,14 +66,19 @@
 </script>
 
 <Dialog bind:open={dialogsState.buyDialog} openFocus={"#buy-dialog-content"}>
-	<DialogContent id="buy-dialog-content" class="w-full max-w-[300px]">
+	<DialogContent id="buy-dialog-content" class="w-full max-w-[400px]">
 		<DialogHeader>
 			<DialogTitle>Purchase</DialogTitle>
-			<DialogDescription
-				>Confirm you want to buy this post.</DialogDescription
-			>
+			<DialogDescription>
+				Confirm you want to buy this post.
+			</DialogDescription>
 		</DialogHeader>
 		<div class="flex w-full px-5 flex-col gap-2">
+			<div
+				class="flex justify-center items-baseline text-sm rounded-md w-full m-auto border-2 border-yellow-500 bg-yellow-400 bg-opacity-50 p-2"
+			>
+				Test Stage: You won't be charged!
+			</div>
 			{#if dialogsState.buyDialogContent}
 				{#if !data}
 					<div class="flex justify-between items-center">
@@ -108,6 +113,7 @@
 				{#if processing}
 					<Loader class="animate-spin" />
 				{:else}
+					<HandCoins class="mr-1" />
 					Purchase
 				{/if}
 			</Button>

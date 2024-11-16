@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Ellipsis, Loader } from "lucide-svelte";
+	import { Ellipsis, Loader, ShoppingCart } from "lucide-svelte";
 	import { link } from "svelte-routing";
 	import { toast } from "svelte-sonner";
 	import { SvelteMap } from "svelte/reactivity";
@@ -111,7 +111,7 @@
 			<Avatar
 				class="inline-flex bg-gradient-to-bl from-amber-500 via-blue-500 to-teal-500 bg-opacity-50"
 			>
-				<AvatarFallback class="font-extrabold bg-transparent"
+				<AvatarFallback class="font-extrabold bg-transparent text-white"
 					>{data.uploader.slice(0, 2)}</AvatarFallback
 				>
 			</Avatar>
@@ -189,13 +189,18 @@
 							/>
 						{:catch e}
 							{#if e === "402"}
-								<div class="flex flex-col justify-center">
+								<div
+									class="flex flex-col justify-center items-center"
+								>
 									{#if postActive}
+										<span class="mb-2 font-bold"
+											>Private Content</span
+										>
 										<span>
 											<small class="text-primary"
-												>Price:</small
-											>
-											{postPrice} AR
+												>Price:
+												{postPrice} AR
+											</small>
 										</span>
 									{:else}
 										<span>Can't buy Content!</span>
@@ -206,8 +211,10 @@
 										disabled={!postActive}
 										onclick={() =>
 											buyPost(content.data, txId)}
-										>Buy</Button
 									>
+										<ShoppingCart class="mr-1" />
+										Fake Buy
+									</Button>
 									{#if buyError}
 										<span> {buyError} </span>
 									{/if}

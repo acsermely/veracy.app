@@ -13,11 +13,19 @@
 <div
 	class="w-full flex justify-evenly py-2 md:max-w-[200px] md:justify-start md:flex-col"
 >
-	<h1
-		class="hidden md:block text-2xl p-5 w-full text-center cursor-default bg-gradient-to-r from-amber-500 via-blue-500 to-teal-500 text-transparent bg-clip-text font-extrabold"
+	<a
+		class="hidden md:block text-2xl p-5 w-full text-center select-none bg-gradient-to-r from-amber-500 via-blue-500 to-teal-500 text-transparent bg-clip-text font-extrabold"
+		href="/"
+		use:link
+		onclick={() => {
+			const elem = document.getElementById("top");
+			elem?.scrollIntoView({
+				behavior: "smooth",
+			});
+		}}
 	>
 		Veracy<span class="text-xs">.app</span>
-	</h1>
+	</a>
 	<a
 		href="/"
 		use:link
@@ -27,7 +35,6 @@
 			elem?.scrollIntoView({
 				behavior: "smooth",
 			});
-			console.log(elem);
 		}}
 	>
 		<Home size="28" />
