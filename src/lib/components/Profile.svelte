@@ -36,9 +36,9 @@
 </script>
 
 <div
-	class="flex flex-col w-full max-w-[450px] items-center m-3 mb-0 overflow-y-auto no-scrollbar no-scrollbar::-webkit-scrollbar"
+	class="flex flex-col w-full items-center m-3 mb-0 overflow-y-auto no-scrollbar no-scrollbar::-webkit-scrollbar"
 >
-	<div class="flex mb-3 w-full justify-between items-baseline">
+	<div class="flex mb-3 w-full max-w-[450px] justify-between items-baseline">
 		<Button
 			variant="outline"
 			size="icon"
@@ -60,7 +60,7 @@
 			</Button>
 		{/if}
 	</div>
-	<div class="w-full">
+	<div class="w-full max-w-[450px]">
 		<Card class="w-full">
 			<CardHeader class="flex items-center">
 				<Avatar>
@@ -82,7 +82,7 @@
 			</CardContent>
 		</Card>
 	</div>
-	<div class="w-full">
+	<div class="w-full flex flex-col items-center">
 		{#if postIds}
 			{#each postIds as id}
 				{#await fetchData(id)}

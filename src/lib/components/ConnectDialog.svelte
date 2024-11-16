@@ -127,18 +127,13 @@
 			throw errorMessage;
 		}
 		try {
-			challange = await response
-				.arrayBuffer()
-				.then((challange) => {
-					if (!walletState.wallet) {
-						toast.error("No Wallet");
-						throw "No wallet connected!";
-					}
-					return walletState.wallet.decrypt(challange);
-				})
-				.finally(() => {
-					feedState.queryData();
-				});
+			challange = await response.arrayBuffer().then((challange) => {
+				if (!walletState.wallet) {
+					toast.error("No Wallet");
+					throw "No wallet connected!";
+				}
+				return walletState.wallet.decrypt(challange);
+			});
 		} catch (e) {
 			errorMessage = "Failed to get your key! Try again!";
 			console.error(e);
