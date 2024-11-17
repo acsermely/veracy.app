@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Loader } from "lucide-svelte";
+	import { toast } from "svelte-sonner";
 	import type { Post } from "../model/post.model";
 	import { getFeedState } from "../state/feed.svelte";
 	import { ArweaveUtils } from "../utils/arweave.utils";
@@ -22,8 +23,13 @@
 
 	async function loadMore(): Promise<void> {
 		loadingMore = true;
-		await feedState.moreData();
-		loadingMore = false;
+		try {
+			await feedState.moreData();
+		} catch {
+			toast.error("Failed to get more. Try again!");
+		} finally {
+			loadingMore = false;
+		}
 	}
 </script>
 

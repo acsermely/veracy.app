@@ -2,6 +2,7 @@ import Arweave from "arweave";
 import type Transaction from "arweave/node/lib/transaction";
 import {
 	ARWEAVE_URL,
+	REQUEST_TIMEOUT,
 	TX_APP_CONTENT_TYPE,
 	TX_APP_NAME,
 	TX_APP_VERSION,
@@ -14,7 +15,7 @@ export class ArweaveUtils {
 		host: "arweave.net",
 		port: 443,
 		protocol: "https",
-		timeout: 20000,
+		timeout: REQUEST_TIMEOUT,
 		logging: false,
 	});
 
@@ -28,6 +29,7 @@ export class ArweaveUtils {
 		return fetch(`${ARWEAVE_URL}/graphql`, {
 			method: "POST",
 			body: JSON.stringify(query),
+			signal: AbortSignal.timeout(REQUEST_TIMEOUT),
 			headers,
 		})
 			.then((response) => response.json())

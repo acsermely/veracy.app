@@ -20,3 +20,5 @@ export const TX_APP_VERSION = "0.0.4";
 export const TX_APP_CONTENT_TYPE = "application/json";
 // export const ARWEAVE_URL = "https://arweave.net";
 export const ARWEAVE_URL = "https://node2.irys.xyz"; //Loads slower, but no delay with new transactions
+
+export const REQUEST_TIMEOUT = 5000;

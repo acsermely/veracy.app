@@ -30,10 +30,10 @@
 		currentY = event.touches[0].clientY;
 		if (currentY - startY > 10) {
 			pulling = true;
-			translateY = (currentY - startY) * resistance;
 			if (currentY - startY > 150) {
 				shouldRefresh = true;
 			} else {
+				translateY = (currentY - startY) * resistance;
 				shouldRefresh = false;
 			}
 		} else {
