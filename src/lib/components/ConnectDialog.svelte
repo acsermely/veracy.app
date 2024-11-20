@@ -65,6 +65,10 @@
 			errorMessage = "Couldn't create wallet";
 			return;
 		} finally {
+			mnemonic = "";
+			pin = [NaN, NaN, NaN, NaN];
+			pinAgain = [NaN, NaN, NaN, NaN];
+			importExistingWallet = false;
 			loading = false;
 		}
 		onConnect();
@@ -403,7 +407,7 @@
 						rows={2}
 					></Textarea>
 					<Button
-						variant="secondary"
+						variant="ghost"
 						onclick={() => {
 							navigator.clipboard.writeText(mnemonic);
 							toast.success("Passphrase Copied");
