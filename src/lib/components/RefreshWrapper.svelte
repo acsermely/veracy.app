@@ -78,6 +78,7 @@
 	{/if}
 	<div
 		transition:fade
+		id="scroll-element"
 		class="overflow-x-hidden overflow-y-auto no-scrollbar no-scrollbar::-webkit-scrollbar flex-1 flex flex-col items-center w-full transition-transform ease-linear"
 		style="transform: translateY({translateY}px);"
 		onscroll={(event: UIEvent) => {

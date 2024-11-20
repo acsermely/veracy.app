@@ -2,7 +2,6 @@ import { getContext, setContext } from "svelte";
 import { LocalWallet } from "../model/wallet.model";
 
 const WALLET_LOCAL_SIGN_PRIV_KEY = "WALLET_LOCAL_SIGN_PRIV_KEY";
-const WALLET_LOCAL_SIGN_PUB_KEY = "WALLET_LOCAL_SIGN_PUB_KEY";
 const WALLET_LOCAL_ENCRYPT_PRIV_KEY = "WALLET_LOCAL_ENCRYPT_PRIV_KEY";
 const WALLET_LOCAL_ENCRYPT_PUB_KEY = "WALLET_LOCAL_ENCRYPT_PUB_KEY";
 const WALLET_LOCAL_ADDRESS = "WALLET_LOCAL_ADDRESS";
@@ -22,11 +21,10 @@ export class LocalWalletState {
 
 	constructor() {
 		const privSKJWK = localStorage.getItem(WALLET_LOCAL_SIGN_PRIV_KEY);
-		const pubSKJWK = localStorage.getItem(WALLET_LOCAL_SIGN_PUB_KEY);
 		const privEKJWK = localStorage.getItem(WALLET_LOCAL_ENCRYPT_PRIV_KEY);
 		const pubEKJWK = localStorage.getItem(WALLET_LOCAL_ENCRYPT_PUB_KEY);
 		const addr = localStorage.getItem(WALLET_LOCAL_ADDRESS);
-		if (privSKJWK && pubSKJWK && privEKJWK && pubEKJWK && addr) {
+		if (privSKJWK && privEKJWK && pubEKJWK && addr) {
 			this.hasKeys = true;
 			try {
 				this.connect();
@@ -36,16 +34,12 @@ export class LocalWalletState {
 		}
 	}
 
-	register = async (): Promise<void> => {
-		const newWallet = await LocalWallet.New();
+	register = async (mnemonic?: string, pin?: number[]): Promise<void> => {
+		const newWallet = await LocalWallet.New(mnemonic);
 
 		const privSKJWK = await crypto.subtle.exportKey(
 			"jwk",
 			newWallet.privateSignKey,
-		);
-		const pubSKJWK = await crypto.subtle.exportKey(
-			"jwk",
-			newWallet.publicSignKey,
 		);
 		const privEKJWK = await crypto.subtle.exportKey(
 			"jwk",
@@ -59,10 +53,6 @@ export class LocalWalletState {
 		localStorage.setItem(
 			WALLET_LOCAL_SIGN_PRIV_KEY,
 			JSON.stringify(privSKJWK),
-		);
-		localStorage.setItem(
-			WALLET_LOCAL_SIGN_PUB_KEY,
-			JSON.stringify(pubSKJWK),
 		);
 		localStorage.setItem(
 			WALLET_LOCAL_ENCRYPT_PRIV_KEY,
@@ -80,12 +70,11 @@ export class LocalWalletState {
 
 	connect = async (): Promise<void> => {
 		const privSKJWK = localStorage.getItem(WALLET_LOCAL_SIGN_PRIV_KEY);
-		const pubSKJWK = localStorage.getItem(WALLET_LOCAL_SIGN_PUB_KEY);
 		const privEKJWK = localStorage.getItem(WALLET_LOCAL_ENCRYPT_PRIV_KEY);
 		const pubEKJWK = localStorage.getItem(WALLET_LOCAL_ENCRYPT_PUB_KEY);
 		const addr = localStorage.getItem(WALLET_LOCAL_ADDRESS);
 
-		if (privSKJWK && pubSKJWK && privEKJWK && pubEKJWK && addr) {
+		if (privSKJWK && privEKJWK && pubEKJWK && addr) {
 			try {
 				const privSK = await crypto.subtle.importKey(
 					"jwk",
@@ -96,17 +85,6 @@ export class LocalWalletState {
 					},
 					true,
 					["sign"],
-				);
-
-				const pubSK = await crypto.subtle.importKey(
-					"jwk",
-					JSON.parse(pubSKJWK) as JsonWebKey,
-					{
-						name: "RSA-PSS",
-						hash: { name: "SHA-256" },
-					},
-					true,
-					["verify"],
 				);
 
 				const privEK = await crypto.subtle.importKey(
@@ -131,13 +109,7 @@ export class LocalWalletState {
 					["encrypt"],
 				);
 
-				this.wallet = new LocalWallet(
-					pubSK,
-					privSK,
-					pubEK,
-					privEK,
-					addr,
-				);
+				this.wallet = new LocalWallet(privSK, pubEK, privEK, addr);
 				return;
 			} catch (e) {
 				console.error(e);

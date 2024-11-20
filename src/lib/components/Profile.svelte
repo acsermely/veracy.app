@@ -46,7 +46,7 @@
 				if (history.length > 2) {
 					history.back();
 				} else {
-					navigate("/");
+					navigate("/", { replace: true });
 				}
 			}}><ChevronLeft /></Button
 		>

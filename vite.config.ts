@@ -1,3 +1,4 @@
+import inject from "@rollup/plugin-inject";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import path from "path";
 import { defineConfig } from "vite";
@@ -61,6 +62,18 @@ export default defineConfig({
 		alias: {
 			$lib: path.resolve("./src/lib"),
 			$scripts: path.resolve("./scripts"),
+		},
+	},
+	build: {
+		target: "esnext",
+		sourcemap: true,
+		rollupOptions: {
+			plugins: [
+				inject({
+					include: ["node_modules/@ledgerhq/**"],
+					modules: { Buffer: ["buffer", "Buffer"] },
+				}),
+			],
 		},
 	},
 });

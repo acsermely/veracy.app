@@ -1,35 +1,54 @@
 import Arweave from "arweave";
 import type Transaction from "arweave/web/lib/transaction";
+import { generateMnemonic } from "bip39-web-crypto";
 import { ArweaveUtils } from "../utils/arweave.utils";
-
+// @ts-ignore
+import { getKeyPairFromMnemonic } from "human-crypto-keys";
 export class LocalWallet {
-	public publicSignKey: CryptoKey;
 	public privateSignKey: CryptoKey;
 	public publicEncriptKey: CryptoKey;
 	public privateEncriptKey: CryptoKey;
 
 	public address: string;
 
-	static async New(): Promise<LocalWallet> {
-		const { signKeyair, encryptKeypair, address } =
-			await generateLocalKeys();
+	static async newMnemonic(): Promise<string> {
+		const wordlists = (
+			await import("bip39-web-crypto/src/wordlists/english.json")
+		).default;
+		return generateMnemonic(undefined, undefined, wordlists);
+	}
+	static async New(mnemonic?: string): Promise<LocalWallet> {
+		let ret: {
+			signKey: CryptoKey;
+			encryptKeypair: CryptoKeyPair;
+		};
+		if (mnemonic) {
+			ret = await generateLocalKeysFromMnemonic(mnemonic);
+		} else {
+			ret = await generateLocalKeys();
+		}
+
+		const address = await crypto.subtle
+			.exportKey("jwk", ret.signKey)
+			.then((signPrivateKey) =>
+				ArweaveUtils.arweave.wallets
+					.jwkToAddress(signPrivateKey as JWKInterface)
+					.then((address) => address),
+			);
 		return new LocalWallet(
-			signKeyair.publicKey,
-			signKeyair.privateKey,
-			encryptKeypair.publicKey,
-			encryptKeypair.privateKey,
+			ret.signKey,
+			ret.encryptKeypair.publicKey,
+			ret.encryptKeypair.privateKey,
 			address,
 		);
 	}
 
 	constructor(
-		publicSignKey: CryptoKey,
 		privateSignKey: CryptoKey,
 		publicEncriptKey: CryptoKey,
 		privateEncriptKey: CryptoKey,
 		address: string,
 	) {
-		this.publicSignKey = publicSignKey;
 		this.privateSignKey = privateSignKey;
 		this.publicEncriptKey = publicEncriptKey;
 		this.privateEncriptKey = privateEncriptKey;
@@ -88,10 +107,98 @@ export class LocalWallet {
 	}
 }
 
-async function generateLocalKeys(): Promise<{
-	signKeyair: CryptoKeyPair;
+async function generateLocalKeysFromMnemonic(mnemonic: string): Promise<{
+	signKey: CryptoKey;
 	encryptKeypair: CryptoKeyPair;
-	address: string;
+}> {
+	let keyPair = await getKeyPairFromMnemonic(
+		mnemonic,
+		{ id: "rsa", modulusLength: 4096 },
+		{ privateKeyFormat: "pkcs8-der" },
+	);
+	const imported = await window.crypto.subtle.importKey(
+		"pkcs8",
+		keyPair.privateKey,
+		{ name: "RSA-PSS", hash: "SHA-256" },
+		true,
+		["sign"],
+	);
+	const privSKJWK = await window.crypto.subtle.exportKey("jwk", imported);
+	delete privSKJWK.key_ops;
+	delete privSKJWK.alg;
+
+	const signKey = await crypto.subtle.importKey(
+		"jwk",
+		privSKJWK,
+		{
+			name: "RSA-PSS",
+			hash: { name: "SHA-256" },
+		},
+		true,
+		["sign"],
+	);
+
+	const publicKeyJWK = await crypto.subtle.exportKey("jwk", signKey);
+	const privateKeyJWK = await crypto.subtle.exportKey("jwk", signKey);
+
+	const rsaOaepPublicKeyJWK = {
+		kty: publicKeyJWK.kty,
+		n: publicKeyJWK.n,
+		e: publicKeyJWK.e,
+		alg: "RSA-OAEP-256",
+		ext: true,
+		key_ops: ["encrypt"],
+	} as JsonWebKey;
+
+	const rsaOaepPublicKey = await crypto.subtle.importKey(
+		"jwk",
+		rsaOaepPublicKeyJWK,
+		{
+			name: "RSA-OAEP",
+			hash: { name: "SHA-256" },
+		},
+		true,
+		["encrypt"],
+	);
+
+	const rsaOaepPrivateKeyJWK = {
+		kty: privateKeyJWK.kty,
+		n: privateKeyJWK.n,
+		e: privateKeyJWK.e,
+		d: privateKeyJWK.d,
+		p: privateKeyJWK.p,
+		q: privateKeyJWK.q,
+		dp: privateKeyJWK.dp,
+		dq: privateKeyJWK.dq,
+		qi: privateKeyJWK.qi,
+		alg: "RSA-OAEP-256",
+		ext: true,
+		key_ops: ["decrypt"],
+	};
+
+	const rsaOaepPrivateKey = await crypto.subtle.importKey(
+		"jwk",
+		rsaOaepPrivateKeyJWK,
+		{
+			name: "RSA-OAEP",
+			hash: { name: "SHA-256" },
+		},
+		true,
+		["decrypt"],
+	);
+
+	return {
+		signKey,
+		encryptKeypair: {
+			privateKey: rsaOaepPrivateKey,
+			publicKey: rsaOaepPublicKey,
+		},
+	};
+}
+
+async function generateLocalKeys(): Promise<{
+	signKey: CryptoKey;
+	encryptKeypair: CryptoKeyPair;
 }> {
 	const signKeyair = await crypto.subtle.generateKey(
 		{
@@ -158,21 +265,12 @@ async function generateLocalKeys(): Promise<{
 		["decrypt"],
 	);
 
-	const signPrivateKey = (await crypto.subtle.exportKey(
-		"jwk",
-		signKeyair.privateKey,
-	)) as JWKInterface;
-
-	const address =
-		await ArweaveUtils.arweave.wallets.jwkToAddress(signPrivateKey);
-
 	return {
-		signKeyair,
+		signKey: signKeyair.privateKey,
 		encryptKeypair: {
 			privateKey: rsaOaepPrivateKey,
 			publicKey: rsaOaepPublicKey,
 		},
-		address,
 	};
 }
 

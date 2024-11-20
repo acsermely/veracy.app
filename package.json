@@ -33,6 +33,10 @@
 		"vite-plugin-pwa": "^0.20.5"
 	},
 	"dependencies": {
-		"arweave": "^1.15.1"
+		"@rollup/plugin-inject": "^5.0.5",
+		"arweave": "^1.15.1",
+		"bip39-web-crypto": "^4.0.1",
+		"buffer": "^6.0.3",
+		"human-crypto-keys": "^0.1.4"
 	}
 }

@@ -4,7 +4,7 @@
 	import type { TextareaEvents } from "./index.js";
 
 	interface HTMLTextareaAttributesExt extends HTMLTextareaAttributes {
-		inputRef: HTMLTextAreaElement | undefined;
+		inputRef?: HTMLTextAreaElement | undefined;
 	}
 
 	type $$Props = HTMLTextareaAttributesExt;

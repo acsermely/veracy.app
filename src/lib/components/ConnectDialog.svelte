@@ -2,6 +2,7 @@
 	import { Copy, Loader, Settings, User } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
 	import { slide } from "svelte/transition";
+	import { LocalWallet } from "../model/wallet.model";
 	import { getDialogsState } from "../state/dialogs.svelte";
 	import { getFeedState } from "../state/feed.svelte";
 	import { getLocalWalletState } from "../state/local-wallet.svelte";
@@ -14,6 +15,8 @@
 	import DialogHeader from "./ui/dialog/dialog-header.svelte";
 	import DialogTitle from "./ui/dialog/dialog-title.svelte";
 	import Input from "./ui/input/input.svelte";
+	import { PinInput } from "./ui/pin-input";
+	import { Textarea } from "./ui/textarea";
 
 	const feedState = getFeedState();
 	const walletState = getLocalWalletState();
@@ -28,10 +31,36 @@
 	let errorMessage = $state("");
 	let loading = $state(false);
 
-	async function onRegister() {
+	let pin = $state([NaN, NaN, NaN, NaN]);
+	let pinAgain = $state([NaN, NaN, NaN, NaN]);
+	let generatingWallet = $state(false);
+	let pinOk = $derived(!pin.includes(NaN));
+	let pinAgainOk = $derived(!pinAgain.includes(NaN));
+	let allPinOk = $derived(
+		pinOk &&
+			pinAgainOk &&
+			pin[0] === pinAgain[0] &&
+			pin[1] === pinAgain[1] &&
+			pin[2] === pinAgain[2] &&
+			pin[3] === pinAgain[3],
+	);
+	let pinMismatch = $derived(
+		pinOk &&
+			pinAgainOk &&
+			!(
+				pin[0] === pinAgain[0] &&
+				pin[1] === pinAgain[1] &&
+				pin[2] === pinAgain[2] &&
+				pin[3] === pinAgain[3]
+			),
+	);
+	let mnemonic = $state("");
+	let importExistingWallet = $state(false);
+
+	async function onRegister(mnomenic?: string) {
 		loading = true;
 		try {
-			await walletState.register();
+			await walletState.register(mnomenic || undefined);
 		} catch {
 			errorMessage = "Couldn't create wallet";
 			return;
@@ -255,90 +284,170 @@
 			</div>
 		</DialogHeader>
 		<div class="flex w-full flex-col">
-			<div>
-				<h1>
-					Server<span class:hidden={!nodeState.isConnected}
-						>: <span class="text-green-500">connected</span></span
-					>
-				</h1>
-				<Input
-					class="my-3 w-full"
-					placeholder="Server Address"
-					type="text"
-					bind:value={url}
-				/>
-			</div>
-
-			{#if loading}
-				<div
-					in:slide
-					out:slide
-					class="flex bg-blue-500 bg-opacity-50 border-blue-500 border-2 items-center
-					justify-center rounded-md my-2 py-3
-					text-primary w-full"
-				>
-					<Loader class="animate-spin" />
-				</div>
-			{:else if !walletState.hasKeys}
-				<div class="flex flex-col" in:slide out:slide>
-					<div
-						class="flex bg-yellow-500 bg-opacity-50 border-yellow-500 border-2 items-center
-					justify-center rounded-md my-2 py-3
-					text-primary w-full"
-					>
-						No available Wallet
+			{#if !mnemonic && !importExistingWallet}
+				<div in:slide out:slide class="flex w-full flex-col">
+					<div>
+						<h1>
+							Server<span class:hidden={!nodeState.isConnected}
+								>: <span class="text-green-500">connected</span
+								></span
+							>
+						</h1>
+						<Input
+							class="my-3 w-full"
+							placeholder="Server Address"
+							type="text"
+							bind:value={url}
+						/>
 					</div>
-					<Button class="my-3" onclick={() => onRegister()}
-						>Create Wallet and Register</Button
-					>
+
+					{#if loading}
+						<div
+							in:slide
+							out:slide
+							class="flex bg-blue-500 bg-opacity-50 border-blue-500 border-2 items-center
+					justify-center rounded-md my-2 py-3
+					text-primary w-full"
+						>
+							<Loader class="animate-spin" />
+						</div>
+					{:else if !walletState.hasKeys}
+						<div class="flex flex-col gap-3" in:slide out:slide>
+							<div
+								class="flex bg-yellow-500 bg-opacity-50 border-yellow-500 border-2 items-center
+					justify-center rounded-md my-2 py-3
+					text-primary w-full"
+							>
+								No available Wallet
+							</div>
+							<Button onclick={() => onRegister()}
+								>Quick Registration</Button
+							>
+							<Button
+								variant="secondary"
+								onclick={async () =>
+									(mnemonic =
+										await LocalWallet.newMnemonic())}
+								>Generate Wallet and Register</Button
+							>
+							<Button
+								variant="secondary"
+								onclick={async () =>
+									(importExistingWallet = true)}
+								>Register existing Wallet</Button
+							>
+						</div>
+					{:else if !walletState.isConnected}
+						<Button class="my-3" onclick={() => onConnect()}
+							>Connect</Button
+						>
+					{:else}
+						<!-- svelte-ignore a11y_no_static_element_interactions -->
+						<div
+							in:slide
+							out:slide
+							class="flex bg-green-500 bg-opacity-30 border-green-500 border-2 items-center cursor-copy
+					justify-center rounded-md my-2 py-3
+					text-primary w-full"
+							onclick={() => {
+								navigator.clipboard.writeText(
+									walletState.address,
+								);
+								toast.success("Wallet address Copied");
+							}}
+						>
+							Wallet: {walletState.address.slice(0, 20)}...
+							<Copy class="mx-3" />
+						</div>
+					{/if}
+
+					{#if errorMessage}
+						<div
+							in:slide
+							out:slide
+							class="flex bg-destructive bg-opacity-50 items-center
+					justify-center rounded-md my-2 py-3
+					text-primary w-full"
+						>
+							Error: {errorMessage}
+						</div>
+					{/if}
+					{#if (walletState.isConnected && !nodeState.isConnected) || nodeState.url !== url}
+						<div class="flex flex-col w-full" in:slide out:slide>
+							<div class="flex items-center w-full">
+								<Button
+									onclick={() => loginKey()}
+									class="m-3 w-full">Login</Button
+								>
+							</div>
+							<div class="flex items-center w-full my-3 mt-6">
+								Would you like to Register:
+							</div>
+							<div class="flex items-center w-full">
+								<Button
+									onclick={() => registerKey()}
+									class="m-3 w-full"
+									>One-Click Registration</Button
+								>
+							</div>
+						</div>
+					{/if}
 				</div>
-			{:else if !walletState.isConnected}
-				<Button class="my-3" onclick={() => onConnect()}>Connect</Button
-				>
 			{:else}
-				<!-- svelte-ignore a11y_no_static_element_interactions -->
-				<div
-					in:slide
-					out:slide
-					class="flex bg-green-500 bg-opacity-30 border-green-500 border-2 items-center cursor-copy
-					justify-center rounded-md my-2 py-3
-					text-primary w-full"
-					onclick={() => {
-						navigator.clipboard.writeText(walletState.address);
-						toast.success("Wallet address Copied");
-					}}
-				>
-					Wallet: {walletState.address.slice(0, 20)}...
-					<Copy class="mx-3" />
-				</div>
-			{/if}
+				<div in:slide out:slide class="flex w-full flex-col gap-2">
+					<span>Seedphrase:</span>
+					<Textarea
+						class="resize-none"
+						bind:value={mnemonic}
+						disabled={!importExistingWallet}
+						rows={2}
+					></Textarea>
+					<Button
+						variant="secondary"
+						onclick={() => {
+							navigator.clipboard.writeText(mnemonic);
+							toast.success("Passphrase Copied");
+						}}>Copy Seedphrase</Button
+					>
+					<span>{!pinOk ? "Set Pin" : "Pin Again"}</span>
+					<div class="flex flex-col">
+						{#if !pinOk}
+							<div
+								in:slide
+								out:slide
+								class="flex justify-evenly m-1"
+							>
+								<PinInput bind:pin />
+							</div>
+						{:else}
+							<div
+								in:slide
+								out:slide
+								class="flex justify-evenly m-1"
+							>
+								<PinInput bind:pin={pinAgain} show={pinOk} />
+							</div>
+						{/if}
+					</div>
+					<Button
+						variant="secondary"
+						onclick={() => {
+							pin = [NaN, NaN, NaN, NaN];
+							pinAgain = [NaN, NaN, NaN, NaN];
+						}}>Clear Pin</Button
+					>
 
-			{#if errorMessage}
-				<div
-					in:slide
-					out:slide
-					class="flex bg-destructive bg-opacity-50 items-center
-					justify-center rounded-md my-2 py-3
-					text-primary w-full"
-				>
-					Error: {errorMessage}
-				</div>
-			{/if}
-			{#if (walletState.isConnected && !nodeState.isConnected) || nodeState.url !== url}
-				<div class="flex flex-col w-full" in:slide out:slide>
-					<div class="flex items-center w-full">
-						<Button onclick={() => loginKey()} class="m-3 w-full"
-							>Login</Button
-						>
-					</div>
-					<div class="flex items-center w-full my-3 mt-6">
-						Would you like to Register:
-					</div>
-					<div class="flex items-center w-full">
-						<Button onclick={() => registerKey()} class="m-3 w-full"
-							>One-Click Registration</Button
-						>
-					</div>
+					<Button
+						disabled={!allPinOk || loading || !mnemonic}
+						variant={pinMismatch ? "destructive" : "default"}
+						onclick={() => onRegister(mnemonic)}
+					>
+						{#if loading}
+							<Loader class="animate-spin m-2" />
+						{:else}
+							{pinMismatch ? "Pin Mismatch!" : "Generate Wallet"}
+						{/if}
+					</Button>
 				</div>
 			{/if}
 		</div>
@@ -346,9 +455,23 @@
 			<Button
 				class="m-3"
 				variant="secondary"
-				onclick={() => (dialogsState.connectDialog = false)}
-				>Close</Button
+				onclick={() => {
+					if (mnemonic || importExistingWallet) {
+						mnemonic = "";
+						pin = [NaN, NaN, NaN, NaN];
+						pinAgain = [NaN, NaN, NaN, NaN];
+						importExistingWallet = false;
+						return;
+					}
+					dialogsState.connectDialog = false;
+				}}
 			>
+				{#if mnemonic || importExistingWallet}
+					Back
+				{:else}
+					Close
+				{/if}
+			</Button>
 		</DialogFooter>
 	</DialogContent>
 </Dialog>
