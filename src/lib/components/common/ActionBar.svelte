@@ -1,13 +1,13 @@
-<script>
+<script lang="ts">
 	import { Home, Moon, PlusCircle, Search, Sun, User } from "lucide-svelte";
 	import { toggleMode } from "mode-watcher";
 	import { link } from "svelte-routing";
-	import { getLocalWalletState } from "../state/local-wallet.svelte";
-	import BuyPostDialog from "./BuyPostDialog.svelte";
-	import ConnectDialog from "./ConnectDialog.svelte";
-	import { Button } from "./ui/button";
+	import { getWalletState } from "../../state/wallet.svelte";
+	import BuyPostDialog from "../dialogs/BuyPostDialog.svelte";
+	import ConnectDialog from "../dialogs/ConnectDialog.svelte";
+	import { Button } from "../ui/button";
 
-	const walletState = getLocalWalletState();
+	const walletState = getWalletState();
 </script>
 
 <div

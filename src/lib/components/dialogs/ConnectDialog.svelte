@@ -2,24 +2,24 @@
 	import { Copy, Loader, Settings, User } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
 	import { slide } from "svelte/transition";
-	import { LocalWallet } from "../model/wallet.model";
-	import { getDialogsState } from "../state/dialogs.svelte";
-	import { getFeedState } from "../state/feed.svelte";
-	import { getLocalWalletState } from "../state/local-wallet.svelte";
-	import { getContentNodeState } from "../state/node.svelte";
-	import { buttonVariants } from "./ui/button";
-	import Button from "./ui/button/button.svelte";
-	import { Dialog, DialogTrigger } from "./ui/dialog";
-	import DialogContent from "./ui/dialog/dialog-content.svelte";
-	import DialogFooter from "./ui/dialog/dialog-footer.svelte";
-	import DialogHeader from "./ui/dialog/dialog-header.svelte";
-	import DialogTitle from "./ui/dialog/dialog-title.svelte";
-	import Input from "./ui/input/input.svelte";
-	import { PinInput } from "./ui/pin-input";
-	import { Textarea } from "./ui/textarea";
+	import { LocalWallet } from "../../models/wallet.model";
+	import { getDialogsState } from "../../state/dialogs.svelte";
+	import { getFeedState } from "../../state/feed.svelte";
+	import { getWalletState } from "../../state/wallet.svelte";
+	import { getContentNodeState } from "../../state/node.svelte";
+	import { buttonVariants } from "../ui/button";
+	import Button from "../ui/button/button.svelte";
+	import { Dialog, DialogTrigger } from "../ui/dialog";
+	import DialogContent from "../ui/dialog/dialog-content.svelte";
+	import DialogFooter from "../ui/dialog/dialog-footer.svelte";
+	import DialogHeader from "../ui/dialog/dialog-header.svelte";
+	import DialogTitle from "../ui/dialog/dialog-title.svelte";
+	import Input from "../ui/input/input.svelte";
+	import { PinInput } from "../ui/pin-input";
+	import { Textarea } from "../ui/textarea";
 
 	const feedState = getFeedState();
-	const walletState = getLocalWalletState();
+	const walletState = getWalletState();
 	const nodeState = getContentNodeState();
 	const dialogsState = getDialogsState();
 
@@ -346,7 +346,8 @@
 							>Connect</Button
 						>
 					{:else}
-						<!-- svelte-ignore a11y_no_static_element_interactions -->
+						<!-- svelte-ignore a11y_no_static_element_interactions a11y-click-events-have-key-events -->
+						<!-- svelte-ignore a11y_click_events_have_key_events -->
 						<div
 							in:slide
 							out:slide

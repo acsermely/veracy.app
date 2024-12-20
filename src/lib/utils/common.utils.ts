@@ -1,4 +1,4 @@
-import type { PostContent } from "../model/post.model";
+import type { PostContent } from "../models/post.model";
 
 export function runDelayed(fn: () => void, ms: number = 1): void {
 	const timeout = setTimeout(() => {

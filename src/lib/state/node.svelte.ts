@@ -12,13 +12,9 @@ export class ContentNode {
 			urlHost || localStorage.getItem(STORAGE_NODE_URL) || this.url;
 	}
 
-	loginCheck = async (url?: string): Promise<Response> => {
-		url = url || this.url;
-		if (!url) {
-			throw new Error("No URL");
-		}
+	loginCheck = async (): Promise<Response> => {
 		try {
-			const response = await fetch(`${url}/loginCheck`, {
+			const response = await fetch(`${this.url}/loginCheck`, {
 				credentials: "include",
 				signal: AbortSignal.timeout(5000),
 			});

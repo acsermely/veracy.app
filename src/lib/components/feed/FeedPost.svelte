@@ -4,23 +4,26 @@
 	import { toast } from "svelte-sonner";
 	import { SvelteMap } from "svelte/reactivity";
 	import { fade } from "svelte/transition";
-	import type { Post } from "../model/post.model";
-	import { getDialogsState } from "../state/dialogs.svelte";
-	import { getLocalWalletState } from "../state/local-wallet.svelte";
-	import { getContentNodeState } from "../state/node.svelte";
-	import { ArweaveUtils, type ArPaymentResult } from "../utils/arweave.utils";
-	import { hasPrivateContent } from "../utils/common.utils";
-	import AvatarFallback from "./ui/avatar/avatar-fallback.svelte";
-	import Avatar from "./ui/avatar/avatar.svelte";
-	import Button from "./ui/button/button.svelte";
-	import CardContent from "./ui/card/card-content.svelte";
-	import CardDescription from "./ui/card/card-description.svelte";
-	import CardFooter from "./ui/card/card-footer.svelte";
-	import CardHeader from "./ui/card/card-header.svelte";
-	import CardTitle from "./ui/card/card-title.svelte";
-	import Card from "./ui/card/card.svelte";
-	import { Popover, PopoverTrigger } from "./ui/popover";
-	import PopoverContent from "./ui/popover/popover-content.svelte";
+	import type { Post } from "../../models/post.model";
+	import { getDialogsState } from "../../state/dialogs.svelte";
+	import { getWalletState } from "../../state/wallet.svelte";
+	import { getContentNodeState } from "../../state/node.svelte";
+	import {
+		ArweaveUtils,
+		type ArPaymentResult,
+	} from "../../utils/arweave.utils";
+	import { hasPrivateContent } from "../../utils/common.utils";
+	import AvatarFallback from "../ui/avatar/avatar-fallback.svelte";
+	import Avatar from "../ui/avatar/avatar.svelte";
+	import Button from "../ui/button/button.svelte";
+	import CardContent from "../ui/card/card-content.svelte";
+	import CardDescription from "../ui/card/card-description.svelte";
+	import CardFooter from "../ui/card/card-footer.svelte";
+	import CardHeader from "../ui/card/card-header.svelte";
+	import CardTitle from "../ui/card/card-title.svelte";
+	import Card from "../ui/card/card.svelte";
+	import { Popover, PopoverTrigger } from "../ui/popover";
+	import PopoverContent from "../ui/popover/popover-content.svelte";
 
 	const {
 		data,
@@ -29,7 +32,7 @@
 	}: { data: Post; txId?: string; isPreview?: boolean } = $props();
 
 	const nodeState = getContentNodeState();
-	const walletState = getLocalWalletState();
+	const walletState = getWalletState();
 	const dialogState = getDialogsState();
 
 	const shareUrl = $derived(`${location.origin}/post/${txId}`);
@@ -136,7 +139,9 @@
 								navigator.clipboard.writeText(shareUrl);
 								toast.success("Link Copied");
 							}}>Share</Button
-						> <br />
+						>
+						<a href={shareUrl} target="_blank"> Open </a>
+						<br />
 					{/if}
 					{#if data.tags?.length}
 						<small>Tags:</small>

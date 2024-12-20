@@ -1,7 +1,7 @@
 import { getContext, setContext } from "svelte";
 import { ArweaveUtils } from "../utils/arweave.utils";
 
-export class UserStorageState {
+export class SearchState {
 	public allUsers?: Set<string>;
 
 	constructor() {
@@ -20,12 +20,12 @@ export class UserStorageState {
 	};
 }
 
-const USER_STORAGE_STATE_KEY = "user-storage-state-key";
+const SEARCH_STATE_KEY = "search-state-key";
 
-export function setUserStorageState(): UserStorageState {
-	return setContext(USER_STORAGE_STATE_KEY, new UserStorageState());
+export function setSearchState(): SearchState {
+	return setContext(SEARCH_STATE_KEY, new SearchState());
 }
 
-export function getUserStorageState(): UserStorageState {
-	return getContext<UserStorageState>(USER_STORAGE_STATE_KEY);
+export function getSearchState(): SearchState {
+	return getContext<SearchState>(SEARCH_STATE_KEY);
 }

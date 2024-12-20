@@ -9,12 +9,6 @@
 			"$lib/*": [
 				"./src/lib/*"
 			],
-			"$scripts": [
-				"./scripts"
-			],
-			"$scripts/*": [
-				"./scripts/*"
-			]
 		},
 		"target": "ESNext",
 		"useDefineForClassFields": true,
@@ -28,6 +22,6 @@
 	"include": [
 		"src/**/*.ts",
 		"src/**/*.js",
-		"src/**/*.svelte"
+		"src/**/*.svelte",
 	]
 }

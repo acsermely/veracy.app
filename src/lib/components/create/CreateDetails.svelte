@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Minus, Plus } from "lucide-svelte";
-	import { Button } from "./ui/button";
-	import { Input } from "./ui/input";
+	import { Button } from "../ui/button";
+	import { Input } from "../ui/input";
 
 	let {
 		tags = $bindable(),

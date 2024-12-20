@@ -1,36 +1,48 @@
 <script lang="ts">
 	import { ModeWatcher } from "mode-watcher";
 	import { Route, Router } from "svelte-routing";
-	import ActionBar from "./lib/components/ActionBar.svelte";
-	import Main from "./lib/components/Main.svelte";
-	import Profile from "./lib/components/Profile.svelte";
-
-	import Create from "./lib/components/Create.svelte";
-	import Search from "./lib/components/Search.svelte";
-	import SinglePost from "./lib/components/SinglePost.svelte";
+	import ActionBar from "./lib/components/common/ActionBar.svelte";
 	import { Toaster } from "./lib/components/ui/sonner";
 	import { setDialogsState } from "./lib/state/dialogs.svelte";
 	import { setFeedState } from "./lib/state/feed.svelte";
-	import { setLocalWalletState } from "./lib/state/local-wallet.svelte";
+	import { setWalletState } from "./lib/state/wallet.svelte";
 	import { setContentNodeState } from "./lib/state/node.svelte";
-	import { setUserStorageState } from "./lib/state/user-storage.svelte";
+	import { setSearchState } from "./lib/state/search.svelte";
+	import Create from "./routes/Create.svelte";
+	import Feed from "./routes/Feed.svelte";
+	import Profile from "./routes/Profile.svelte";
+	import Search from "./routes/Search.svelte";
+	import SinglePost from "./routes/SinglePost.svelte";
 
 	const feedState = setFeedState();
-	setLocalWalletState();
-	setUserStorageState();
+	setWalletState();
+	setSearchState();
 	const dialogState = setDialogsState();
 	const nodeState = setContentNodeState();
 
 	let url = $state("");
+	let installPromt = $state<any>();
 
-	nodeState.loginCheck().catch(() => {
-		dialogState.connectDialog = true;
+	nodeState.loginCheck().then(() => {
+		dialogState.connectDialog = false;
 	});
 
 	feedState.queryData();
+
+	function beforeInstall(event: any): void {
+		installPromt = event;
+	}
+
+	// function install(): void {
+	// 	installPromt.prompt().then((result: any) => {
+	// 		console.log(result);
+	// 	});
+	// }
 </script>
 
 <ModeWatcher />
+<svelte:window onbeforeinstallprompt={(event: any) => beforeInstall(event)} />
+
 <div
 	class="bg-inherit flex w-[100dvw] h-[100dvh] flex-col-reverse md:flex-row overflow-hidden"
 >
@@ -42,7 +54,7 @@
 	<div class="flex-1 flex justify-center overflow-hidden">
 		<Router {url}>
 			<Route path="/">
-				<Main />
+				<Feed />
 			</Route>
 			<Route path="/p/:id" let:params>
 				<Profile walletId={params.id} />

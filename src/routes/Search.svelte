@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { navigate } from "svelte-routing";
-	import { STORAGE_SEARCH_HISTORY } from "../constants";
-	import { getUserStorageState } from "../state/user-storage.svelte";
-	import { Avatar, AvatarFallback } from "./ui/avatar";
-	import Button from "./ui/button/button.svelte";
-	import { Input } from "./ui/input";
+	import { Avatar, AvatarFallback } from "../lib/components/ui/avatar";
+	import Button from "../lib/components/ui/button/button.svelte";
+	import { Input } from "../lib/components/ui/input";
+	import { STORAGE_SEARCH_HISTORY } from "../lib/constants";
+	import { getSearchState } from "../lib/state/search.svelte";
 
-	const userStorageState = getUserStorageState();
+	const searchState = getSearchState();
 
 	function addToHistory(id: string): void {
 		if (searchHistory.includes(id)) {
@@ -32,7 +32,7 @@
 		bind:value={searchInput}
 		placeholder="Search..."
 		onkeyup={() => {
-			searchResults = userStorageState.search(searchInput);
+			searchResults = searchState.search(searchInput);
 		}}
 	/>
 	<ul class="w-full max-w-[450px] h-full">

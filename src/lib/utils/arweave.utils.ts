@@ -8,7 +8,7 @@ import {
 	TX_APP_VERSION,
 	TxType,
 } from "../constants";
-import type { Post } from "../model/post.model";
+import type { Post } from "../models/post.model";
 
 export class ArweaveUtils {
 	static arweave = Arweave.init({

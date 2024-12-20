@@ -1,20 +1,20 @@
 <script lang="ts">
 	import { HandCoins, Loader } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
-	import type { Post } from "../model/post.model";
-	import { getDialogsState } from "../state/dialogs.svelte";
-	import { getLocalWalletState } from "../state/local-wallet.svelte";
-	import { ArweaveUtils } from "../utils/arweave.utils";
-	import { runDelayed } from "../utils/common.utils";
-	import Button from "./ui/button/button.svelte";
-	import { Dialog } from "./ui/dialog";
-	import DialogContent from "./ui/dialog/dialog-content.svelte";
-	import DialogDescription from "./ui/dialog/dialog-description.svelte";
-	import DialogFooter from "./ui/dialog/dialog-footer.svelte";
-	import DialogHeader from "./ui/dialog/dialog-header.svelte";
-	import DialogTitle from "./ui/dialog/dialog-title.svelte";
+	import type { Post } from "../../models/post.model";
+	import { getDialogsState } from "../../state/dialogs.svelte";
+	import { getWalletState } from "../../state/wallet.svelte";
+	import { ArweaveUtils } from "../../utils/arweave.utils";
+	import { runDelayed } from "../../utils/common.utils";
+	import Button from "../ui/button/button.svelte";
+	import { Dialog } from "../ui/dialog";
+	import DialogContent from "../ui/dialog/dialog-content.svelte";
+	import DialogDescription from "../ui/dialog/dialog-description.svelte";
+	import DialogFooter from "../ui/dialog/dialog-footer.svelte";
+	import DialogHeader from "../ui/dialog/dialog-header.svelte";
+	import DialogTitle from "../ui/dialog/dialog-title.svelte";
 
-	const walletState = getLocalWalletState();
+	const walletState = getWalletState();
 	const dialogsState = getDialogsState();
 
 	let data = $state<Post>();

@@ -9,17 +9,17 @@
 	import {
 		type PostContent,
 		type PostContentAlign,
-	} from "../model/post.model";
-	import { runDelayed } from "../utils/common.utils";
-	import { compressImageInput } from "../utils/image.utils";
-	import Button from "./ui/button/button.svelte";
-	import { Card, CardContent, CardFooter } from "./ui/card";
-	import Input from "./ui/input/input.svelte";
-	import { Select, SelectValue } from "./ui/select";
-	import SelectContent from "./ui/select/select-content.svelte";
-	import SelectItem from "./ui/select/select-item.svelte";
-	import SelectTrigger from "./ui/select/select-trigger.svelte";
-	import Textarea from "./ui/textarea/textarea.svelte";
+	} from "../../models/post.model";
+	import { runDelayed } from "../../utils/common.utils";
+	import { compressImageInput } from "../../utils/image.utils";
+	import Button from "../ui/button/button.svelte";
+	import { Card, CardContent, CardFooter } from "../ui/card";
+	import Input from "../ui/input/input.svelte";
+	import { Select, SelectValue } from "../ui/select";
+	import SelectContent from "../ui/select/select-content.svelte";
+	import SelectItem from "../ui/select/select-item.svelte";
+	import SelectTrigger from "../ui/select/select-trigger.svelte";
+	import Textarea from "../ui/textarea/textarea.svelte";
 
 	let { data = $bindable() }: { data: Partial<PostContent>[] } = $props();
 

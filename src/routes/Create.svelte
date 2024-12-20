@@ -1,28 +1,28 @@
 <script lang="ts">
 	import { link } from "svelte-routing";
 	import { toast } from "svelte-sonner";
+	import CreateContent from "../lib/components/create/CreateContent.svelte";
+	import CreateDetails from "../lib/components/create/CreateDetails.svelte";
+	import CreateFinish from "../lib/components/create/CreateFinish.svelte";
+	import CreateUpload from "../lib/components/create/CreateUpload.svelte";
+	import { buttonVariants } from "../lib/components/ui/button";
+	import Button from "../lib/components/ui/button/button.svelte";
 	import {
 		genPostId,
 		type Post,
 		type PostContent,
-	} from "../model/post.model";
-	import { getDialogsState } from "../state/dialogs.svelte";
-	import { getLocalWalletState } from "../state/local-wallet.svelte";
-	import { getContentNodeState } from "../state/node.svelte";
-	import { ArweaveUtils } from "../utils/arweave.utils";
-	import { hasPrivateContent } from "../utils/common.utils";
-	import CreateContent from "./CreateContent.svelte";
-	import CreateDetails from "./CreateDetails.svelte";
-	import CreateFinish from "./CreateFinish.svelte";
-	import CreateUpload from "./CreateUpload.svelte";
-	import { buttonVariants } from "./ui/button";
-	import Button from "./ui/button/button.svelte";
+	} from "../lib/models/post.model";
+	import { getDialogsState } from "../lib/state/dialogs.svelte";
+	import { getWalletState } from "../lib/state/wallet.svelte";
+	import { getContentNodeState } from "../lib/state/node.svelte";
+	import { ArweaveUtils } from "../lib/utils/arweave.utils";
+	import { hasPrivateContent } from "../lib/utils/common.utils";
 
 	let currentStep = $state(0);
 	let uploading = $state(false);
 	let uploadMessage = $state("");
 
-	const walletState = getLocalWalletState();
+	const walletState = getWalletState();
 	const nodeState = getContentNodeState();
 	const dialogsState = getDialogsState();
 

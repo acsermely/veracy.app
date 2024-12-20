@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { Loader } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
-	import type { Post } from "../model/post.model";
-	import { getFeedState } from "../state/feed.svelte";
-	import { ArweaveUtils } from "../utils/arweave.utils";
-	import MainPost from "./MainPost.svelte";
-	import RefreshWrapper from "./RefreshWrapper.svelte";
-	import Button from "./ui/button/button.svelte";
-	import CardContent from "./ui/card/card-content.svelte";
-	import CardHeader from "./ui/card/card-header.svelte";
-	import Card from "./ui/card/card.svelte";
-	import Skeleton from "./ui/skeleton/skeleton.svelte";
+	import RefreshWrapper from "../lib/components/common/RefreshWrapper.svelte";
+	import FeedPost from "../lib/components/feed/FeedPost.svelte";
+	import Button from "../lib/components/ui/button/button.svelte";
+	import CardContent from "../lib/components/ui/card/card-content.svelte";
+	import CardHeader from "../lib/components/ui/card/card-header.svelte";
+	import Card from "../lib/components/ui/card/card.svelte";
+	import Skeleton from "../lib/components/ui/skeleton/skeleton.svelte";
+	import type { Post } from "../lib/models/post.model";
+	import { getFeedState } from "../lib/state/feed.svelte";
+	import { ArweaveUtils } from "../lib/utils/arweave.utils";
 
 	const feedState = getFeedState();
 
@@ -33,6 +33,7 @@
 	}
 </script>
 
+asdadsad
 <RefreshWrapper
 	onRefresh={() => {
 		feedState.queryData();
@@ -52,7 +53,7 @@
 					</CardContent>
 				</Card>
 			{:then data}
-				<MainPost {data} txId={id} />
+				<FeedPost {data} txId={id} />
 			{/await}
 		{/each}
 		<div class="my-3 w-full flex flex-col items-center">

@@ -2,11 +2,11 @@
 	import { Loader } from "lucide-svelte";
 	import { link } from "svelte-routing";
 	import { toast } from "svelte-sonner";
-	import type { Post } from "../model/post.model";
-	import { getLocalWalletState } from "../state/local-wallet.svelte";
-	import { ArweaveUtils } from "../utils/arweave.utils";
-	import { runDelayed } from "../utils/common.utils";
-	import { Button, buttonVariants } from "./ui/button";
+	import type { Post } from "../../models/post.model";
+	import { getWalletState } from "../../state/wallet.svelte";
+	import { ArweaveUtils } from "../../utils/arweave.utils";
+	import { runDelayed } from "../../utils/common.utils";
+	import { Button, buttonVariants } from "../ui/button";
 	import {
 		Dialog,
 		DialogContent,
@@ -14,7 +14,7 @@
 		DialogHeader,
 		DialogTitle,
 		DialogTrigger,
-	} from "./ui/dialog";
+	} from "../ui/dialog";
 
 	let {
 		data = $bindable(),
@@ -30,7 +30,7 @@
 		needPayment: boolean;
 	} = $props();
 
-	const walletState = getLocalWalletState();
+	const walletState = getWalletState();
 
 	let alreadyPaid = $state(false);
 	let payDialog = $state(false);

@@ -1,12 +1,12 @@
 import { getContext, setContext } from "svelte";
-import { LocalWallet } from "../model/wallet.model";
+import { LocalWallet } from "../models/wallet.model";
 
 const WALLET_LOCAL_SIGN_PRIV_KEY = "WALLET_LOCAL_SIGN_PRIV_KEY";
 const WALLET_LOCAL_ENCRYPT_PRIV_KEY = "WALLET_LOCAL_ENCRYPT_PRIV_KEY";
 const WALLET_LOCAL_ENCRYPT_PUB_KEY = "WALLET_LOCAL_ENCRYPT_PUB_KEY";
 const WALLET_LOCAL_ADDRESS = "WALLET_LOCAL_ADDRESS";
 
-export class LocalWalletState {
+export class WalletState {
 	wallet = $state<LocalWallet>();
 
 	isConnected = $derived(this.wallet !== undefined);
@@ -128,12 +128,12 @@ export class LocalWalletState {
 	};
 }
 
-const LOCAL_WALLET_STATE_KEY = "local-wallet-state-key";
+const WALLET_STATE_KEY = "wallet-state-key";
 
-export function setLocalWalletState(): LocalWalletState {
-	return setContext(LOCAL_WALLET_STATE_KEY, new LocalWalletState());
+export function setWalletState(): WalletState {
+	return setContext(WALLET_STATE_KEY, new WalletState());
 }
 
-export function getLocalWalletState(): LocalWalletState {
-	return getContext<LocalWalletState>(LOCAL_WALLET_STATE_KEY);
+export function getWalletState(): WalletState {
+	return getContext<WalletState>(WALLET_STATE_KEY);
 }

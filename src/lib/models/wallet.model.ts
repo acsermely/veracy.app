@@ -288,6 +288,7 @@ async function createDataItem(
 		target?: string;
 	},
 ) {
+	// @ts-ignore
 	const { createData, signers } = await import("$scripts/arbundles");
 	const { data, tags, target } = item;
 	const sk = (await crypto.subtle.exportKey(
