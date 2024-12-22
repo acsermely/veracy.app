@@ -20,7 +20,7 @@
 	const previewPost = $derived({
 		id: "",
 		content: data,
-		uploader: walletState.address,
+		uploader: walletState.wallet?.address,
 		title,
 		price,
 		tags,

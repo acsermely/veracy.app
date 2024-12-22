@@ -33,7 +33,6 @@
 	}
 </script>
 
-asdadsad
 <RefreshWrapper
 	onRefresh={() => {
 		feedState.queryData();

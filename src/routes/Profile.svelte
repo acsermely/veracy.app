@@ -19,7 +19,7 @@
 
 	const dialogsState = getDialogsState();
 
-	let isMe = $derived(walletId === getWalletState().address);
+	let isMe = $derived(walletId === getWalletState().wallet?.address);
 
 	$effect(() => {
 		queryData();
@@ -82,7 +82,7 @@
 			</CardContent>
 		</Card>
 	</div>
-	<div class="w-full flex flex-col items-center">
+	<div class="w-full flex flex-col items-center max-w-[450px]">
 		{#if postIds}
 			{#each postIds as id}
 				{#await fetchData(id)}

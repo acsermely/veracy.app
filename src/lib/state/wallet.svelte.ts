@@ -1,30 +1,19 @@
 import { getContext, setContext } from "svelte";
-import { LocalWallet } from "../models/wallet.model";
+import { Wallet } from "../models/wallet.model";
+import { getAddressFromKey, getEncryptKey } from "../utils/wallet.utils";
 
-const WALLET_LOCAL_SIGN_PRIV_KEY = "WALLET_LOCAL_SIGN_PRIV_KEY";
-const WALLET_LOCAL_ENCRYPT_PRIV_KEY = "WALLET_LOCAL_ENCRYPT_PRIV_KEY";
-const WALLET_LOCAL_ENCRYPT_PUB_KEY = "WALLET_LOCAL_ENCRYPT_PUB_KEY";
-const WALLET_LOCAL_ADDRESS = "WALLET_LOCAL_ADDRESS";
+const WALLET_LOCAL_PRIV_KEY = "WALLET_LOCAL_PRIV_KEY";
+const WALLET_STATE_KEY = "wallet-state-key";
 
 export class WalletState {
-	wallet = $state<LocalWallet>();
+	wallet = $state<Wallet>();
 
 	isConnected = $derived(this.wallet !== undefined);
 	hasKeys = $state<boolean>(false);
 
-	get address(): string {
-		if (this.wallet?.address) {
-			return this.wallet.address;
-		}
-		return localStorage.getItem(WALLET_LOCAL_ADDRESS) || "";
-	}
-
 	constructor() {
-		const privSKJWK = localStorage.getItem(WALLET_LOCAL_SIGN_PRIV_KEY);
-		const privEKJWK = localStorage.getItem(WALLET_LOCAL_ENCRYPT_PRIV_KEY);
-		const pubEKJWK = localStorage.getItem(WALLET_LOCAL_ENCRYPT_PUB_KEY);
-		const addr = localStorage.getItem(WALLET_LOCAL_ADDRESS);
-		if (privSKJWK && privEKJWK && pubEKJWK && addr) {
+		const key = localStorage.getItem(WALLET_LOCAL_PRIV_KEY);
+		if (key) {
 			this.hasKeys = true;
 			try {
 				this.connect();
@@ -35,81 +24,25 @@ export class WalletState {
 	}
 
 	register = async (mnemonic?: string, pin?: number[]): Promise<void> => {
-		const newWallet = await LocalWallet.New(mnemonic);
-
-		const privSKJWK = await crypto.subtle.exportKey(
-			"jwk",
-			newWallet.privateSignKey,
-		);
-		const privEKJWK = await crypto.subtle.exportKey(
-			"jwk",
-			newWallet.privateEncriptKey,
-		);
-		const pubEKJWK = await crypto.subtle.exportKey(
-			"jwk",
-			newWallet.publicEncriptKey,
-		);
+		const newWallet = await Wallet.New(mnemonic);
 
 		localStorage.setItem(
-			WALLET_LOCAL_SIGN_PRIV_KEY,
-			JSON.stringify(privSKJWK),
+			WALLET_LOCAL_PRIV_KEY,
+			JSON.stringify(newWallet.rawKey),
 		);
-		localStorage.setItem(
-			WALLET_LOCAL_ENCRYPT_PRIV_KEY,
-			JSON.stringify(privEKJWK),
-		);
-		localStorage.setItem(
-			WALLET_LOCAL_ENCRYPT_PUB_KEY,
-			JSON.stringify(pubEKJWK),
-		);
-		localStorage.setItem(WALLET_LOCAL_ADDRESS, newWallet.address);
 
 		this.wallet = newWallet;
 		this.hasKeys = true;
 	};
 
 	connect = async (): Promise<void> => {
-		const privSKJWK = localStorage.getItem(WALLET_LOCAL_SIGN_PRIV_KEY);
-		const privEKJWK = localStorage.getItem(WALLET_LOCAL_ENCRYPT_PRIV_KEY);
-		const pubEKJWK = localStorage.getItem(WALLET_LOCAL_ENCRYPT_PUB_KEY);
-		const addr = localStorage.getItem(WALLET_LOCAL_ADDRESS);
+		const key = localStorage.getItem(WALLET_LOCAL_PRIV_KEY);
 
-		if (privSKJWK && privEKJWK && pubEKJWK && addr) {
+		if (key) {
 			try {
-				const privSK = await crypto.subtle.importKey(
-					"jwk",
-					JSON.parse(privSKJWK) as JsonWebKey,
-					{
-						name: "RSA-PSS",
-						hash: { name: "SHA-256" },
-					},
-					true,
-					["sign"],
-				);
-
-				const privEK = await crypto.subtle.importKey(
-					"jwk",
-					JSON.parse(privEKJWK) as JsonWebKey,
-					{
-						name: "RSA-OAEP",
-						hash: { name: "SHA-256" },
-					},
-					true,
-					["decrypt"],
-				);
-
-				const pubEK = await crypto.subtle.importKey(
-					"jwk",
-					JSON.parse(pubEKJWK) as JsonWebKey,
-					{
-						name: "RSA-OAEP",
-						hash: { name: "SHA-256" },
-					},
-					true,
-					["encrypt"],
-				);
-
-				this.wallet = new LocalWallet(privSK, pubEK, privEK, addr);
+				const rawKey = JSON.parse(key) as JsonWebKey;
+				const address = await getAddressFromKey(rawKey);
+				this.wallet = new Wallet(rawKey, address);
 				return;
 			} catch (e) {
 				console.error(e);
@@ -124,11 +57,10 @@ export class WalletState {
 		if (!this.wallet) {
 			throw "No Wallet!";
 		}
-		return crypto.subtle.exportKey("jwk", this.wallet.publicEncriptKey);
+		const encryptKey = await getEncryptKey(this.wallet.rawKey);
+		return crypto.subtle.exportKey("jwk", encryptKey);
 	};
 }
-
-const WALLET_STATE_KEY = "wallet-state-key";
 
 export function setWalletState(): WalletState {
 	return setContext(WALLET_STATE_KEY, new WalletState());

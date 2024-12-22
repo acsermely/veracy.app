@@ -44,9 +44,9 @@
 		<PlusCircle size="28" />
 		<span class="hidden md:block">New</span>
 	</a>
-	{#if walletState.address}
+	{#if walletState.wallet?.address}
 		<a
-			href={"/p/" + walletState.address}
+			href={"/p/" + walletState.wallet.address}
 			use:link
 			class="flex md:gap-4 md:p-5"
 		>

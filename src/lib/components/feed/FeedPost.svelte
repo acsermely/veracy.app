@@ -6,8 +6,8 @@
 	import { fade } from "svelte/transition";
 	import type { Post } from "../../models/post.model";
 	import { getDialogsState } from "../../state/dialogs.svelte";
-	import { getWalletState } from "../../state/wallet.svelte";
 	import { getContentNodeState } from "../../state/node.svelte";
+	import { getWalletState } from "../../state/wallet.svelte";
 	import {
 		ArweaveUtils,
 		type ArPaymentResult,
@@ -140,7 +140,6 @@
 								toast.success("Link Copied");
 							}}>Share</Button
 						>
-						<a href={shareUrl} target="_blank"> Open </a>
 						<br />
 					{/if}
 					{#if data.tags?.length}

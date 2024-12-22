@@ -2,11 +2,11 @@
 	import { Copy, Loader, Settings, User } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
 	import { slide } from "svelte/transition";
-	import { LocalWallet } from "../../models/wallet.model";
+	import { Wallet } from "../../models/wallet.model";
 	import { getDialogsState } from "../../state/dialogs.svelte";
 	import { getFeedState } from "../../state/feed.svelte";
-	import { getWalletState } from "../../state/wallet.svelte";
 	import { getContentNodeState } from "../../state/node.svelte";
+	import { getWalletState } from "../../state/wallet.svelte";
 	import { buttonVariants } from "../ui/button";
 	import Button from "../ui/button/button.svelte";
 	import { Dialog, DialogTrigger } from "../ui/dialog";
@@ -123,7 +123,7 @@
 			errorMessage = "No Server URL!";
 			return;
 		}
-		if (!walletState.wallet) {
+		if (!walletState.wallet || !walletState.wallet.address) {
 			errorMessage = "No available Wallet!";
 			return;
 		}
@@ -142,7 +142,7 @@
 		let response: Response;
 		try {
 			response = await nodeState.registerKey(
-				walletState.address,
+				walletState.wallet.address,
 				pubKey,
 				url,
 			);
@@ -176,7 +176,7 @@
 
 		try {
 			await nodeState.loginKeyChallange(
-				walletState.address,
+				walletState.wallet.address,
 				challange,
 				url,
 			);
@@ -193,14 +193,14 @@
 
 	async function loginKey(): Promise<void> {
 		errorMessage = "";
-		if (!url || !walletState.address) {
+		if (!url || !walletState.wallet?.address) {
 			throw "No URL or Wallet Address";
 		}
 
 		let response: Response;
 		try {
 			response = await nodeState.getKeyChallange(
-				walletState.address,
+				walletState.wallet.address,
 				url,
 			);
 			if (response.status !== 200) {
@@ -233,7 +233,7 @@
 
 		try {
 			response = await nodeState.loginKeyChallange(
-				walletState.address,
+				walletState.wallet.address,
 				challange,
 				url,
 			);
@@ -255,12 +255,12 @@
 	bind:open={dialogsState.connectDialog}
 	openFocus={"#connect-dialog-content"}
 >
-	{#if !walletState.address || !nodeState.isConnected}
+	{#if !walletState.wallet?.address || !nodeState.isConnected}
 		<DialogTrigger
 			class={buttonVariants({ variant: "destructive" }) + " gap-4"}
 		>
 			<User />
-			{#if !walletState.address}
+			{#if !walletState.wallet?.address}
 				Register
 			{:else}
 				Login
@@ -330,8 +330,7 @@
 							<Button
 								variant="secondary"
 								onclick={async () =>
-									(mnemonic =
-										await LocalWallet.newMnemonic())}
+									(mnemonic = await Wallet.newMnemonic())}
 								>Generate Wallet and Register</Button
 							>
 							<Button
@@ -356,12 +355,15 @@
 					text-primary w-full"
 							onclick={() => {
 								navigator.clipboard.writeText(
-									walletState.address,
+									walletState.wallet!.address,
 								);
 								toast.success("Wallet address Copied");
 							}}
 						>
-							Wallet: {walletState.address.slice(0, 20)}...
+							Wallet: {walletState.wallet!.address.slice(
+								0,
+								20,
+							)}...
 							<Copy class="mx-3" />
 						</div>
 					{/if}

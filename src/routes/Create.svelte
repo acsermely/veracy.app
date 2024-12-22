@@ -13,8 +13,8 @@
 		type PostContent,
 	} from "../lib/models/post.model";
 	import { getDialogsState } from "../lib/state/dialogs.svelte";
-	import { getWalletState } from "../lib/state/wallet.svelte";
 	import { getContentNodeState } from "../lib/state/node.svelte";
+	import { getWalletState } from "../lib/state/wallet.svelte";
 	import { ArweaveUtils } from "../lib/utils/arweave.utils";
 	import { hasPrivateContent } from "../lib/utils/common.utils";
 
@@ -54,10 +54,10 @@
 			}
 			const uploadNumber = await nodeState.uploadImage(
 				id,
-				walletState.address,
+				walletState.wallet.address,
 				item.data,
 			);
-			const contentId = `${walletState.address}:${id}:${uploadNumber}`;
+			const contentId = `${walletState.wallet.address}:${id}:${uploadNumber}`;
 			content.push({
 				privacy: item.privacy || "PUBLIC",
 				type: "IMG",
@@ -70,13 +70,12 @@
 			id,
 			tags,
 			title,
-			uploader: walletState.address,
+			uploader: walletState.wallet.address,
 			content,
 		};
 		fullPostData = postData;
 		const tx = await ArweaveUtils.newPostTx(postData);
-		await walletState.wallet.dispatch(tx);
-
+		await ArweaveUtils.dispatch(walletState.wallet, tx);
 		return;
 	}
 

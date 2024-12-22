@@ -1,7 +1,8 @@
 import Arweave from "arweave";
 import type Transaction from "arweave/node/lib/transaction";
+import type { JWKInterface } from "arweave/node/lib/wallet";
 import {
-	ARWEAVE_URL,
+	BUNDLER_URL,
 	REQUEST_TIMEOUT,
 	TX_APP_CONTENT_TYPE,
 	TX_APP_NAME,
@@ -9,6 +10,8 @@ import {
 	TxType,
 } from "../constants";
 import type { Post } from "../models/post.model";
+import type { Wallet } from "../models/wallet.model";
+import { getSignKey } from "./wallet.utils";
 
 export class ArweaveUtils {
 	static arweave = Arweave.init({
@@ -26,7 +29,7 @@ export class ArweaveUtils {
 		const headers = new Headers({});
 		headers.append("content-type", "application/json");
 		headers.append("accept", "application/json, text/plain, */*");
-		return fetch(`${ARWEAVE_URL}/graphql`, {
+		return fetch(`${BUNDLER_URL}/graphql`, {
 			method: "POST",
 			body: JSON.stringify(query),
 			signal: AbortSignal.timeout(REQUEST_TIMEOUT),
@@ -42,7 +45,7 @@ export class ArweaveUtils {
 	}
 
 	static async getTxById<T>(txId: string): Promise<T> {
-		const response = await fetch(`${ARWEAVE_URL}/${txId}`);
+		const response = await fetch(`${BUNDLER_URL}/${txId}`);
 		return (await response.json().then((data) => {
 			return data;
 		})) as T;
@@ -165,6 +168,45 @@ export class ArweaveUtils {
 					),
 				),
 		);
+	}
+
+	static async dispatch(wallet: Wallet, tx: Transaction): Promise<any> {
+		let dispatchResult: Awaited<any> | undefined;
+		if (!tx.quantity || tx.quantity === "0") {
+			try {
+				const data = tx.get("data", { decode: true, string: false });
+				const tags = tx.tags.map((tag) => ({
+					name: tag.get("name", { decode: true, string: true }),
+					value: tag.get("value", { decode: true, string: true }),
+				}));
+				const target = tx.target;
+				const bundleTx = await createDataItem(
+					await getSignKey(wallet.rawKey),
+					{
+						data,
+						tags,
+						target,
+					},
+				);
+				await fetch(BUNDLER_URL + "/tx", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/octet-stream",
+					},
+					body: bundleTx.getRaw(),
+				}).then((response) => {
+					if (response.status >= 200 && response.status < 300) {
+						dispatchResult = { id: bundleTx.id, type: "BUNDLED" };
+					}
+				});
+			} catch (e) {
+				console.error(e);
+			}
+		}
+		if (dispatchResult) {
+			return dispatchResult;
+		}
+		throw "Dispatch Error";
 	}
 }
 
@@ -328,3 +370,33 @@ export type ArPaymentResult = {
 	target: string;
 	price: number;
 };
+
+/**
+ * This code originates from the ArweaveWebWallet project
+ * @link https://github.com/jfbeats/ArweaveWebWallet/blob/master/src/providers/Arweave.ts
+ * @param item ArDataItemParams
+ * @returns
+ */
+async function createDataItem(
+	privateKey: CryptoKey,
+	item: {
+		data: Uint8Array | string;
+		tags?: { name: string; value: string; key?: string }[];
+		target?: string;
+	},
+) {
+	// @ts-ignore
+	const { createData, signers } = await import("$scripts/arbundles");
+	const { data, tags, target } = item;
+	const sk = (await crypto.subtle.exportKey(
+		"jwk",
+		privateKey,
+	)) as JWKInterface;
+	const signer = new signers.ArweaveSigner(sk);
+	const anchor = Arweave.utils
+		.bufferTob64(crypto.getRandomValues(new Uint8Array(32)))
+		.slice(0, 32);
+	const dataItem = createData(data, signer, { tags, target, anchor });
+	await dataItem.sign(signer);
+	return dataItem;
+}

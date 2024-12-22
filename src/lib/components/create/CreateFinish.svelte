@@ -53,7 +53,7 @@
 		let result;
 		try {
 			const tx = await ArweaveUtils.newSetPriceTx(data.id, price);
-			result = await walletState.wallet.dispatch(tx);
+			result = await ArweaveUtils.dispatch(walletState.wallet, tx);
 		} catch {
 			toast.error("Couldn't set price!");
 			processing = false;

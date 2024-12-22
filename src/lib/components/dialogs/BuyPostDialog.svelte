@@ -52,7 +52,7 @@
 		);
 		let result;
 		try {
-			result = await walletState.wallet.dispatch(tx);
+			result = await ArweaveUtils.dispatch(walletState.wallet, tx);
 		} catch {
 			toast.error("Transaction failed!");
 			processing = false;
