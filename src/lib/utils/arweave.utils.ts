@@ -2,6 +2,10 @@ import Arweave from "arweave";
 import type Transaction from "arweave/node/lib/transaction";
 import type { JWKInterface } from "arweave/node/lib/wallet";
 import {
+	ACTIVATION_ADDRESS,
+	ARWEAVE_PORT,
+	ARWEAVE_PROTOCOL,
+	ARWEAVE_URL,
 	BUNDLER_URL,
 	REQUEST_TIMEOUT,
 	TX_APP_CONTENT_TYPE,
@@ -15,9 +19,9 @@ import { getSignKey } from "./wallet.utils";
 
 export class ArweaveUtils {
 	static arweave = Arweave.init({
-		host: "arweave.net",
-		port: 443,
-		protocol: "https",
+		host: ARWEAVE_URL,
+		port: ARWEAVE_PORT,
+		protocol: ARWEAVE_PROTOCOL,
 		timeout: REQUEST_TIMEOUT,
 		logging: false,
 	});
@@ -51,6 +55,10 @@ export class ArweaveUtils {
 		})) as T;
 	}
 
+	static async getPaymentById(txId: string): Promise<Transaction> {
+		return ArweaveUtils.arweave.transactions.get(txId);
+	}
+
 	static async newPostTx(data: Post): Promise<Transaction> {
 		const stringData = JSON.stringify(data);
 		let tx = await this.arweave.createTransaction({
@@ -66,24 +74,25 @@ export class ArweaveUtils {
 		if (data.tags && data.tags.length > 0) {
 			tx.addTag("Post-Tags", data.tags.join(" "));
 		}
-		// if (data.settings) {
-		// 	if (data.settings.disableComments) {
-		// 		tx.addTag("Post-Comments", "false");
-		// 	}
-		// }
 		return tx;
 	}
 
 	static async newPaymentTx(
+		targetAddr: string,
+		sourceAddr: string,
 		postId: string,
 		price: number,
+		fee?: number,
 	): Promise<Transaction> {
-		const stringData = JSON.stringify({
-			target: postId,
-			price: price,
-		});
+		const priceInWinston = this.arweave.ar.arToWinston(price.toString());
+		const balance = await this.arweave.wallets.getBalance(sourceAddr);
+		if (Number.parseInt(balance) < Number.parseInt(priceInWinston)) {
+			throw "Insufficient balance";
+		}
 		let tx = await this.arweave.createTransaction({
-			data: stringData,
+			target: targetAddr,
+			quantity: priceInWinston,
+			// reward: fee,
 		});
 		tx.addTag("App-Name", TX_APP_NAME);
 		tx.addTag("Content-Type", TX_APP_CONTENT_TYPE);
@@ -95,18 +104,23 @@ export class ArweaveUtils {
 	}
 
 	static async newSetPriceTx(
+		sourceAddr: string,
 		postId: string,
 		price: number,
+		// fee?: number,
 	): Promise<Transaction> {
 		if (!price || price === 0) {
 			throw "No Price";
 		}
-		const stringData = JSON.stringify({
-			target: postId,
-			price: price,
-		});
+		const priceInWinston = this.arweave.ar.arToWinston(price.toString());
+		const balance = await this.arweave.wallets.getBalance(sourceAddr);
+		if (Number.parseInt(balance) < Number.parseInt(priceInWinston)) {
+			throw "Insufficient balance";
+		}
 		let tx = await this.arweave.createTransaction({
-			data: stringData,
+			target: ACTIVATION_ADDRESS,
+			quantity: priceInWinston,
+			// reward: fee,
 		});
 		tx.addTag("App-Name", TX_APP_NAME);
 		tx.addTag("Content-Type", TX_APP_CONTENT_TYPE);
@@ -150,11 +164,15 @@ export class ArweaveUtils {
 		tx: string,
 		uploader: string,
 	): Promise<string[]> {
-		return ArweaveUtils.query<ArQueryResult<ArQueryIds>>(
-			queryPriceForTx(tx, uploader),
-		).then((data) =>
-			data.data.transactions.edges.map((item) => item.node.id),
-		);
+		return ArweaveUtils.arweave.api
+			.post<ArQueryResult<ArQueryIds>>(
+				"/graphql",
+				queryPriceForTx(tx, uploader),
+			)
+			.then((response) => response.data)
+			.then((data) =>
+				data.data.transactions.edges.map((item) => item.node.id),
+			);
 	}
 
 	static async getAllUserAddresses(): Promise<Set<string>> {
@@ -168,6 +186,33 @@ export class ArweaveUtils {
 					),
 				),
 		);
+	}
+
+	static async getBalance(address: string): Promise<any> {
+		return this.arweave.ar.winstonToAr(
+			await this.arweave.wallets.getBalance(address),
+		);
+	}
+
+	static async submitPayment(wallet: Wallet, tx: Transaction): Promise<any> {
+		try {
+			await this.arweave.transactions.sign(
+				tx,
+				wallet.rawKey as JWKInterface,
+			);
+		} catch (e) {
+			console.error(e);
+			throw "Sign failed";
+		}
+
+		try {
+			const result = await this.arweave.transactions.post(tx);
+			console.log(result);
+			return result;
+		} catch (e) {
+			console.error(e);
+			throw "Couldn't create uploader";
+		}
 	}
 
 	static async dispatch(wallet: Wallet, tx: Transaction): Promise<any> {
@@ -237,12 +282,12 @@ export function queryPosts(cursor?: string) {
 }
 
 export function queryPriceForTx(tx: string, sender: string): { query: string } {
+	// order: DESC,
+	// timestamp: {from: 1728246095432, to: ${new Date().getTime()}},
 	return {
 		query: `{
 			transactions(
-				order: DESC,
 				owners: ["${sender}"],
-				timestamp: {from: 1728246095432, to: ${new Date().getTime()}},
 				tags: [
 					{ name: "App-Name", values: ["${TX_APP_NAME}"]},
 					{ name: "Version", values: ["${TX_APP_VERSION}"]},

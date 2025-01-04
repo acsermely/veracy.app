@@ -12,3 +12,4 @@ export function hasPrivateContent(data: Partial<PostContent>[]): boolean {
 		return content?.privacy === "PRIVATE";
 	}).length;
 }
+

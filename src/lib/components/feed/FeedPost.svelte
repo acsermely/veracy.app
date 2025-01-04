@@ -8,10 +8,7 @@
 	import { getDialogsState } from "../../state/dialogs.svelte";
 	import { getContentNodeState } from "../../state/node.svelte";
 	import { getWalletState } from "../../state/wallet.svelte";
-	import {
-		ArweaveUtils,
-		type ArPaymentResult,
-	} from "../../utils/arweave.utils";
+	import { ArweaveUtils } from "../../utils/arweave.utils";
 	import { hasPrivateContent } from "../../utils/common.utils";
 	import AvatarFallback from "../ui/avatar/avatar-fallback.svelte";
 	import Avatar from "../ui/avatar/avatar.svelte";
@@ -72,10 +69,10 @@
 		if (result.length < 1) {
 			return undefined;
 		}
-		const priceData = await ArweaveUtils.getTxById<ArPaymentResult>(
-			result[0],
+		const price = await ArweaveUtils.getPaymentById(result[0]).then((tx) =>
+			ArweaveUtils.arweave.ar.winstonToAr(tx.quantity),
 		);
-		return priceData.price;
+		return Number.parseFloat(price);
 	}
 
 	async function getImagePromise(id: string): Promise<string> {

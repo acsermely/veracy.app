@@ -1,8 +1,9 @@
 import { getContext, setContext } from "svelte";
 import { Wallet } from "../models/wallet.model";
+import { DB } from "../utils/db.utils";
 import { getAddressFromKey, getEncryptKey } from "../utils/wallet.utils";
 
-const WALLET_LOCAL_PRIV_KEY = "WALLET_LOCAL_PRIV_KEY";
+const WALLET_LOCAL_ADDRESS = "WALLET_LOCAL_ADDRESS";
 const WALLET_STATE_KEY = "wallet-state-key";
 
 export class WalletState {
@@ -12,8 +13,8 @@ export class WalletState {
 	hasKeys = $state<boolean>(false);
 
 	constructor() {
-		const key = localStorage.getItem(WALLET_LOCAL_PRIV_KEY);
-		if (key) {
+		const address = localStorage.getItem(WALLET_LOCAL_ADDRESS);
+		if (address) {
 			this.hasKeys = true;
 			try {
 				this.connect();
@@ -26,21 +27,23 @@ export class WalletState {
 	register = async (mnemonic?: string, pin?: number[]): Promise<void> => {
 		const newWallet = await Wallet.New(mnemonic);
 
-		localStorage.setItem(
-			WALLET_LOCAL_PRIV_KEY,
-			JSON.stringify(newWallet.rawKey),
-		);
+		try {
+			const address = await getAddressFromKey(newWallet.rawKey);
+			await DB.addWallet(address, newWallet.rawKey);
+			localStorage.setItem(WALLET_LOCAL_ADDRESS, address);
+		} catch {
+			throw "Failed to save wallet data";
+		}
 
 		this.wallet = newWallet;
 		this.hasKeys = true;
 	};
 
 	connect = async (): Promise<void> => {
-		const key = localStorage.getItem(WALLET_LOCAL_PRIV_KEY);
-
-		if (key) {
+		const addr = localStorage.getItem(WALLET_LOCAL_ADDRESS);
+		if (addr) {
 			try {
-				const rawKey = JSON.parse(key) as JsonWebKey;
+				const rawKey = await DB.getWallet(addr);
 				const address = await getAddressFromKey(rawKey);
 				this.wallet = new Wallet(rawKey, address);
 				return;
@@ -49,7 +52,6 @@ export class WalletState {
 				throw "Failed to connect to wallet.";
 			}
 		}
-
 		throw "No wallet found.";
 	};
 

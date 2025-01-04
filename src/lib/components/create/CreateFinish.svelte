@@ -3,6 +3,7 @@
 	import { link } from "svelte-routing";
 	import { toast } from "svelte-sonner";
 	import type { Post } from "../../models/post.model";
+	import { getFeedState } from "../../state/feed.svelte";
 	import { getWalletState } from "../../state/wallet.svelte";
 	import { ArweaveUtils } from "../../utils/arweave.utils";
 	import { runDelayed } from "../../utils/common.utils";
@@ -31,6 +32,7 @@
 	} = $props();
 
 	const walletState = getWalletState();
+	const feedState = getFeedState();
 
 	let alreadyPaid = $state(false);
 	let payDialog = $state(false);
@@ -52,8 +54,12 @@
 		processing = true;
 		let result;
 		try {
-			const tx = await ArweaveUtils.newSetPriceTx(data.id, price);
-			result = await ArweaveUtils.dispatch(walletState.wallet, tx);
+			const tx = await ArweaveUtils.newSetPriceTx(
+				walletState.wallet.address,
+				data.id,
+				price,
+			);
+			result = await ArweaveUtils.submitPayment(walletState.wallet, tx);
 		} catch {
 			toast.error("Couldn't set price!");
 			processing = false;
@@ -74,7 +80,12 @@
 	{:else}
 		<span class="text-xl m-10">{uploadMessage}</span>
 		{#if !needPayment || alreadyPaid}
-			<a class={buttonVariants({ variant: "default" })} href="/" use:link>
+			<a
+				class={buttonVariants({ variant: "default" })}
+				href="/"
+				use:link
+				onclick={() => feedState.queryData()}
+			>
 				Home Page
 			</a>
 		{:else}

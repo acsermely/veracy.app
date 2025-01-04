@@ -6,6 +6,7 @@
 		Plus,
 		X,
 	} from "lucide-svelte";
+	import { POST_MAX_NUMBER_OF_CONTENT } from "../../constants";
 	import {
 		type PostContent,
 		type PostContentAlign,
@@ -211,7 +212,7 @@
 		<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 		<span
 			onclick={() => {
-				if (data.length >= 20) {
+				if (data.length >= POST_MAX_NUMBER_OF_CONTENT) {
 					return;
 				}
 				data.push({});

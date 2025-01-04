@@ -26,8 +26,10 @@
 	});
 
 	let postIds = $state<string[]>();
+	let balance = $state<string>();
 	const queryData = async (): Promise<void> => {
 		postIds = await ArweaveUtils.getAllPostsIdForWallet(walletId);
+		balance = await ArweaveUtils.getBalance(walletId);
 	};
 
 	const fetchData = async (id: string): Promise<Post> => {
@@ -71,6 +73,7 @@
 				class="flex justify-center items-center gap-3 flex-col"
 			>
 				<h1>{walletId.slice(0, 25)}...</h1>
+				<h4>{balance}</h4>
 				{#if !isMe}
 					<Button
 						variant="secondary"

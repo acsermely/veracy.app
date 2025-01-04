@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type Transaction from "arweave/node/lib/transaction";
 	import { HandCoins, Loader } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
 	import type { Post } from "../../models/post.model";
@@ -46,17 +47,31 @@
 			return;
 		}
 		processing = true;
-		const tx = await ArweaveUtils.newPaymentTx(
-			dialogsState.buyDialogContent.id,
-			dialogsState.buyDialogContent.price,
-		);
+		let tx: Transaction;
+		try {
+			tx = await ArweaveUtils.newPaymentTx(
+				data.uploader,
+				walletState.wallet.address,
+				dialogsState.buyDialogContent.id,
+				dialogsState.buyDialogContent.price,
+			);
+		} catch (e) {
+			if ((e as string)?.indexOf("Insufficient") >= 0) {
+				toast.error("Insufficient balance!");
+			} else {
+				toast.error("Transaction failed!");
+			}
+			processing = false;
+			throw "Transaction failed!";
+		}
+
 		let result;
 		try {
-			result = await ArweaveUtils.dispatch(walletState.wallet, tx);
+			result = await ArweaveUtils.submitPayment(walletState.wallet, tx);
 		} catch {
 			toast.error("Transaction failed!");
 			processing = false;
-			throw "ransaction failed!";
+			throw "Transaction failed!";
 		}
 		runDelayed(() => {
 			dialogsState.closeBuyDialog();
