@@ -18,16 +18,16 @@ export enum TxType {
 }
 
 // GATEWAYS
-// export const ARWEAVE_URL = "arweave.net";
-// export const ARWEAVE_PORT = 443;
-// export const ARWEAVE_PROTOCOL = "https";
-// export const BUNDLER_URL = "https://node2.irys.xyz";
+export const ARWEAVE_URL = "arweave.net";
+export const ARWEAVE_PORT = 443;
+export const ARWEAVE_PROTOCOL = "https";
+export const BUNDLER_URL = "https://node2.irys.xyz";
 
 // TEST GATEWAYS
-export const ARWEAVE_URL = "localhost";
-export const ARWEAVE_PORT = 1984;
-export const ARWEAVE_PROTOCOL = "http";
-export const BUNDLER_URL = "https://devnet.irys.xyz";
+// export const ARWEAVE_URL = "localhost";
+// export const ARWEAVE_PORT = 1984;
+// export const ARWEAVE_PROTOCOL = "http";
+// export const BUNDLER_URL = "https://devnet.irys.xyz";
 
 // POSTS
 export const TX_APP_NAME = "VeracyApp";
