@@ -89,11 +89,6 @@
 			</DialogDescription>
 		</DialogHeader>
 		<div class="flex w-full px-5 flex-col gap-2">
-			<div
-				class="flex justify-center items-baseline text-sm rounded-md w-full m-auto border-2 border-yellow-500 bg-yellow-400 bg-opacity-50 p-2"
-			>
-				Test Stage: You won't be charged!
-			</div>
 			{#if dialogsState.buyDialogContent}
 				{#if !data}
 					<div class="flex justify-between items-center">

@@ -129,13 +129,15 @@
 									</Button>
 								</div>
 							{/if}
-							<Button
-								variant="ghost"
-								size="icon"
-								onclick={() => deleteData(i)}
-							>
-								<X />
-							</Button>
+							{#if data.length > 1 || content.type}
+								<Button
+									variant="ghost"
+									size="icon"
+									onclick={() => deleteData(i)}
+								>
+									<X />
+								</Button>
+							{/if}
 						</div>
 						{#if !content.type}
 							<div

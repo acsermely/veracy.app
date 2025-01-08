@@ -1,4 +1,6 @@
 <script lang="ts">
+	// NOT USED FOR NOW
+
 	import { Minus, Plus } from "lucide-svelte";
 	import { Button } from "../ui/button";
 	import { Input } from "../ui/input";

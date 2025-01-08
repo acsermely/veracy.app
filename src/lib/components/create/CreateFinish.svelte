@@ -1,79 +1,32 @@
 <script lang="ts">
 	import { Loader } from "lucide-svelte";
 	import { link } from "svelte-routing";
-	import { toast } from "svelte-sonner";
 	import type { Post } from "../../models/post.model";
+	import { getDialogsState } from "../../state/dialogs.svelte";
 	import { getFeedState } from "../../state/feed.svelte";
-	import { getWalletState } from "../../state/wallet.svelte";
-	import { ArweaveUtils } from "../../utils/arweave.utils";
-	import { runDelayed } from "../../utils/common.utils";
 	import { Button, buttonVariants } from "../ui/button";
-	import {
-		Dialog,
-		DialogContent,
-		DialogFooter,
-		DialogHeader,
-		DialogTitle,
-		DialogTrigger,
-	} from "../ui/dialog";
+	import { Input } from "../ui/input";
 
 	let {
 		data = $bindable(),
 		uploading = $bindable(),
 		uploadMessage = $bindable(),
-		price = $bindable(),
 		needPayment,
 	}: {
 		data?: Post;
 		uploading: boolean;
 		uploadMessage: string;
-		price?: number;
 		needPayment: boolean;
 	} = $props();
 
-	const walletState = getWalletState();
 	const feedState = getFeedState();
+	const dialogState = getDialogsState();
 
 	let alreadyPaid = $state(false);
-	let payDialog = $state(false);
-	let processing = $state(false);
-
-	async function pay(): Promise<void> {
-		if (!data) {
-			toast.error("Post data is not available!");
-			return;
-		}
-		if (!price || price === 0) {
-			toast.error("Missing Price!");
-			return;
-		}
-		if (!walletState.wallet) {
-			toast.error("No Wallet!");
-			return;
-		}
-		processing = true;
-		let result;
-		try {
-			const tx = await ArweaveUtils.newSetPriceTx(
-				walletState.wallet.address,
-				data.id,
-				price,
-			);
-			result = await ArweaveUtils.submitPayment(walletState.wallet, tx);
-		} catch {
-			toast.error("Couldn't set price!");
-			processing = false;
-			throw "couldn't set price!";
-		}
-		runDelayed(() => {
-			payDialog = false;
-			processing = false;
-			alreadyPaid = true;
-		}, 300);
-	}
+	let price = $state<number>();
 </script>
 
-<div class="flex flex-col w-full justify-center items-center h-40">
+<div class="flex flex-col w-full justify-center items-center">
 	{#if uploading}
 		<span class="text-xl m-10">Uploading...</span>
 		<Loader class="size-10 animate-spin" />
@@ -92,62 +45,30 @@
 			<div class="m-5">
 				For activation send the price to the platform:
 			</div>
-
-			<Dialog bind:open={payDialog} openFocus={"#buy-dialog-content"}>
-				<DialogTrigger
-					disabled={!price || price === 0}
-					class={buttonVariants({
-						variant: !price ? "destructive" : "default",
-					})}
-				>
-					{#if price}
-						Send {price} AR
-					{:else}
-						Missing Price
-					{/if}
-				</DialogTrigger>
-				<DialogContent
-					id="buy-dialog-content"
-					class="w-full max-w-[350px]"
-				>
-					<DialogHeader>
-						<DialogTitle>Transaction</DialogTitle>
-					</DialogHeader>
-					<div class="flex w-full px-5 flex-col gap-2">
-						{#if price}
-							<div class="flex justify-between items-center">
-								<small>Price:</small><b>{price} AR</b>
-							</div>
-							<div class="flex justify-between items-center">
-								<small>Recipient:</small><b>PLATFORM_WALLET</b>
-							</div>
-						{:else}
-							<div class="flex justify-center items-center">
-								<b>Missing Price</b>
-							</div>
-						{/if}
-					</div>
-					<DialogFooter>
-						<Button
-							class="m-3"
-							variant="secondary"
-							onclick={() => (payDialog = false)}>Cancel</Button
-						>
-						<Button
-							class="m-3"
-							variant="default"
-							disabled={!price || price === 0}
-							onclick={() => pay()}
-						>
-							{#if processing}
-								<Loader class="animate-spin" />
-							{:else}
-								Pay
-							{/if}
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
+			<Input
+				class="my-5 max-w-40"
+				maxlength={4}
+				bind:value={price}
+				type="number"
+				placeholder="Set Price..."
+			/>
+			<Button
+				disabled={!price || !data?.id || price === 0}
+				class={buttonVariants({
+					variant: !price ? "destructive" : "default",
+				})}
+				onclick={() => {
+					dialogState
+						.openSetPaymentDialog(data!.id, price!)
+						.then((success) => (alreadyPaid = success));
+				}}
+			>
+				{#if price}
+					Send {price} AR
+				{:else}
+					Missing Price
+				{/if}
+			</Button>
 		{/if}
 	{/if}
 </div>

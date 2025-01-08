@@ -38,9 +38,9 @@
 </script>
 
 <div
-	class="flex flex-col w-full items-center m-3 mb-0 overflow-y-auto no-scrollbar no-scrollbar::-webkit-scrollbar"
+	class="flex flex-col w-full items-center overflow-y-auto no-scrollbar no-scrollbar::-webkit-scrollbar"
 >
-	<div class="flex mb-3 w-full max-w-[450px] justify-between items-baseline">
+	<div class="flex p-3 w-full max-w-[450px] justify-between items-baseline">
 		<Button
 			variant="outline"
 			size="icon"
@@ -62,7 +62,7 @@
 			</Button>
 		{/if}
 	</div>
-	<div class="w-full max-w-[450px]">
+	<div class="w-full px-3 max-w-[450px]">
 		<Card class="w-full">
 			<CardHeader class="flex items-center">
 				<Avatar>
@@ -73,7 +73,6 @@
 				class="flex justify-center items-center gap-3 flex-col"
 			>
 				<h1>{walletId.slice(0, 25)}...</h1>
-				<h4>{balance}</h4>
 				{#if !isMe}
 					<Button
 						variant="secondary"
@@ -81,6 +80,8 @@
 							toast.warning("Feature is not available yet!");
 						}}>Follow</Button
 					>
+				{:else}
+					<h4>{balance}</h4>
 				{/if}
 			</CardContent>
 		</Card>

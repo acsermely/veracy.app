@@ -24,9 +24,18 @@ export class WalletState {
 		}
 	}
 
-	register = async (mnemonic?: string, pin?: number[]): Promise<void> => {
+	registerFromMnem = async (mnemonic?: string): Promise<void> => {
 		const newWallet = await Wallet.New(mnemonic);
+		await this.register(newWallet);
+	};
 
+	registerFromJWK = async (key: JsonWebKey): Promise<void> => {
+		const address = await getAddressFromKey(key);
+		const newWallet = new Wallet(key, address);
+		await this.register(newWallet);
+	};
+
+	register = async (newWallet: Wallet): Promise<void> => {
 		try {
 			const address = await getAddressFromKey(newWallet.rawKey);
 			await DB.addWallet(address, newWallet.rawKey);

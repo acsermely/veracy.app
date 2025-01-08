@@ -5,6 +5,7 @@
 	import { getWalletState } from "../../state/wallet.svelte";
 	import BuyPostDialog from "../dialogs/BuyPostDialog.svelte";
 	import ConnectDialog from "../dialogs/ConnectDialog.svelte";
+	import SetPaymentDialog from "../dialogs/SetPaymentDialog.svelte";
 	import { Button } from "../ui/button";
 
 	const walletState = getWalletState();
@@ -62,6 +63,7 @@
 <div class="flex flex-col w-full gap-2">
 	<ConnectDialog />
 	<BuyPostDialog />
+	<SetPaymentDialog />
 	<Button
 		class="hidden md:flex w-full"
 		onclick={toggleMode}

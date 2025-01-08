@@ -19,6 +19,7 @@
 	import CardHeader from "../ui/card/card-header.svelte";
 	import CardTitle from "../ui/card/card-title.svelte";
 	import Card from "../ui/card/card.svelte";
+	import { Input } from "../ui/input";
 	import { Popover, PopoverTrigger } from "../ui/popover";
 	import PopoverContent from "../ui/popover/popover-content.svelte";
 
@@ -33,22 +34,18 @@
 	const dialogState = getDialogsState();
 
 	const shareUrl = $derived(`${location.origin}/post/${txId}`);
+	const isMe = $derived(data.uploader === walletState.wallet?.address);
 	let buyError = $state("");
 	let postActive = $state(false);
 	let postPrice = $state<number>();
+	let newPrice = $state<number>();
 
 	$effect(() => {
 		if (!hasPrivateContent(data.content) || !data.id || isPreview) {
 			postActive = true;
 			return;
 		}
-		getPrice(data.id, data.uploader).then((price) => {
-			if (price === undefined) {
-				return;
-			}
-			postPrice = price;
-			postActive = true;
-		});
+		checkPrice();
 	});
 
 	let dataPromises = $state(
@@ -60,6 +57,16 @@
 				}),
 		),
 	);
+
+	function checkPrice(): void {
+		getPrice(data.id, data.uploader).then((price) => {
+			if (price === undefined) {
+				return;
+			}
+			postPrice = price;
+			postActive = true;
+		});
+	}
 
 	async function getPrice(
 		postId: string,
@@ -112,7 +119,7 @@
 				class="inline-flex bg-gradient-to-bl from-amber-500 via-blue-500 to-teal-500 bg-opacity-50"
 			>
 				<AvatarFallback class="font-extrabold bg-transparent text-white"
-					>{data.uploader.slice(0, 2)}</AvatarFallback
+					>{data.uploader.slice(0, 3)}</AvatarFallback
 				>
 			</Avatar>
 			<CardHeader class="inline-flex p-3 py-0">
@@ -124,10 +131,10 @@
 				>
 			</CardHeader>
 		</a>
-		{#if data.tags?.length || txId}
+		{#if txId}
 			<Popover>
 				<PopoverTrigger class="mr-2"><Ellipsis /></PopoverTrigger>
-				<PopoverContent class="w-fit" side="left">
+				<PopoverContent class="w-fit flex flex-col gap-1" side="left">
 					{#if txId}
 						<Button
 							variant="outline"
@@ -137,13 +144,20 @@
 								toast.success("Link Copied");
 							}}>Share</Button
 						>
-						<br />
-					{/if}
-					{#if data.tags?.length}
-						<small>Tags:</small>
-						{#each data.tags as tag}
-							<br /><small class="m-2">{tag}</small>
-						{/each}
+						{#if isMe}
+							<Button
+								variant="outline"
+								size="sm"
+								onclick={() => {
+									dialogState.openSetPaymentDialog(
+										data!.id,
+										undefined,
+									);
+								}}
+							>
+								asd
+							</Button>
+						{/if}
 					{/if}
 				</PopoverContent>
 			</Popover>
@@ -183,11 +197,43 @@
 								/>
 							</div>
 						{:then src}
-							<img
-								class="h-full object-contain"
-								{src}
-								alt={"image_" + i}
-							/>
+							{#if postActive || content.privacy === "PUBLIC"}
+								<img
+									class="h-full object-contain"
+									{src}
+									alt={"image_" + i}
+								/>
+							{:else if !postActive && isMe}
+								<div
+									class="flex flex-col justify-center items-center"
+								>
+									<span>Activate your Post!</span>
+									<Input
+										class="my-5"
+										maxlength={4}
+										bind:value={newPrice}
+										type="number"
+										placeholder="Set Price..."
+									/>
+									<Button
+										disabled={!newPrice}
+										onclick={() => {
+											dialogState
+												.openSetPaymentDialog(
+													data.id,
+													newPrice!,
+												)
+												.then(() => checkPrice());
+										}}
+									>
+										{#if newPrice}
+											Send {newPrice} AR
+										{:else}
+											Set Price
+										{/if}
+									</Button>
+								</div>
+							{/if}
 						{:catch e}
 							{#if e === "402"}
 								<div
@@ -214,7 +260,7 @@
 											buyPost(content.data, txId)}
 									>
 										<ShoppingCart class="mr-1" />
-										Fake Buy
+										Buy
 									</Button>
 									{#if buyError}
 										<span> {buyError} </span>

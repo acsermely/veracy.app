@@ -9,6 +9,28 @@ export class DialogsState {
 		price: number;
 	}>();
 
+	public setPaymentDialog = $state(false);
+	public setPaymentDialogContent = $state<{
+		id: string;
+		price?: number;
+	}>();
+
+	private _setPaymentResolver!: (success: boolean) => void;
+
+	public openSetPaymentDialog(id: string, price?: number): Promise<boolean> {
+		this.setPaymentDialogContent = { id, price };
+		this.setPaymentDialog = true;
+		return new Promise((resolve) => (this._setPaymentResolver = resolve));
+	}
+
+	public closeSetPaymentDialog(success: boolean): void {
+		this.setPaymentDialogContent = undefined;
+		this.setPaymentDialog = false;
+		if (this._setPaymentResolver) {
+			this._setPaymentResolver(success);
+		}
+	}
+
 	private _buyResolver!: () => void;
 
 	public openBuyDialog(id: string, price: number): Promise<void> {

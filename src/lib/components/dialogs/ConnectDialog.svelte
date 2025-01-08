@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Copy, Loader, Settings, User } from "lucide-svelte";
+	import { Copy, Download, Loader, Settings, User } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
 	import { slide } from "svelte/transition";
 	import { Wallet } from "../../models/wallet.model";
@@ -7,6 +7,7 @@
 	import { getFeedState } from "../../state/feed.svelte";
 	import { getContentNodeState } from "../../state/node.svelte";
 	import { getWalletState } from "../../state/wallet.svelte";
+	import { getAddressFromKey } from "../../utils/wallet.utils";
 	import { buttonVariants } from "../ui/button";
 	import Button from "../ui/button/button.svelte";
 	import { Dialog, DialogTrigger } from "../ui/dialog";
@@ -15,7 +16,6 @@
 	import DialogHeader from "../ui/dialog/dialog-header.svelte";
 	import DialogTitle from "../ui/dialog/dialog-title.svelte";
 	import Input from "../ui/input/input.svelte";
-	import { PinInput } from "../ui/pin-input";
 	import { Textarea } from "../ui/textarea";
 
 	const feedState = getFeedState();
@@ -31,43 +31,67 @@
 	let errorMessage = $state("");
 	let loading = $state(false);
 
-	let pin = $state([NaN, NaN, NaN, NaN]);
-	let pinAgain = $state([NaN, NaN, NaN, NaN]);
-	let generatingWallet = $state(false);
-	let pinOk = $derived(!pin.includes(NaN));
-	let pinAgainOk = $derived(!pinAgain.includes(NaN));
-	let allPinOk = $derived(
-		pinOk &&
-			pinAgainOk &&
-			pin[0] === pinAgain[0] &&
-			pin[1] === pinAgain[1] &&
-			pin[2] === pinAgain[2] &&
-			pin[3] === pinAgain[3],
-	);
-	let pinMismatch = $derived(
-		pinOk &&
-			pinAgainOk &&
-			!(
-				pin[0] === pinAgain[0] &&
-				pin[1] === pinAgain[1] &&
-				pin[2] === pinAgain[2] &&
-				pin[3] === pinAgain[3]
-			),
-	);
+	// let pin = $state([NaN, NaN, NaN, NaN]);
+	// let pinAgain = $state([NaN, NaN, NaN, NaN]);
+	// let pinOk = $derived(!pin.includes(NaN));
+	// let pinAgainOk = $derived(!pinAgain.includes(NaN));
+	// let allPinOk = $derived(
+	// 	pinOk &&
+	// 		pinAgainOk &&
+	// 		pin[0] === pinAgain[0] &&
+	// 		pin[1] === pinAgain[1] &&
+	// 		pin[2] === pinAgain[2] &&
+	// 		pin[3] === pinAgain[3],
+	// );
+	// let pinMismatch = $derived(
+	// 	pinOk &&
+	// 		pinAgainOk &&
+	// 		!(
+	// 			pin[0] === pinAgain[0] &&
+	// 			pin[1] === pinAgain[1] &&
+	// 			pin[2] === pinAgain[2] &&
+	// 			pin[3] === pinAgain[3]
+	// 		),
+	// );
 	let mnemonic = $state("");
 	let importExistingWallet = $state(false);
 
-	async function onRegister(mnomenic?: string) {
+	function triggerKeyfileOpen(): void {
+		document.getElementById("keyfileInput")?.click();
+	}
+
+	function handleKeyfileOpen(event: any) {
+		if (!event.target) {
+			return;
+		}
+		const file = event.target.files[0];
+		const reader = new FileReader();
+		reader.onload = (e: any) => {
+			try {
+				const key = JSON.parse(e.target.result) as JsonWebKey;
+				getAddressFromKey(key).then(() => onRegister(key));
+			} catch {
+				toast.error("Wallet import failed");
+			}
+		};
+		reader.readAsText(file);
+	}
+
+	async function onRegister(key?: string | JsonWebKey) {
 		loading = true;
 		try {
-			await walletState.register(mnomenic || undefined);
+			if (typeof key === "string" || !key) {
+				await walletState.registerFromMnem(key as string | undefined);
+			} else {
+				await walletState.registerFromJWK(key as JsonWebKey);
+			}
 		} catch {
 			errorMessage = "Couldn't create wallet";
 			return;
 		} finally {
 			mnemonic = "";
-			pin = [NaN, NaN, NaN, NaN];
-			pinAgain = [NaN, NaN, NaN, NaN];
+			// pin = [NaN, NaN, NaN, NaN];
+			// pinAgain = [NaN, NaN, NaN, NaN];
 			importExistingWallet = false;
 			loading = false;
 		}
@@ -362,9 +386,38 @@
 						>
 							Wallet: {walletState.wallet!.address.slice(
 								0,
-								20,
+								15,
 							)}...
-							<Copy class="mx-3" />
+							<Button class="ml-2" variant="ghost">
+								<Copy />
+							</Button>
+							<Button
+								variant="ghost"
+								onclick={() => {
+									const a = document.createElement("a");
+									a.href = URL.createObjectURL(
+										new Blob(
+											[
+												JSON.stringify(
+													walletState.wallet!.rawKey,
+												),
+											],
+											{
+												type: "application/json",
+											},
+										),
+									);
+									a.setAttribute(
+										"download",
+										`wallet-${walletState.wallet!.address.slice(0, 3)}.json`,
+									);
+									document.body.appendChild(a);
+									a.click();
+									document.body.removeChild(a);
+								}}
+							>
+								<Download />
+							</Button>
 						</div>
 					{/if}
 
@@ -402,21 +455,45 @@
 				</div>
 			{:else}
 				<div in:slide out:slide class="flex w-full flex-col gap-2">
-					<span>Seedphrase:</span>
 					<Textarea
 						class="resize-none"
 						bind:value={mnemonic}
 						disabled={!importExistingWallet}
+						placeholder="Your Seedphrase..."
 						rows={2}
 					></Textarea>
-					<Button
-						variant="ghost"
-						onclick={() => {
-							navigator.clipboard.writeText(mnemonic);
-							toast.success("Passphrase Copied");
-						}}>Copy Seedphrase</Button
-					>
-					<span>{!pinOk ? "Set Pin" : "Pin Again"}</span>
+					{#if !importExistingWallet}
+						<div class="flex w-full gap-3">
+							<Button
+								class="flex-1"
+								variant="outline"
+								onclick={() => {
+									navigator.clipboard.writeText(mnemonic);
+									toast.success("Passphrase Copied");
+								}}>Copy Seedphrase</Button
+							>
+							<Button
+								class="flex-1"
+								variant="outline"
+								onclick={() => {
+									const a = document.createElement("a");
+									a.href = URL.createObjectURL(
+										new Blob([mnemonic], {
+											type: "text/plain",
+										}),
+									);
+									a.setAttribute(
+										"download",
+										`seedphrase_${mnemonic.slice(0, 3).trim()}.txt`,
+									);
+									document.body.appendChild(a);
+									a.click();
+									document.body.removeChild(a);
+								}}>Download Seedphrase</Button
+							>
+						</div>
+					{/if}
+					<!-- <span>{!pinOk ? "Set Pin" : "Pin Again"}</span>
 					<div class="flex flex-col">
 						{#if !pinOk}
 							<div
@@ -442,9 +519,9 @@
 							pin = [NaN, NaN, NaN, NaN];
 							pinAgain = [NaN, NaN, NaN, NaN];
 						}}>Clear Pin</Button
-					>
+					> -->
 
-					<Button
+					<!-- <Button
 						disabled={!allPinOk || loading || !mnemonic}
 						variant={pinMismatch ? "destructive" : "default"}
 						onclick={() => onRegister(mnemonic)}
@@ -454,7 +531,33 @@
 						{:else}
 							{pinMismatch ? "Pin Mismatch!" : "Generate Wallet"}
 						{/if}
+					</Button> -->
+					<Button
+						disabled={loading || !mnemonic}
+						variant="default"
+						onclick={() => onRegister(mnemonic)}
+					>
+						{#if loading}
+							<Loader class="animate-spin m-2" />
+						{:else}
+							Generate Wallet
+						{/if}
 					</Button>
+					{#if importExistingWallet}
+						<div class="w-full flex justify-center">
+							<p class="p-2 m-2 border-y-2">or</p>
+						</div>
+						<input
+							id="keyfileInput"
+							type="file"
+							accept=".json"
+							class="hidden"
+							onchange={handleKeyfileOpen}
+						/>
+						<Button variant="default" onclick={triggerKeyfileOpen}
+							>Import Keyfile</Button
+						>
+					{/if}
 				</div>
 			{/if}
 		</div>
@@ -465,8 +568,8 @@
 				onclick={() => {
 					if (mnemonic || importExistingWallet) {
 						mnemonic = "";
-						pin = [NaN, NaN, NaN, NaN];
-						pinAgain = [NaN, NaN, NaN, NaN];
+						// pin = [NaN, NaN, NaN, NaN];
+						// pinAgain = [NaN, NaN, NaN, NaN];
 						importExistingWallet = false;
 						return;
 					}
