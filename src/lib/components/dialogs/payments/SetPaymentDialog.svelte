@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { Loader } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
-	import { getDialogsState } from "../../state/dialogs.svelte";
-	import { getWalletState } from "../../state/wallet.svelte";
-	import { ArweaveUtils } from "../../utils/arweave.utils";
-	import { runDelayed } from "../../utils/common.utils";
-	import { Button } from "../ui/button";
+	import { getDialogsState } from "../../../state/dialogs.svelte";
+	import { getWalletState } from "../../../state/wallet.svelte";
+	import { ArweaveUtils } from "../../../utils/arweave.utils";
+	import { runDelayed } from "../../../utils/common.utils";
+	import { Button } from "../../ui/button";
 	import {
 		Dialog,
 		DialogContent,
 		DialogFooter,
 		DialogHeader,
 		DialogTitle,
-	} from "../ui/dialog";
-	import Input from "../ui/input/input.svelte";
+	} from "../../ui/dialog";
+	import Input from "../../ui/input/input.svelte";
 
 	const dialogState = getDialogsState();
 	const walletState = getWalletState();

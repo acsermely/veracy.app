@@ -84,7 +84,7 @@
 				return;
 			}
 		} else if (currentStep == 1) {
-			if (!nodeState.isConnected || !walletState.isConnected) {
+			if (!nodeState.isConnected || !walletState.hasWallet) {
 				toast.error("Login with your Wallet");
 				return;
 			}
@@ -110,7 +110,7 @@
 <div
 	class="flex-1 flex flex-col items-center w-full max-h-full overflow-y-auto no-scrollbar no-scrollbar::-webkit-scrollbar"
 >
-	{#if !walletState.isConnected && currentStep == 1}
+	{#if !walletState.hasWallet && currentStep == 1}
 		<Button
 			class="max-w-[450px] w-full m-5 mb-0"
 			variant="destructive"

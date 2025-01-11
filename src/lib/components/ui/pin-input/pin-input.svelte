@@ -25,7 +25,6 @@
 
 	$effect(() => {
 		if (show) {
-			console.log("focus");
 			inputRefs[0]?.focus();
 		}
 	});

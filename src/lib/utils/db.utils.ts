@@ -67,6 +67,27 @@ export class DB {
 		});
 	}
 
+	static async getAllWallet(): Promise<any[]> {
+		return new Promise((resolve, reject) => {
+			this.getDb()
+				.then((db) => {
+					const walletStore = db
+						.transaction([DB_STORE_WALLET], "readonly")
+						.objectStore(DB_STORE_WALLET);
+					const req = walletStore.getAllKeys();
+					req.onerror = function () {
+						reject("Get All Failed");
+					};
+					req.onsuccess = function (event: any) {
+						resolve(event.target.result as IDBValidKey[]);
+					};
+				})
+				.catch(() => {
+					reject("Get Failed");
+				});
+		});
+	}
+
 	static async removeWallet(address: string): Promise<void> {
 		return new Promise((resolve, reject) => {
 			this.getDb()

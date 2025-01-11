@@ -207,7 +207,6 @@ export class ArweaveUtils {
 
 		try {
 			const result = await this.arweave.transactions.post(tx);
-			console.log(result);
 			return result;
 		} catch (e) {
 			console.error(e);

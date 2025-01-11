@@ -13,3 +13,19 @@ export function hasPrivateContent(data: Partial<PostContent>[]): boolean {
 	}).length;
 }
 
+export function downloadFile(
+	name: string,
+	content: any,
+	type: "text/plain" | "application/json",
+): void {
+	const a = document.createElement("a");
+	a.href = URL.createObjectURL(
+		new Blob([content], {
+			type,
+		}),
+	);
+	a.setAttribute("download", name);
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+}

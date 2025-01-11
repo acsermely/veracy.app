@@ -3,9 +3,9 @@
 	import { toggleMode } from "mode-watcher";
 	import { link } from "svelte-routing";
 	import { getWalletState } from "../../state/wallet.svelte";
-	import BuyPostDialog from "../dialogs/BuyPostDialog.svelte";
-	import ConnectDialog from "../dialogs/ConnectDialog.svelte";
-	import SetPaymentDialog from "../dialogs/SetPaymentDialog.svelte";
+	import AccountDialog from "../dialogs/account/AccountDialog.svelte";
+	import BuyPostDialog from "../dialogs/payments/BuyPostDialog.svelte";
+	import SetPaymentDialog from "../dialogs/payments/SetPaymentDialog.svelte";
 	import { Button } from "../ui/button";
 
 	const walletState = getWalletState();
@@ -61,7 +61,7 @@
 	</a>
 </div>
 <div class="flex flex-col w-full gap-2">
-	<ConnectDialog />
+	<AccountDialog />
 	<BuyPostDialog />
 	<SetPaymentDialog />
 	<Button

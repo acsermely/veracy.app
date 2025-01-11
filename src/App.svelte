@@ -5,9 +5,9 @@
 	import { Toaster } from "./lib/components/ui/sonner";
 	import { setDialogsState } from "./lib/state/dialogs.svelte";
 	import { setFeedState } from "./lib/state/feed.svelte";
-	import { setWalletState } from "./lib/state/wallet.svelte";
 	import { setContentNodeState } from "./lib/state/node.svelte";
 	import { setSearchState } from "./lib/state/search.svelte";
+	import { setWalletState } from "./lib/state/wallet.svelte";
 	import Create from "./routes/Create.svelte";
 	import Feed from "./routes/Feed.svelte";
 	import Profile from "./routes/Profile.svelte";
@@ -32,12 +32,6 @@
 	function beforeInstall(event: any): void {
 		installPromt = event;
 	}
-
-	// function install(): void {
-	// 	installPromt.prompt().then((result: any) => {
-	// 		console.log(result);
-	// 	});
-	// }
 </script>
 
 <ModeWatcher />

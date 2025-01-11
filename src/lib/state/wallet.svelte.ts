@@ -9,7 +9,8 @@ const WALLET_STATE_KEY = "wallet-state-key";
 export class WalletState {
 	wallet = $state<Wallet>();
 
-	isConnected = $derived(this.wallet !== undefined);
+	hasWallet = $derived(this.wallet !== undefined);
+	// TODO: delete
 	hasKeys = $state<boolean>(false);
 
 	constructor() {
@@ -17,25 +18,25 @@ export class WalletState {
 		if (address) {
 			this.hasKeys = true;
 			try {
-				this.connect();
+				this.useWallet(address);
 			} catch {
-				console.log("Couldn't auto-connect");
+				console.error("Couldn't auto-connect");
 			}
 		}
 	}
 
 	registerFromMnem = async (mnemonic?: string): Promise<void> => {
 		const newWallet = await Wallet.New(mnemonic);
-		await this.register(newWallet);
+		await this.addWallet(newWallet);
 	};
 
 	registerFromJWK = async (key: JsonWebKey): Promise<void> => {
 		const address = await getAddressFromKey(key);
 		const newWallet = new Wallet(key, address);
-		await this.register(newWallet);
+		await this.addWallet(newWallet);
 	};
 
-	register = async (newWallet: Wallet): Promise<void> => {
+	addWallet = async (newWallet: Wallet): Promise<void> => {
 		try {
 			const address = await getAddressFromKey(newWallet.rawKey);
 			await DB.addWallet(address, newWallet.rawKey);
@@ -48,13 +49,19 @@ export class WalletState {
 		this.hasKeys = true;
 	};
 
-	connect = async (): Promise<void> => {
-		const addr = localStorage.getItem(WALLET_LOCAL_ADDRESS);
+	useWallet = async (addr?: string): Promise<void> => {
+		if (!addr) {
+			addr = localStorage.getItem(WALLET_LOCAL_ADDRESS) || undefined;
+		}
 		if (addr) {
+			if (this.wallet) {
+				this.wallet = undefined;
+			}
 			try {
 				const rawKey = await DB.getWallet(addr);
 				const address = await getAddressFromKey(rawKey);
 				this.wallet = new Wallet(rawKey, address);
+				localStorage.setItem(WALLET_LOCAL_ADDRESS, address);
 				return;
 			} catch (e) {
 				console.error(e);

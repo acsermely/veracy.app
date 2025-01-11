@@ -9,7 +9,7 @@ export class ContentNode {
 		const queryParams = new URLSearchParams(window.location.search);
 		const urlHost = queryParams.get("host");
 		this.url =
-			urlHost || localStorage.getItem(STORAGE_NODE_URL) || this.url;
+			localStorage.getItem(STORAGE_NODE_URL) || urlHost || this.url;
 	}
 
 	loginCheck = async (): Promise<Response> => {
@@ -41,6 +41,7 @@ export class ContentNode {
 		publicJWK: JsonWebKey,
 		url?: string,
 	): Promise<Response> => {
+		this.isConnected = false;
 		const response = await fetch(`${url || this.url}/registerKey`, {
 			method: "POST",
 			body: JSON.stringify({
@@ -56,7 +57,6 @@ export class ContentNode {
 		challange: string,
 		url?: string,
 	): Promise<Response> => {
-		this.isConnected = false;
 		if (url) {
 			this.url = url;
 		}
@@ -71,16 +71,23 @@ export class ContentNode {
 		if (response.ok) {
 			localStorage.setItem(STORAGE_NODE_URL, this.url);
 			this.isConnected = true;
+			return response;
 		}
-		return response;
+		throw response.status;
 	};
 
 	getKeyChallange = async (
 		walletId: string,
 		url?: string,
 	): Promise<Response> => {
+		this.isConnected = false;
 		let getUrl = `${url || this.url}/challange?walletId=${walletId}`;
-		return fetch(getUrl);
+		return fetch(getUrl).then((response) => {
+			if (response.ok) {
+				return response;
+			}
+			throw response.status;
+		});
 	};
 
 	getImage = async (id: string, tx: string): Promise<string> => {
