@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { Home, Moon, PlusCircle, Search, Sun, User } from "lucide-svelte";
-	import { toggleMode } from "mode-watcher";
+	import { Home, PlusCircle, Search, User } from "lucide-svelte";
 	import { link } from "svelte-routing";
+	import { getFeedState } from "../../state";
 	import { getWalletState } from "../../state/wallet.svelte";
 	import AccountDialog from "../dialogs/account/AccountDialog.svelte";
 	import BuyPostDialog from "../dialogs/payments/BuyPostDialog.svelte";
 	import SetPaymentDialog from "../dialogs/payments/SetPaymentDialog.svelte";
-	import { Button } from "../ui/button";
 
 	const walletState = getWalletState();
+	const feedState = getFeedState();
 </script>
 
 <div
@@ -36,6 +36,7 @@
 			elem?.scrollIntoView({
 				behavior: "smooth",
 			});
+			feedState.queryData();
 		}}
 	>
 		<Home size="28" />
@@ -64,14 +65,4 @@
 	<AccountDialog />
 	<BuyPostDialog />
 	<SetPaymentDialog />
-	<Button
-		class="hidden md:flex w-full"
-		onclick={toggleMode}
-		variant="ghost"
-		size="icon"
-	>
-		<Sun class="block dark:hidden" />
-		<Moon class="hidden dark:block" />
-		<span class="sr-only">Theme</span>
-	</Button>
 </div>

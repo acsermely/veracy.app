@@ -1,16 +1,31 @@
 <script lang="ts">
-	import type { Snippet } from "svelte";
+	import { onMount, type Snippet } from "svelte";
 	import { fade } from "svelte/transition";
 
-	const {
+	let {
 		onRefresh,
+		scrollPosition = $bindable(),
 		resistance = 0.1,
 		children,
 	}: {
 		onRefresh: () => void;
+		scrollPosition?: number;
 		resistance?: number;
 		children: Snippet;
 	} = $props();
+
+	onMount(() => {
+		setTimeout(() => {
+			if (scrollPosition) {
+				const ref = document.getElementById("scroll-element");
+				ref?.scrollTo({
+					left: 0,
+					top: scrollPosition,
+					behavior: "smooth",
+				});
+			}
+		}, 500);
+	});
 
 	let startY = $state(0);
 	let currentY = $state(0);
@@ -77,14 +92,18 @@
 		</div>
 	{/if}
 	<div
-		transition:fade
+		transition:fade={{ duration: 1000, delay: 300 }}
 		id="scroll-element"
-		class="overflow-x-hidden overflow-y-auto no-scrollbar no-scrollbar::-webkit-scrollbar flex-1 flex flex-col items-center w-full transition-transform ease-linear"
+		class="overflow-x-hidden overflow-y-auto sm:max-md:no-scrollbar sm:max-md:no-scrollbar::-webkit-scrollbar flex-1 flex flex-col items-center w-full transition-transform ease-linear"
 		style="transform: translateY({translateY}px);"
 		onscroll={(event: UIEvent) => {
 			const target = event.target;
 			if (target) {
-				atTop = (target as HTMLElement).scrollTop < 5;
+				const currentScroll = (target as HTMLElement).scrollTop;
+				atTop = currentScroll < 5;
+				if (scrollPosition !== undefined) {
+					scrollPosition = currentScroll;
+				}
 			}
 		}}
 	>

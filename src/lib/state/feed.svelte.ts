@@ -6,8 +6,11 @@ export class FeedState {
 
 	public cursor = $state<string>();
 
+	public scrollPosition = $state(0);
+
 	queryData = async (): Promise<void> => {
 		this.postIds = [];
+		this.scrollPosition = 0;
 		this.postIds = await ArweaveUtils.getPostsIds();
 		this.cursor = this.postIds[this.postIds.length - 1]?.cursor;
 	};

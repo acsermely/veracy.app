@@ -28,7 +28,7 @@
 		Wallet.newMnemonic().then((newMnemonic) => {
 			mnemonic = newMnemonic;
 		});
-		DB.getAllWallet().then((list) => {
+		DB.getAllWalletKey().then((list) => {
 			savedWallets = list.length;
 		});
 	});
@@ -242,7 +242,7 @@
 					quickRegister = true;
 				}}>+</Button
 			>
-			{#await DB.getAllWallet()}
+			{#await DB.getAllWalletKey()}
 				<div>loading wallets</div>
 			{:then walletList}
 				{#each walletList as wallet}

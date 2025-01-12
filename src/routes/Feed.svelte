@@ -37,18 +37,19 @@
 	onRefresh={() => {
 		feedState.queryData();
 	}}
+	bind:scrollPosition={feedState.scrollPosition}
 >
 	<div id="top" class="w-0 h-0"></div>
 	{#if postIds.length}
 		{#each postIds as id}
 			{#await fetchData(id)}
-				<Card class="max-w-[450px] w-full m-5">
+				<Card class="max-w-[450px] w-full m-5 border-none">
 					<CardHeader class="flex flex-row pb-3">
 						<Skeleton class="w-40 h-12"></Skeleton>
 					</CardHeader>
-					<CardContent>
-						<Skeleton class="w-full h-60"></Skeleton>
-						<Skeleton class="w-40 h-6 mt-3"></Skeleton>
+					<CardContent class="flex flex-col items-center">
+						<Skeleton class="w-full h-60 mb-5"></Skeleton>
+						<Skeleton class="w-40 h-6 my-3"></Skeleton>
 					</CardContent>
 				</Card>
 			{:then data}

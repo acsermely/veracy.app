@@ -1,10 +1,17 @@
 const DB_NAME = "VeracyDB";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const DB_STORE_WALLET = "wallet-store";
+const DB_STORE_WATCHER = "watcher-store";
+// const DB_STORE_PAYMENT = "payment-store";
 
 export type DbWalletEntry = {
 	address: string;
 	key: JsonWebKey;
+};
+
+export type DbWatcherEntry = {
+	id: string;
+	data?: any;
 };
 
 export class DB {
@@ -22,17 +29,14 @@ export class DB {
 		return this.db;
 	}
 
-	static async addWallet(address: string, key: JsonWebKey): Promise<void> {
+	private static add(store: string, data: any): Promise<void> {
 		return new Promise((resolve, reject) => {
 			this.getDb()
 				.then((db) => {
 					const walletStore = db
-						.transaction([DB_STORE_WALLET], "readwrite")
-						.objectStore(DB_STORE_WALLET);
-					const req = walletStore.add({
-						address,
-						key,
-					} as DbWalletEntry);
+						.transaction([store], "readwrite")
+						.objectStore(store);
+					const req = walletStore.add(data);
 					req.onerror = function () {
 						reject("Add Failed");
 					};
@@ -46,19 +50,19 @@ export class DB {
 		});
 	}
 
-	static async getWallet(address: string): Promise<JsonWebKey> {
+	private static get<T>(store: string, id: string): Promise<T> {
 		return new Promise((resolve, reject) => {
 			this.getDb()
 				.then((db) => {
 					const walletStore = db
-						.transaction([DB_STORE_WALLET], "readonly")
-						.objectStore(DB_STORE_WALLET);
-					const req = walletStore.get(address);
+						.transaction([store], "readonly")
+						.objectStore(store);
+					const req = walletStore.get(id);
 					req.onerror = function () {
 						reject("Get Failed");
 					};
 					req.onsuccess = function (event: any) {
-						resolve((event.target.result as DbWalletEntry).key);
+						resolve(event.target.result as T);
 					};
 				})
 				.catch(() => {
@@ -67,19 +71,19 @@ export class DB {
 		});
 	}
 
-	static async getAllWallet(): Promise<any[]> {
+	private static getAllKey(store: string): Promise<string[]> {
 		return new Promise((resolve, reject) => {
 			this.getDb()
 				.then((db) => {
 					const walletStore = db
-						.transaction([DB_STORE_WALLET], "readonly")
-						.objectStore(DB_STORE_WALLET);
+						.transaction([store], "readonly")
+						.objectStore(store);
 					const req = walletStore.getAllKeys();
 					req.onerror = function () {
 						reject("Get All Failed");
 					};
 					req.onsuccess = function (event: any) {
-						resolve(event.target.result as IDBValidKey[]);
+						resolve(event.target.result as string[]);
 					};
 				})
 				.catch(() => {
@@ -88,14 +92,14 @@ export class DB {
 		});
 	}
 
-	static async removeWallet(address: string): Promise<void> {
+	private static remove(store: string, id: string): Promise<void> {
 		return new Promise((resolve, reject) => {
 			this.getDb()
 				.then((db) => {
 					const walletStore = db
-						.transaction([DB_STORE_WALLET], "readonly")
-						.objectStore(DB_STORE_WALLET);
-					const req = walletStore.delete(address);
+						.transaction([store], "readwrite")
+						.objectStore(store);
+					const req = walletStore.delete(id);
 					req.onerror = function () {
 						reject("Delete Failed");
 					};
@@ -103,10 +107,55 @@ export class DB {
 						resolve();
 					};
 				})
-				.catch(() => {
+				.catch((e) => {
+					console.error(e);
 					reject("Delete Failed");
 				});
 		});
+	}
+
+	// Wallet
+	static async addWallet(address: string, key: JsonWebKey): Promise<void> {
+		return this.add(DB_STORE_WALLET, {
+			address,
+			key,
+		});
+	}
+
+	static async getWallet(address: string): Promise<JsonWebKey> {
+		return this.get<DbWalletEntry>(DB_STORE_WALLET, address).then(
+			(data) => data.key,
+		);
+	}
+
+	static async getAllWalletKey(): Promise<string[]> {
+		return this.getAllKey(DB_STORE_WALLET);
+	}
+
+	static async removeWallet(address: string): Promise<void> {
+		return this.remove(DB_STORE_WALLET, address);
+	}
+
+	//Watcher
+	static async addWatcher(id: string, data?: any): Promise<void> {
+		return this.add(DB_STORE_WATCHER, {
+			id,
+			data,
+		});
+	}
+
+	static async getWatcher(id: string): Promise<string> {
+		return this.get<DbWatcherEntry>(DB_STORE_WATCHER, id).then(
+			(data) => data?.id,
+		);
+	}
+
+	static async getAllWatcher(): Promise<string[]> {
+		return this.getAllKey(DB_STORE_WATCHER);
+	}
+
+	static async removeWatcher(id: string): Promise<void> {
+		return this.remove(DB_STORE_WATCHER, id);
 	}
 }
 
@@ -118,6 +167,10 @@ async function initializeDB(): Promise<IDBDatabase> {
 			const db = request.result;
 			db.createObjectStore(DB_STORE_WALLET, {
 				keyPath: "address",
+			});
+
+			db.createObjectStore(DB_STORE_WATCHER, {
+				keyPath: "id",
 			});
 		};
 

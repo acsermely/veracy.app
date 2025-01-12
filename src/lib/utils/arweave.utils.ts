@@ -175,6 +175,21 @@ export class ArweaveUtils {
 			);
 	}
 
+	static async getPaymentForPost(
+		tx: string,
+		uploader: string,
+	): Promise<string[]> {
+		return ArweaveUtils.arweave.api
+			.post<ArQueryResult<ArQueryIds>>(
+				"/graphql",
+				queryPaymentForTxAndSender(tx, uploader),
+			)
+			.then((response) => response.data)
+			.then((data) =>
+				data.data.transactions.edges.map((item) => item.node.id),
+			);
+	}
+
 	static async getAllUserAddresses(): Promise<Set<string>> {
 		return ArweaveUtils.query<ArQueryResult<ArQueryAddresses>>(
 			queryAllUserAddresses(),
@@ -313,7 +328,6 @@ export function queryPaymentForTxAndSender(
 		query: `{
 			transactions(
 				owners: ["${sender}"],
-				timestamp: {from: 1728246095432, to: ${new Date().getTime()}},
 				tags: [
 					{ name: "App-Name", values: ["${TX_APP_NAME}"]},
 					{ name: "Version", values: ["${TX_APP_VERSION}"]},

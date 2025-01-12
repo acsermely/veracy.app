@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Ellipsis, Loader, ShoppingCart } from "lucide-svelte";
+	import { Ellipsis, Loader, RefreshCcw, ShoppingCart } from "lucide-svelte";
 	import { link } from "svelte-routing";
 	import { toast } from "svelte-sonner";
 	import { SvelteMap } from "svelte/reactivity";
@@ -8,8 +8,10 @@
 	import { getDialogsState } from "../../state/dialogs.svelte";
 	import { getContentNodeState } from "../../state/node.svelte";
 	import { getWalletState } from "../../state/wallet.svelte";
+	import { getWatcherState } from "../../state/watcher.svelte";
 	import { ArweaveUtils } from "../../utils/arweave.utils";
 	import { hasPrivateContent } from "../../utils/common.utils";
+	import { DB } from "../../utils/db.utils";
 	import AvatarFallback from "../ui/avatar/avatar-fallback.svelte";
 	import Avatar from "../ui/avatar/avatar.svelte";
 	import Button from "../ui/button/button.svelte";
@@ -32,6 +34,7 @@
 	const nodeState = getContentNodeState();
 	const walletState = getWalletState();
 	const dialogState = getDialogsState();
+	const watcherState = getWatcherState();
 
 	const shareUrl = $derived(`${location.origin}/post/${txId}`);
 	const isMe = $derived(data.uploader === walletState.wallet?.address);
@@ -39,6 +42,7 @@
 	let postActive = $state(false);
 	let postPrice = $state<number>();
 	let newPrice = $state<number>();
+	let isWatcherActive = $state(true);
 
 	$effect(() => {
 		if (!hasPrivateContent(data.content) || !data.id || isPreview) {
@@ -46,6 +50,7 @@
 			return;
 		}
 		checkPrice();
+		refreshWatcher();
 	});
 
 	let dataPromises = $state(
@@ -87,6 +92,7 @@
 			return Promise.resolve("");
 		}
 		return nodeState.getImage(id, txId);
+		// return Promise.reject("402");
 	}
 
 	async function buyPost(id: string, txId?: string): Promise<void> {
@@ -103,7 +109,22 @@
 			return;
 		}
 		await dialogState.openBuyDialog(txId, postPrice);
+		watcherState.add(txId).then(() => {
+			refreshWatcher();
+		});
 		dataPromises.set(id, getImagePromise(id));
+		refreshWatcher();
+	}
+
+	async function refreshWatcher(): Promise<boolean> {
+		if (!txId) {
+			isWatcherActive = false;
+			return false;
+		}
+		return DB.getWatcher(txId).then((item) => {
+			isWatcherActive = !!item;
+			return !!item;
+		});
 	}
 </script>
 
@@ -172,7 +193,7 @@
 			{#each data.content as content, i}
 				<div
 					id={data.id + "_" + i}
-					class="min-w-full box-content snap-start inline-flex justify-center min-h-[30dvh]"
+					class="min-w-full box-content snap-start inline-flex justify-center min-h-[40dvh]"
 				>
 					{#if content.type === "TEXT"}
 						<pre
@@ -239,31 +260,44 @@
 								<div
 									class="flex flex-col justify-center items-center"
 								>
-									{#if postActive}
-										<span class="mb-2 font-bold"
-											>Private Content</span
+									{#if isWatcherActive}
+										<span>Processing Payment!</span>
+										<small>
+											You will be notified when it's done!
+										</small>
+										<Button
+											class="my-5"
+											onclick={() => refreshWatcher()}
 										>
-										<span>
-											<small class="text-primary"
-												>Price:
-												{postPrice} AR
-											</small>
-										</span>
+											<RefreshCcw class="mr-1" />
+										</Button>
 									{:else}
-										<span>Can't buy Content!</span>
-										<small>Error: Not activated yet.</small>
-									{/if}
-									<Button
-										class="my-5"
-										disabled={!postActive}
-										onclick={() =>
-											buyPost(content.data, txId)}
-									>
-										<ShoppingCart class="mr-1" />
-										Buy
-									</Button>
-									{#if buyError}
-										<span> {buyError} </span>
+										{#if postActive}
+											<span class="mb-2 font-bold"
+												>Private Content</span
+											>
+											<span>
+												<small class="text-primary"
+													>Price:
+													{postPrice} AR
+												</small>
+											</span>
+										{:else}
+											<span>Can't buy Content!</span>
+											<small>Not active yet.</small>
+										{/if}
+										<Button
+											class="my-5"
+											disabled={!postActive}
+											onclick={() =>
+												buyPost(content.data, txId!)}
+										>
+											<ShoppingCart class="mr-1" />
+											Buy
+										</Button>
+										{#if buyError}
+											<span> {buyError} </span>
+										{/if}
 									{/if}
 								</div>
 							{:else}

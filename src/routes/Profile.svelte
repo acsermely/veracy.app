@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronLeft, Settings } from "lucide-svelte";
+	import { ChevronLeft, Copy, RefreshCcw, Settings } from "lucide-svelte";
 	import { navigate } from "svelte-routing";
 	import { toast } from "svelte-sonner";
 	import FeedPost from "../lib/components/feed/FeedPost.svelte";
@@ -65,14 +65,27 @@
 	<div class="w-full px-3 max-w-[450px]">
 		<Card class="w-full">
 			<CardHeader class="flex items-center">
-				<Avatar>
-					<AvatarFallback>{walletId.slice(0, 2)}</AvatarFallback>
+				<Avatar
+					class="inline-flex bg-gradient-to-bl from-amber-500 via-blue-500 to-teal-500 bg-opacity-50"
+				>
+					<AvatarFallback
+						class="font-extrabold bg-transparent text-white"
+						>{walletId.slice(0, 3)}</AvatarFallback
+					>
 				</Avatar>
 			</CardHeader>
 			<CardContent
 				class="flex justify-center items-center gap-3 flex-col"
 			>
-				<h1>{walletId.slice(0, 25)}...</h1>
+				<a
+					class="flex items-center cursor-copy"
+					role="button"
+					aria-label="Wallet ID"
+					onclick={() => {
+						navigator.clipboard.writeText(walletId);
+						toast.success("Wallet address Copied");
+					}}>{walletId.slice(0, 20)}... <Copy class="h-4" /></a
+				>
 				{#if !isMe}
 					<Button
 						variant="secondary"
@@ -81,7 +94,14 @@
 						}}>Follow</Button
 					>
 				{:else}
-					<h4>{balance}</h4>
+					<div class=" flex border-2 rounded-full py-1 px-4 text-sm">
+						Balance:
+						{#if balance === undefined}
+							<RefreshCcw class="animate-spin h-5 ml-3" />
+						{:else}
+							{Number.parseFloat(balance!).toFixed(4)} AR
+						{/if}
+					</div>
 				{/if}
 			</CardContent>
 		</Card>

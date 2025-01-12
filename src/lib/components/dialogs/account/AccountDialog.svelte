@@ -1,12 +1,5 @@
 <script lang="ts">
-	import {
-		ChevronLeft,
-		Copy,
-		Moon,
-		Settings,
-		Settings2,
-		Sun,
-	} from "lucide-svelte";
+	import { ChevronLeft, Copy, Moon, Settings, Sun } from "lucide-svelte";
 	import { toggleMode } from "mode-watcher";
 	import { toast } from "svelte-sonner";
 	import {
@@ -56,7 +49,7 @@
 	<DialogTrigger
 		class={buttonVariants({ variant: "ghost" }) + " gap-4 hidden md:flex"}
 	>
-		<Settings2 />
+		<Settings />
 	</DialogTrigger>
 	<DialogContent
 		id="connect-dialog-content"

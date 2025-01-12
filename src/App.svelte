@@ -13,12 +13,14 @@
 	import Profile from "./routes/Profile.svelte";
 	import Search from "./routes/Search.svelte";
 	import SinglePost from "./routes/SinglePost.svelte";
+	import { setWatcherState } from "./lib/state/watcher.svelte";
 
 	const feedState = setFeedState();
 	setWalletState();
 	setSearchState();
 	const dialogState = setDialogsState();
 	const nodeState = setContentNodeState();
+	setWatcherState();
 
 	let url = $state("");
 	let installPromt = $state<any>();
