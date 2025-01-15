@@ -67,4 +67,4 @@
 		</Router>
 	</div>
 </div>
-<Toaster richColors expand={true} position="top-center" duration={1000} />
+<Toaster richColors expand={true} position="top-center" duration={2000} />

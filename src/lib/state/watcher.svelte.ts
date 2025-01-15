@@ -11,7 +11,7 @@ export class Watcher {
 	private _interval?: number;
 	private _walletState = getWalletState();
 	private _promiseMap = new Map<string, () => void>();
-	
+
 	constructor() {
 		DB.getAllWatcher().then((list) => {
 			if (list.length > 0) {
@@ -50,6 +50,7 @@ export class Watcher {
 			this._promiseMap.delete(id);
 		}
 		toast.success("Payment Completed. Go to the Post!", {
+			duration: 4000,
 			action: {
 				label: "Go",
 				onClick: () => navigate("/post/" + id),
