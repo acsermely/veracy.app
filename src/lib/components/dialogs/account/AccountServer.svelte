@@ -3,6 +3,7 @@
 	import type { Wallet } from "../../../models/wallet.model";
 	import {
 		getContentNodeState,
+		getDialogsState,
 		getFeedState,
 		getWalletState,
 	} from "../../../state";
@@ -14,6 +15,7 @@
 	const walletState = getWalletState();
 	const nodeState = getContentNodeState();
 	const feedState = getFeedState();
+	const dialogsState = getDialogsState();
 
 	$effect(() => {
 		url = nodeState.url;
@@ -23,9 +25,15 @@
 		if (!loading && walletState.wallet && !nodeState.isConnected) {
 			if (quickRegister) {
 				quickRegister = false;
-				onRegister(url);
+				onRegister(url).then(() => {
+					if (nodeState.isConnected)
+						dialogsState.connectDialog = false;
+				});
 			} else if (!regNeeded) {
-				onLogin(walletState.wallet);
+				onLogin(walletState.wallet).then(() => {
+					if (nodeState.isConnected)
+						dialogsState.connectDialog = false;
+				});
 			}
 		}
 	});
@@ -34,16 +42,21 @@
 	let regNeeded = $state(false);
 	let loading = false;
 
-	function onLogin(wallet: Wallet): void {
+	async function onLogin(wallet: Wallet): Promise<void> {
+		if (!wallet) {
+			throw "No Wallet";
+		}
 		loading = true;
-		nodeState
+		return nodeState
 			.getKeyChallange(wallet.address, url)
 			.then((response) => response.arrayBuffer())
 			.then((encryptedChal) => wallet.decrypt(encryptedChal))
 			.then((challange) =>
 				nodeState.loginKeyChallange(wallet.address, challange, url),
 			)
-			.then(() => toast.success("Logged In"))
+			.then(() => {
+				toast.success("Logged In");
+			})
 			.catch(() => {
 				regNeeded = true;
 				toast.error("Couldn't login! Try Register!");
@@ -55,39 +68,38 @@
 	}
 
 	async function onRegister(url: string): Promise<void> {
-		if (walletState.wallet) {
-			loading = true;
-			nodeState
-				.registerKey(
-					walletState.wallet.address,
-					await walletState.getPublicKey(),
-					url,
-				)
-				.then((response) => response.arrayBuffer())
-				.then((encryptedChal) =>
-					walletState.wallet!.decrypt(encryptedChal),
-				)
-				.then((challange) =>
-					nodeState.loginKeyChallange(
-						walletState.wallet!.address,
-						challange,
-						url,
-					),
-				)
-				.then(() => {
-					regNeeded = false;
-					toast.success("Registered");
-				})
-				.catch(() => {
-					toast.error("Couldn't register! Try Login!");
-					regNeeded = false;
-					throw "couldn't register";
-				})
-				.finally(() => {
-					loading = false;
-					feedState.queryData();
-				});
+		if (!walletState.wallet) {
+			throw "No Wallet";
 		}
+		loading = true;
+		return nodeState
+			.registerKey(
+				walletState.wallet.address,
+				await walletState.getPublicKey(),
+				url,
+			)
+			.then((response) => response.arrayBuffer())
+			.then((encryptedChal) => walletState.wallet!.decrypt(encryptedChal))
+			.then((challange) =>
+				nodeState.loginKeyChallange(
+					walletState.wallet!.address,
+					challange,
+					url,
+				),
+			)
+			.then(() => {
+				regNeeded = false;
+				toast.success("Registered");
+			})
+			.catch(() => {
+				toast.error("Couldn't register! Try Login!");
+				regNeeded = false;
+				throw "couldn't register";
+			})
+			.finally(() => {
+				loading = false;
+				feedState.queryData();
+			});
 	}
 </script>
 

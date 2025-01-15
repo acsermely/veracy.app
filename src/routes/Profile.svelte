@@ -77,14 +77,13 @@
 			<CardContent
 				class="flex justify-center items-center gap-3 flex-col"
 			>
-				<a
-					class="flex items-center cursor-copy"
-					role="button"
-					aria-label="Wallet ID"
+				<Button
+					variant="link"
+					class="flex items-center cursor-pointer"
 					onclick={() => {
 						navigator.clipboard.writeText(walletId);
-						toast.success("Wallet address Copied");
-					}}>{walletId.slice(0, 20)}... <Copy class="h-4" /></a
+						toast.success("Address Copied");
+					}}>{walletId.slice(0, 20)}... <Copy class="h-4" /></Button
 				>
 				{#if !isMe}
 					<Button

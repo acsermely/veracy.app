@@ -8,12 +8,12 @@
 	import { setContentNodeState } from "./lib/state/node.svelte";
 	import { setSearchState } from "./lib/state/search.svelte";
 	import { setWalletState } from "./lib/state/wallet.svelte";
+	import { setWatcherState } from "./lib/state/watcher.svelte";
 	import Create from "./routes/Create.svelte";
 	import Feed from "./routes/Feed.svelte";
 	import Profile from "./routes/Profile.svelte";
 	import Search from "./routes/Search.svelte";
 	import SinglePost from "./routes/SinglePost.svelte";
-	import { setWatcherState } from "./lib/state/watcher.svelte";
 
 	const feedState = setFeedState();
 	setWalletState();
@@ -67,4 +67,4 @@
 		</Router>
 	</div>
 </div>
-<Toaster richColors expand={true} position="top-center" />
+<Toaster richColors expand={true} position="top-center" duration={1000} />

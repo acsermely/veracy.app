@@ -307,10 +307,10 @@
 									{#if nodeState.isConnected}
 										<span class="text-destructive">{e}</span
 										>
-										Please feel free to contact us!
+										<!-- Please feel free to contact us!
 										<small class="text-secondary"
 											>(somehow)</small
-										>
+										> -->
 									{:else}
 										Login to see images!
 										<Button

@@ -25,7 +25,6 @@
 	$effect(() => {
 		if (!walletState.wallet) {
 			currentView = "Wallets";
-			quickRegister = true;
 		} else if (!nodeState.isConnected) {
 			currentView = "Server";
 		} else {

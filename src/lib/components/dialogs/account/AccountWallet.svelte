@@ -195,14 +195,20 @@
 				{/if}
 				<Button
 					class="ml-2 hover:bg-opacity-30"
-					onclick={() => (createType = "new")}
+					onclick={() => {
+						createType = "new";
+						quickRegister = true;
+					}}
 				>
 					New
 				</Button>
 				<Button
 					class="ml-2 hover:bg-opacity-30"
 					variant="secondary"
-					onclick={() => (createType = "existing")}
+					onclick={() => {
+						createType = "existing";
+						quickRegister = true;
+					}}
 				>
 					Existing
 				</Button>
