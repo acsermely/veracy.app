@@ -24,7 +24,7 @@
 					behavior: "smooth",
 				});
 			}
-		}, 500);
+		}, 300);
 	});
 
 	let startY = $state(0);
@@ -94,7 +94,7 @@
 	<div
 		transition:fade={{ duration: 1000, delay: 300 }}
 		id="scroll-element"
-		class="overflow-x-hidden overflow-y-auto sm:max-md:no-scrollbar sm:max-md:no-scrollbar::-webkit-scrollbar flex-1 flex flex-col items-center w-full transition-transform ease-linear"
+		class="overflow-x-hidden overflow-y-auto no-scrollbar no-scrollbar::-webkit-scrollbar flex-1 flex flex-col items-center w-full transition-transform ease-linear"
 		style="transform: translateY({translateY}px);"
 		onscroll={(event: UIEvent) => {
 			const target = event.target;
@@ -110,3 +110,12 @@
 		{@render children()}
 	</div>
 </div>
+
+<style>
+	@media (min-width: 768px) {
+		#scroll-element {
+			-ms-overflow-style: scrollbar;
+			scrollbar-width: thin;
+		}
+	}
+</style>

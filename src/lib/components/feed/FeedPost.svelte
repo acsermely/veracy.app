@@ -1,5 +1,12 @@
 <script lang="ts">
-	import { Ellipsis, Loader, RefreshCcw, ShoppingCart } from "lucide-svelte";
+	import {
+		ChevronLeft,
+		ChevronRight,
+		Ellipsis,
+		Loader,
+		RefreshCcw,
+		ShoppingCart,
+	} from "lucide-svelte";
 	import { link } from "svelte-routing";
 	import { toast } from "svelte-sonner";
 	import { SvelteMap } from "svelte/reactivity";
@@ -43,6 +50,7 @@
 	let postPrice = $state<number>();
 	let newPrice = $state<number>();
 	let isWatcherActive = $state(true);
+	let currentPage = $state(0);
 
 	$effect(() => {
 		if (!hasPrivateContent(data.content) || !data.id || isPreview) {
@@ -126,9 +134,18 @@
 			return !!item;
 		});
 	}
+
+	function scrollToContent(i: number): void {
+		const id = data.id + "_" + i;
+		const elem = document.getElementById(id);
+		elem?.scrollIntoView({
+			behavior: "smooth",
+			block: "center",
+		});
+	}
 </script>
 
-<Card class="max-w-[450px] w-full my-10 border-none shadow-none">
+<Card class="max-w-[450px] w-full my-8 border-none shadow-none">
 	<div transition:fade class="flex w-full">
 		<a
 			class="flex-1 flex p-3 pb-2 pr-0 cursor-pointer items-center"
@@ -185,10 +202,41 @@
 		{/if}
 	</div>
 
-	<CardContent class="flex p-0 border-2">
+	<CardContent class="flex p-0 border-2 relative">
 		<div
-			class="inline-flex w-full overflow-x-scroll overflow-y-hidden scroll-smooth snap-x snap-mandatory max-h-[65dvh]"
+			class="flex items-center absolute left-0 h-full p-1 opacity-30 z-10"
+			class:hidden={currentPage === 0}
+		>
+			<ChevronLeft
+				class="cursor-pointer"
+				onclick={() => scrollToContent(currentPage - 1)}
+			/>
+		</div>
+		<div
+			in:fade
+			out:fade
+			class="flex items-center absolute right-0 h-full p-1 opacity-30 z-10"
+			class:hidden={currentPage === data.content.length - 1}
+		>
+			<ChevronRight
+				class="cursor-pointer"
+				onclick={() => scrollToContent(currentPage + 1)}
+			/>
+		</div>
+		<div
+			class="relative inline-flex w-full overflow-x-scroll overflow-y-hidden scroll-smooth snap-x snap-mandatory max-h-[65dvh]"
 			style="scrollbar-color: rgba(128, 128, 128, .5) rgba(0, 0, 0, 0); scrollbar-width: thin;"
+			onscroll={(event: UIEvent) => {
+				const target = event.target as HTMLElement;
+				if (!target) {
+					return;
+				}
+				const currentScroll = target.scrollLeft;
+				const postWidth = target.scrollWidth / data.content.length;
+				currentPage = Math.floor(
+					(currentScroll + postWidth / 2) / postWidth,
+				);
+			}}
 		>
 			{#each data.content as content, i}
 				<div
@@ -333,14 +381,10 @@
 				<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 				<span
 					onclick={() => {
-						const id = data.id + "_" + i;
-						const elem = document.getElementById(id);
-						elem?.scrollIntoView({
-							behavior: "smooth",
-							block: "center",
-						});
+						scrollToContent(i);
 					}}
-					class="px-2 w-6 h-6 flex items-center text-xs font-extrabold justify-center hover:bg-slate-500 opacity-50 rounded-full cursor-pointer mx-2"
+					class="px-2 w-6 h-6 flex items-center text-xs font-extrabold justify-center hover:bg-slate-500 opacity-30 rounded-full cursor-pointer mx-2"
+					class:bg-slate-500={currentPage === i}
 				>
 					{i + 1}
 				</span>
