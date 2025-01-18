@@ -37,5 +37,5 @@ export const TX_APP_CONTENT_TYPE = "application/json";
 export const REQUEST_TIMEOUT = 10000;
 
 // ACTIVATION ADDRESS
-export const ACTIVATION_ADDRESS = "0S00yFATR2ozqXiq0XT6EjnB0EBc5xHW35HPZpSK1J8"; // Only for Testing
-// export const ACTIVATION_ADDRESS = "";
+// export const ACTIVATION_ADDRESS = "0S00yFATR2ozqXiq0XT6EjnB0EBc5xHW35HPZpSK1J8"; // Only for Testing
+export const ACTIVATION_ADDRESS = "8vAopD3Fv7QnEqG00-E6aSyLaL9WKZpHmeTPWyNxs9c";
