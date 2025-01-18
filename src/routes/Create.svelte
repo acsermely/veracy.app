@@ -15,7 +15,10 @@
 	import { getContentNodeState } from "../lib/state/node.svelte";
 	import { getWalletState } from "../lib/state/wallet.svelte";
 	import { ArweaveUtils } from "../lib/utils/arweave.utils";
-	import { hasPrivateContent } from "../lib/utils/common.utils";
+	import {
+		createSHA256Hash,
+		hasPrivateContent,
+	} from "../lib/utils/common.utils";
 
 	let currentStep = $state(0);
 	let uploading = $state(false);
@@ -41,11 +44,13 @@
 			if (!item.data) {
 				continue;
 			}
+			const hash = await createSHA256Hash(item.data);
 			if (item.type === "TEXT") {
 				content.push({
 					privacy: "PUBLIC",
 					type: "TEXT",
 					data: item.data,
+					hash,
 					align: item.align || "left",
 				} as PostContent);
 				continue;
@@ -60,6 +65,7 @@
 				privacy: item.privacy || "PUBLIC",
 				type: "IMG",
 				data: contentId,
+				hash,
 				align: item.align || "left",
 			} as PostContent);
 		}

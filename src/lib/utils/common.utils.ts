@@ -29,3 +29,14 @@ export function downloadFile(
 	a.click();
 	document.body.removeChild(a);
 }
+
+export async function createSHA256Hash(data: string): Promise<string> {
+	const encoder = new TextEncoder();
+	const dataArray = encoder.encode(data);
+	const hashBuffer = await crypto.subtle.digest("SHA-256", dataArray);
+	const hashArray = Array.from(new Uint8Array(hashBuffer));
+	const hashHex = hashArray
+		.map((byte) => byte.toString(16).padStart(2, "0"))
+		.join("");
+	return hashHex;
+}

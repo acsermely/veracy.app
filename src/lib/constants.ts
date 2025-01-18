@@ -31,7 +31,7 @@ export const BUNDLER_URL = "https://node2.irys.xyz";
 
 // POSTS
 export const TX_APP_NAME = "VeracyApp";
-export const TX_APP_VERSION = "0.0.4";
+export const TX_APP_VERSION = "0.0.5";
 export const TX_APP_CONTENT_TYPE = "application/json";
 
 export const REQUEST_TIMEOUT = 10000;

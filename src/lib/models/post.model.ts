@@ -15,6 +15,7 @@ export type PostContent = {
 	type: PostContentType;
 	privacy: PostContentPrivacy;
 	data: string;
+	hash: string;
 	align?: PostContentAlign;
 };
 

@@ -2,6 +2,7 @@
 	import {
 		ChevronLeft,
 		ChevronRight,
+		CircleAlert,
 		Ellipsis,
 		Loader,
 		RefreshCcw,
@@ -17,7 +18,10 @@
 	import { getWalletState } from "../../state/wallet.svelte";
 	import { getWatcherState } from "../../state/watcher.svelte";
 	import { ArweaveUtils } from "../../utils/arweave.utils";
-	import { hasPrivateContent } from "../../utils/common.utils";
+	import {
+		createSHA256Hash,
+		hasPrivateContent,
+	} from "../../utils/common.utils";
 	import { DB } from "../../utils/db.utils";
 	import AvatarFallback from "../ui/avatar/avatar-fallback.svelte";
 	import Avatar from "../ui/avatar/avatar.svelte";
@@ -52,7 +56,10 @@
 	let isWatcherActive = $state(true);
 	let currentPage = $state(0);
 
+	let hashValid = $state<boolean[]>(data.content.map(() => false));
+
 	$effect(() => {
+		checkValidationHashes();
 		if (!hasPrivateContent(data.content) || !data.id || isPreview) {
 			postActive = true;
 			return;
@@ -79,6 +86,26 @@
 			postPrice = price;
 			postActive = true;
 		});
+	}
+
+	function checkValidationHashes(): void {
+		for (const [i, item] of data.content.entries()) {
+			if (item.type === "TEXT") {
+				createSHA256Hash(item.data).then((hash) => {
+					hashValid[i] = hash === item.hash;
+				});
+			} else if (item.type === "IMG") {
+				dataPromises
+					.get(item.data)
+					?.then((data) => createSHA256Hash(data))
+					.then((hash) => {
+						hashValid[i] = hash === item.hash;
+					})
+					.catch(() => {
+						hashValid[i] = true;
+					});
+			}
+		}
 	}
 
 	async function getPrice(
@@ -146,7 +173,7 @@
 </script>
 
 <Card class="max-w-[450px] w-full my-8 border-none shadow-none">
-	<div transition:fade class="flex w-full">
+	<div class="flex w-full">
 		<a
 			class="flex-1 flex p-3 pb-2 pr-0 cursor-pointer items-center"
 			href={"/p/" + data.uploader}
@@ -169,6 +196,20 @@
 				>
 			</CardHeader>
 		</a>
+		{#if hashValid.includes(false)}
+			{console.log(data)}
+			<Popover>
+				<PopoverTrigger class="mr-3 text-red-500"
+					><CircleAlert /></PopoverTrigger
+				>
+				<PopoverContent
+					class="w-fit flex flex-col gap-1 text-lg border-red-500"
+					side="left"
+				>
+					Altered or corrupted content!
+				</PopoverContent>
+			</Popover>
+		{/if}
 		{#if txId}
 			<Popover>
 				<PopoverTrigger class="mr-2"><Ellipsis /></PopoverTrigger>
@@ -193,7 +234,7 @@
 									);
 								}}
 							>
-								asd
+								Set New Price
 							</Button>
 						{/if}
 					{/if}
@@ -242,6 +283,8 @@
 				<div
 					id={data.id + "_" + i}
 					class="min-w-full box-content snap-start inline-flex justify-center min-h-[40dvh]"
+					class:border-b-2={!hashValid[i]}
+					class:border-red-500={!hashValid[i]}
 				>
 					{#if content.type === "TEXT"}
 						<pre
