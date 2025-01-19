@@ -40,7 +40,9 @@
 <div
 	class="flex flex-col w-full items-center overflow-y-auto no-scrollbar no-scrollbar::-webkit-scrollbar"
 >
-	<div class="flex p-3 w-full max-w-[450px] justify-between items-baseline">
+	<div
+		class="flex p-3 md:px-0 w-full max-w-[450px] justify-between items-baseline"
+	>
 		<Button
 			variant="outline"
 			size="icon"
@@ -62,7 +64,7 @@
 			</Button>
 		{/if}
 	</div>
-	<div class="w-full px-3 max-w-[450px]">
+	<div class="w-full px-3 md:px-0 max-w-[450px]">
 		<Card class="w-full">
 			<CardHeader class="flex items-center">
 				<Avatar

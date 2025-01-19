@@ -302,6 +302,7 @@ export function queryPriceForTx(tx: string, sender: string): { query: string } {
 		query: `{
 			transactions(
 				owners: ["${sender}"],
+				recipients: ["${ACTIVATION_ADDRESS}"]
 				tags: [
 					{ name: "App-Name", values: ["${TX_APP_NAME}"]},
 					{ name: "Version", values: ["${TX_APP_VERSION}"]},

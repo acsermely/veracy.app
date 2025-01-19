@@ -56,10 +56,12 @@
 	let isWatcherActive = $state(true);
 	let currentPage = $state(0);
 
-	let hashValid = $state<boolean[]>(data.content.map(() => false));
+	let hashValid = $state<boolean[]>(data.content.map(() => true));
 
 	$effect(() => {
-		checkValidationHashes();
+		if (!isPreview) {
+			checkValidationHashes();
+		}
 		if (!hasPrivateContent(data.content) || !data.id || isPreview) {
 			postActive = true;
 			return;
@@ -245,7 +247,7 @@
 
 	<CardContent class="flex p-0 border-2 relative">
 		<div
-			class="flex items-center absolute left-0 h-full p-1 opacity-30 z-10"
+			class="flex items-center absolute left-0 h-full p-1 opacity-50 z-10"
 			class:hidden={currentPage === 0}
 		>
 			<ChevronLeft
@@ -256,7 +258,7 @@
 		<div
 			in:fade
 			out:fade
-			class="flex items-center absolute right-0 h-full p-1 opacity-30 z-10"
+			class="flex items-center absolute right-0 h-full p-1 opacity-50 z-10"
 			class:hidden={currentPage === data.content.length - 1}
 		>
 			<ChevronRight
