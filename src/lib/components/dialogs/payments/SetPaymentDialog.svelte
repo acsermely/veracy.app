@@ -18,13 +18,24 @@
 	const dialogState = getDialogsState();
 	const walletState = getWalletState();
 
-	$effect(() => {});
+	$effect(() => {
+		ArweaveUtils.arweave.transactions
+			.getPrice(0)
+			.then((newFee) => (fee = newFee));
+	});
 
 	let processing = $state(false);
 	let newPrice = $state<number>();
+	let fee = $state("0");
+	let price = $derived<number | undefined>(
+		dialogState.setPaymentDialogContent?.price || newPrice,
+	);
+	let totalPrice = $derived<number>(
+		Number(price) +
+			Number.parseFloat(ArweaveUtils.arweave.ar.winstonToAr(fee)),
+	);
 
 	async function pay(): Promise<void> {
-		const price = dialogState.setPaymentDialogContent?.price || newPrice;
 		if (
 			!dialogState.setPaymentDialogContent ||
 			!dialogState.setPaymentDialogContent.id
@@ -71,6 +82,9 @@
 		</DialogHeader>
 		<div class="flex w-full px-5 flex-col gap-2">
 			<div class="flex justify-between items-center">
+				<small>Recipient:</small><b>PLATFORM</b>
+			</div>
+			<div class="flex justify-between items-center">
 				<small>Price:</small>
 				{#if dialogState.setPaymentDialogContent?.price}
 					<b>{dialogState.setPaymentDialogContent.price} AR</b>
@@ -83,7 +97,15 @@
 				{/if}
 			</div>
 			<div class="flex justify-between items-center">
-				<small>Recipient:</small><b>PLATFORM_WALLET</b>
+				<small>Fee:</small><small
+					>~{ArweaveUtils.arweave.ar.winstonToAr(fee, {
+						decimals: 6,
+					})}
+					AR</small
+				>
+			</div>
+			<div class="flex justify-between items-center">
+				<b>Total:</b><b>{totalPrice} AR</b>
 			</div>
 		</div>
 		<DialogFooter>

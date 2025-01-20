@@ -10,13 +10,10 @@ export class WalletState {
 	wallet = $state<Wallet>();
 
 	hasWallet = $derived(this.wallet !== undefined);
-	// TODO: delete
-	hasKeys = $state<boolean>(false);
 
 	constructor() {
 		const address = localStorage.getItem(WALLET_LOCAL_ADDRESS);
 		if (address) {
-			this.hasKeys = true;
 			try {
 				this.useWallet(address);
 			} catch {
@@ -46,7 +43,6 @@ export class WalletState {
 		}
 
 		this.wallet = newWallet;
-		this.hasKeys = true;
 	};
 
 	useWallet = async (addr?: string): Promise<void> => {

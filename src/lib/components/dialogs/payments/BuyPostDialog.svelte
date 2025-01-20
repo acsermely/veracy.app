@@ -20,11 +20,19 @@
 
 	let data = $state<Post>();
 	let processing = $state(false);
+	let fee = $state("0");
+	let totalPrice = $derived<number>(
+		Number(dialogsState.buyDialogContent?.price || 0) +
+			Number.parseFloat(ArweaveUtils.arweave.ar.winstonToAr(fee)),
+	);
 
 	$effect(() => {
 		if (dialogsState.buyDialog) {
 			fetchData();
 		}
+		ArweaveUtils.arweave.transactions
+			.getPrice(0)
+			.then((price) => (fee = price));
 	});
 
 	async function fetchData(): Promise<void> {
@@ -96,14 +104,24 @@
 					</div>
 				{:else}
 					<div class="flex justify-between items-center">
+						<small>Recipient:</small><b
+							>{data.uploader.slice(0, 10)}...</b
+						>
+					</div>
+					<div class="flex justify-between items-center">
 						<small>Price:</small><b
 							>{dialogsState.buyDialogContent.price} AR</b
 						>
 					</div>
 					<div class="flex justify-between items-center">
-						<small>Recipient:</small><b
-							>{data.uploader.slice(0, 10)}...</b
+						<small>Fee:</small><small
+							>~{ArweaveUtils.arweave.ar.winstonToAr(fee, {
+								decimals: 6,
+							})} AR</small
 						>
+					</div>
+					<div class="flex justify-between items-center">
+						<b>Total:</b><b>{totalPrice} AR</b>
 					</div>
 					{#if data.title}
 						<div class="flex justify-between items-center">

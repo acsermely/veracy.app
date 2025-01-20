@@ -347,6 +347,13 @@
 										{/if}
 									</Button>
 								</div>
+							{:else}
+								<div
+									class="flex flex-col justify-center items-center"
+								>
+									<span>Can't buy Content!</span>
+									<small>Not active yet.</small>
+								</div>
 							{/if}
 						{:catch e}
 							{#if e === "402"}

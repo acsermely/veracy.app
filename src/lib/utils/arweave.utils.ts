@@ -82,17 +82,20 @@ export class ArweaveUtils {
 		sourceAddr: string,
 		postId: string,
 		price: number,
-		fee?: number,
 	): Promise<Transaction> {
 		const priceInWinston = this.arweave.ar.arToWinston(price.toString());
 		const balance = await this.arweave.wallets.getBalance(sourceAddr);
-		if (Number.parseInt(balance) < Number.parseInt(priceInWinston)) {
+		const fee = await this.arweave.transactions.getPrice(0);
+		if (
+			Number.parseInt(balance) <
+			Number.parseInt(priceInWinston) + Number.parseInt(fee)
+		) {
 			throw "Insufficient balance";
 		}
 		let tx = await this.arweave.createTransaction({
 			target: targetAddr,
 			quantity: priceInWinston,
-			// reward: fee,
+			reward: fee,
 		});
 		tx.addTag("App-Name", TX_APP_NAME);
 		tx.addTag("Content-Type", TX_APP_CONTENT_TYPE);
@@ -107,20 +110,23 @@ export class ArweaveUtils {
 		sourceAddr: string,
 		postId: string,
 		price: number,
-		// fee?: number,
 	): Promise<Transaction> {
 		if (!price || price === 0) {
 			throw "No Price";
 		}
 		const priceInWinston = this.arweave.ar.arToWinston(price.toString());
 		const balance = await this.arweave.wallets.getBalance(sourceAddr);
-		if (Number.parseInt(balance) < Number.parseInt(priceInWinston)) {
+		const fee = await this.arweave.transactions.getPrice(0);
+		if (
+			Number.parseInt(balance) <
+			Number.parseInt(priceInWinston) + Number.parseInt(fee)
+		) {
 			throw "Insufficient balance";
 		}
 		let tx = await this.arweave.createTransaction({
 			target: ACTIVATION_ADDRESS,
 			quantity: priceInWinston,
-			// reward: fee,
+			reward: fee,
 		});
 		tx.addTag("App-Name", TX_APP_NAME);
 		tx.addTag("Content-Type", TX_APP_CONTENT_TYPE);

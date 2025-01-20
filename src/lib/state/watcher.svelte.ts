@@ -5,7 +5,7 @@ import { ArweaveUtils } from "../utils/arweave.utils";
 import { DB } from "../utils/db.utils";
 import { getWalletState } from "./wallet.svelte";
 
-const WATCHER_INTERVAL = 3000;
+const WATCHER_INTERVAL = 5000;
 
 export class Watcher {
 	private _interval?: number;

@@ -1,7 +1,7 @@
 const IMAGE_WIDTH_PX = 500;
 const IMAGE_FORMAT = "image/webp";
 const IMAGE_FORMAT_FALLBACK = "image/jpeg"; // Some browsers are not supporintg webp
-const IMAGE_SIZE_TRESHOLD = 100 * 1024; // 100 kb
+const IMAGE_SIZE_TRESHOLD = 200 * 1024; // 200 kb
 
 /**
  * Convert (resize, compress) image to smaller dataURL
