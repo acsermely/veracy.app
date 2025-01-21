@@ -22,12 +22,14 @@ export const ARWEAVE_URL = "arweave.net";
 export const ARWEAVE_PORT = 443;
 export const ARWEAVE_PROTOCOL = "https";
 export const BUNDLER_URL = "https://node2.irys.xyz";
+export const ACTIVATION_ADDRESS = "8vAopD3Fv7QnEqG00-E6aSyLaL9WKZpHmeTPWyNxs9c";
 
 // TEST GATEWAYS
 // export const ARWEAVE_URL = "localhost";
 // export const ARWEAVE_PORT = 1984;
 // export const ARWEAVE_PROTOCOL = "http";
 // export const BUNDLER_URL = "https://devnet.irys.xyz";
+// export const ACTIVATION_ADDRESS = "0S00yFATR2ozqXiq0XT6EjnB0EBc5xHW35HPZpSK1J8"; // Only for Testing
 
 // POSTS
 export const TX_APP_NAME = "VeracyApp";
@@ -35,7 +37,3 @@ export const TX_APP_VERSION = "0.0.5";
 export const TX_APP_CONTENT_TYPE = "application/json";
 
 export const REQUEST_TIMEOUT = 10000;
-
-// ACTIVATION ADDRESS
-// export const ACTIVATION_ADDRESS = "0S00yFATR2ozqXiq0XT6EjnB0EBc5xHW35HPZpSK1J8"; // Only for Testing
-export const ACTIVATION_ADDRESS = "8vAopD3Fv7QnEqG00-E6aSyLaL9WKZpHmeTPWyNxs9c";
