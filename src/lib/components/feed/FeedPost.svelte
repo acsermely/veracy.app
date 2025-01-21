@@ -186,7 +186,7 @@
 				class="inline-flex bg-gradient-to-bl from-amber-500 via-blue-500 to-teal-500 bg-opacity-50"
 			>
 				<AvatarFallback class="font-extrabold bg-transparent text-white"
-					>{data.uploader.slice(0, 3)}</AvatarFallback
+					>{data.uploader?.slice(0, 3)}</AvatarFallback
 				>
 			</Avatar>
 			<CardHeader class="inline-flex p-3 py-0">
@@ -194,7 +194,7 @@
 					<CardTitle>{data.title}</CardTitle>
 				{/if}
 				<CardDescription
-					>{data.uploader.slice(0, 25)}...</CardDescription
+					>{data.uploader?.slice(0, 25)}...</CardDescription
 				>
 			</CardHeader>
 		</a>
