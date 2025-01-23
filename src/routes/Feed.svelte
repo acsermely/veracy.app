@@ -9,10 +9,12 @@
 	import Card from "../lib/components/ui/card/card.svelte";
 	import Skeleton from "../lib/components/ui/skeleton/skeleton.svelte";
 	import type { Post } from "../lib/models/post.model";
+	import { getDialogsState } from "../lib/state";
 	import { getFeedState } from "../lib/state/feed.svelte";
 	import { ArweaveUtils } from "../lib/utils/arweave.utils";
 
 	const feedState = getFeedState();
+	const dialogState = getDialogsState();
 
 	let postIds = $derived(feedState.postIds.map((item) => item.id));
 	let loadingMore = $state(false);
@@ -40,6 +42,12 @@
 	bind:scrollPosition={feedState.scrollPosition}
 >
 	<div id="top" class="w-0 h-0"></div>
+	<Button
+		variant="outline"
+		class="w-full m-3 max-w-[450px]"
+		onclick={() => (dialogState.feedbackDialog = true)}
+		>Send Feedback</Button
+	>
 	{#if postIds.length}
 		{#each postIds as id}
 			{#await fetchData(id)}

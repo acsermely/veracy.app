@@ -225,7 +225,7 @@
 								toast.success("Link Copied");
 							}}>Share</Button
 						>
-						{#if isMe}
+						{#if isMe && hasPrivateContent(data.content)}
 							<Button
 								variant="outline"
 								size="sm"

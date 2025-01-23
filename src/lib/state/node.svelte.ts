@@ -123,6 +123,27 @@ export class ContentNode {
 			throw new Error("Failed to upload image.");
 		});
 	};
+
+	sendFeedback = async (
+		feedbackType: "feedback" | "report",
+		content: string,
+		target?: string,
+	): Promise<Response> => {
+		return fetch(`${this.url}/feedback`, {
+			method: "POST",
+			credentials: "include",
+			body: JSON.stringify({
+				feedbackType,
+				content,
+				target,
+			}),
+		}).then((response) => {
+			if (response.ok) {
+				return response;
+			}
+			throw new Error("Failed to send feedback.");
+		});
+	};
 }
 
 const NODE_STATE_KEY = "node-state-key";
