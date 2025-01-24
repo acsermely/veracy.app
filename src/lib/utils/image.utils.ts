@@ -1,4 +1,4 @@
-const IMAGE_WIDTH_PX = 500;
+const IMAGE_WIDTH_PX = 800;
 const IMAGE_FORMAT = "image/webp";
 const IMAGE_FORMAT_FALLBACK = "image/jpeg"; // Some browsers are not supporintg webp
 const IMAGE_SIZE_TRESHOLD = 200 * 1024; // 200 kb
@@ -8,7 +8,11 @@ const IMAGE_SIZE_TRESHOLD = 200 * 1024; // 200 kb
  * @param {File} file
  * @returns {Promise<string>} Compressed image as DataURL
  */
-export const compressImageInput = async (file: File): Promise<string> => {
+export const compressImageInput = async (
+	file: File,
+	width = IMAGE_WIDTH_PX,
+	trashold = IMAGE_SIZE_TRESHOLD,
+): Promise<string> => {
 	return new Promise((resolve, reject) => {
 		if (!file.type.startsWith("image/")) {
 			reject("Not an Image file!");
@@ -17,7 +21,7 @@ export const compressImageInput = async (file: File): Promise<string> => {
 		reader.onload = (event) => {
 			const img = new Image();
 			img.onload = () => {
-				resolve(compressImage(img));
+				resolve(compressImage(img, width, trashold));
 			};
 
 			img.src = event.target?.result?.toString()!;
@@ -34,7 +38,8 @@ export const compressImageInput = async (file: File): Promise<string> => {
  */
 const recursiveImgCompress = (
 	canvas: HTMLCanvasElement,
-	quality = 1,
+	quality: number,
+	trashold: number,
 ): string => {
 	let format = IMAGE_FORMAT;
 	let size = Math.ceil(canvas.toDataURL(IMAGE_FORMAT, quality).length);
@@ -45,17 +50,21 @@ const recursiveImgCompress = (
 		size = size_fallback;
 		format = IMAGE_FORMAT_FALLBACK;
 	}
-	if (size < IMAGE_SIZE_TRESHOLD) {
+	if (size < trashold) {
 		return canvas.toDataURL(format, quality);
 	}
-	return recursiveImgCompress(canvas, quality - 0.1);
+	return recursiveImgCompress(canvas, quality - 0.01, trashold);
 };
 
 /**
  * @param {HTMLImageElement} img
  * @returns {string} DataURL
  */
-export const compressImage = (img: HTMLImageElement): string => {
+export const compressImage = (
+	img: HTMLImageElement,
+	width: number,
+	trashold: number,
+): string => {
 	const canvas = document.createElement("canvas");
 	const ctx = canvas.getContext("2d");
 	if (!ctx) {
@@ -63,9 +72,9 @@ export const compressImage = (img: HTMLImageElement): string => {
 	}
 	const aspectRatio = img.width / img.height;
 
-	canvas.width = IMAGE_WIDTH_PX;
-	canvas.height = IMAGE_WIDTH_PX / aspectRatio;
+	canvas.width = width;
+	canvas.height = width / aspectRatio;
 	ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-	return recursiveImgCompress(canvas);
+	return recursiveImgCompress(canvas, 1, trashold);
 };

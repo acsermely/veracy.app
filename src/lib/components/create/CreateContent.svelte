@@ -84,7 +84,9 @@
 										content.privacy = v?.value;
 									}}
 								>
-									<SelectTrigger class="m-x-2 w-1/2">
+									<SelectTrigger
+										class="m-x-2 w-fit gap-3 border-none"
+									>
 										<SelectValue placeholder="Public" />
 									</SelectTrigger>
 									<SelectContent>

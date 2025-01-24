@@ -245,24 +245,24 @@
 		{/if}
 	</div>
 
-	<CardContent class="flex p-0 border-2 relative">
+	<CardContent class="flex p-0 relative">
 		<div
-			class="flex items-center absolute left-0 h-full p-1 opacity-50 z-10"
+			class="flex items-center absolute left-0 h-full p-1 opacity-70 z-10"
 			class:hidden={currentPage === 0}
 		>
 			<ChevronLeft
-				class="cursor-pointer"
+				class="cursor-pointer h-full"
 				onclick={() => scrollToContent(currentPage - 1)}
 			/>
 		</div>
 		<div
 			in:fade
 			out:fade
-			class="flex items-center absolute right-0 h-full p-1 opacity-50 z-10"
+			class="flex items-center absolute right-0 h-full p-1 opacity-70 z-10"
 			class:hidden={currentPage === data.content.length - 1}
 		>
 			<ChevronRight
-				class="cursor-pointer"
+				class="cursor-pointer  h-full"
 				onclick={() => scrollToContent(currentPage + 1)}
 			/>
 		</div>
@@ -284,7 +284,7 @@
 			{#each data.content as content, i}
 				<div
 					id={data.id + "_" + i}
-					class="min-w-full box-content snap-start inline-flex justify-center min-h-[40dvh]"
+					class="min-w-full h-full box-content snap-start inline-flex justify-center min-h-[40dvh]"
 					class:border-b-2={!hashValid[i]}
 					class:border-red-500={!hashValid[i]}
 				>
@@ -435,10 +435,9 @@
 					onclick={() => {
 						scrollToContent(i);
 					}}
-					class="px-2 w-6 h-6 flex items-center text-xs font-extrabold justify-center hover:bg-slate-500 opacity-30 rounded-full cursor-pointer mx-2"
-					class:bg-slate-500={currentPage === i}
+					class="px-2 w-4 h-4 flex items-center text-xs font-extrabold justify-center bg-slate-500 opacity-30 rounded-full cursor-pointer mx-2"
+					class:opacity-100={currentPage === i}
 				>
-					{i + 1}
 				</span>
 			{/each}
 		</CardFooter>
