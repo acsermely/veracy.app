@@ -442,17 +442,20 @@
 		</div>
 	</CardContent>
 	{#if data.content.length > 1}
-		<CardFooter class="p-3 flex justify-center w-full flex-wrap">
+		<CardFooter class="p-2 flex justify-center w-full flex-wrap">
 			{#each data.content as _, i}
 				<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 				<span
 					onclick={() => {
 						scrollToContent(i);
 					}}
-					class="px-2 w-4 h-4 flex items-center text-xs font-extrabold justify-center bg-slate-500 rounded-full cursor-pointer mx-2"
+					class="px-2 cursor-pointer"
 					class:opacity-100={currentPage === i}
 					class:opacity-30={currentPage !== i}
 				>
+					<span
+						class="w-2 h-2 flex items-center text-xs font-extrabold justify-center bg-slate-500 rounded-full"
+					></span>
 				</span>
 			{/each}
 		</CardFooter>
