@@ -57,6 +57,8 @@
 	let currentPage = $state(0);
 
 	let hashValid = $state<boolean[]>(data.content.map(() => true));
+	let dataPromises =
+		$state<SvelteMap<string, Promise<string>>>(initDataPromises());
 
 	$effect(() => {
 		if (!isPreview) {
@@ -70,15 +72,15 @@
 		refreshWatcher();
 	});
 
-	let dataPromises = $state(
-		new SvelteMap<string, Promise<string>>(
+	function initDataPromises(): SvelteMap<string, Promise<string>> {
+		return new SvelteMap<string, Promise<string>>(
 			data.content
 				.filter((item) => item.type === "IMG")
 				.map((item) => {
 					return [item.data, getImagePromise(item.data)];
 				}),
-		),
-	);
+		);
+	}
 
 	function checkPrice(): void {
 		getPrice(data.id, data.uploader).then((price) => {
@@ -199,7 +201,6 @@
 			</CardHeader>
 		</a>
 		{#if hashValid.includes(false)}
-			{console.log(data)}
 			<Popover>
 				<PopoverTrigger class="mr-3 text-red-500"
 					><CircleAlert /></PopoverTrigger
@@ -311,12 +312,25 @@
 								/>
 							</div>
 						{:then src}
-							{#if postActive || content.privacy === "PUBLIC"}
+							{#if (postActive || content.privacy === "PUBLIC") && hashValid[i]}
 								<img
 									class="h-full object-contain"
 									{src}
 									alt={"image_" + i}
 								/>
+							{:else if !hashValid[i]}
+								<div
+									class="flex flex-col justify-center items-center"
+								>
+									<span>Corrupted Content</span>
+									<Button
+										class="my-5"
+										onclick={() =>
+											(dataPromises = initDataPromises())}
+									>
+										<RefreshCcw class="mr-1" />
+									</Button>
+								</div>
 							{:else if !postActive && isMe}
 								<div
 									class="flex flex-col justify-center items-center"
@@ -435,8 +449,9 @@
 					onclick={() => {
 						scrollToContent(i);
 					}}
-					class="px-2 w-4 h-4 flex items-center text-xs font-extrabold justify-center bg-slate-500 opacity-30 rounded-full cursor-pointer mx-2"
+					class="px-2 w-4 h-4 flex items-center text-xs font-extrabold justify-center bg-slate-500 rounded-full cursor-pointer mx-2"
 					class:opacity-100={currentPage === i}
+					class:opacity-30={currentPage !== i}
 				>
 				</span>
 			{/each}
