@@ -226,6 +226,19 @@
 								toast.success("Link Copied");
 							}}>Share</Button
 						>
+						<Button
+							variant="outline"
+							size="sm"
+							onclick={() => {
+								nodeState
+									.sendFeedback(
+										"report",
+										`page: ${currentPage}`,
+										txId,
+									)
+									.then(() => toast.success("Reported!"));
+							}}>Report</Button
+						>
 						{#if isMe && hasPrivateContent(data.content)}
 							<Button
 								variant="outline"
