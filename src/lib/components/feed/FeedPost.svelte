@@ -176,7 +176,7 @@
 	}
 </script>
 
-<Card class="max-w-[450px] w-full my-8 border-none shadow-none">
+<Card class="max-w-[500px] w-full my-8 border-none shadow-none">
 	<div class="flex w-full">
 		<a
 			class="flex-1 flex p-3 pb-2 pr-0 cursor-pointer items-center"
@@ -281,7 +281,7 @@
 			/>
 		</div>
 		<div
-			class="relative inline-flex w-full overflow-x-scroll overflow-y-hidden scroll-smooth snap-x snap-mandatory max-h-[65dvh]"
+			class="relative inline-flex w-full overflow-x-scroll overflow-y-hidden scroll-smooth snap-x snap-mandatory max-h-[70dvh]"
 			style="scrollbar-color: rgba(128, 128, 128, .5) rgba(0, 0, 0, 0); scrollbar-width: thin;"
 			onscroll={(event: UIEvent) => {
 				const target = event.target as HTMLElement;
