@@ -32,6 +32,12 @@
 		}
 	});
 
+	$effect(() => {
+		if (!dialogsState.connectDialog) {
+			currentView = undefined;
+		}
+	});
+
 	let currentView = $state<"Wallets" | "Server">();
 	let quickRegister = $state(false);
 

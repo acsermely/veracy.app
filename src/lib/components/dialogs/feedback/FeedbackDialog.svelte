@@ -67,7 +67,7 @@
 				>
 			</div>
 		</div>
-		<DialogFooter>
+		<DialogFooter class="gap-3">
 			<Button onclick={() => send()}>Send</Button>
 			<Button
 				onclick={() => (dialogsState.feedbackDialog = false)}
