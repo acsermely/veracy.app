@@ -8,23 +8,28 @@
 	} from "lucide-svelte";
 	import { POST_MAX_NUMBER_OF_CONTENT } from "../../constants";
 	import {
+		type PostAge,
 		type PostContent,
 		type PostContentAlign,
+		type PostContentPrivacy,
 	} from "../../models/post.model";
 	import { runDelayed } from "../../utils/common.utils";
 	import { compressImageInput } from "../../utils/image.utils";
 	import Button from "../ui/button/button.svelte";
 	import { Card, CardContent, CardFooter } from "../ui/card";
 	import Input from "../ui/input/input.svelte";
-	import { Select, SelectValue } from "../ui/select";
+	import { Select } from "../ui/select";
 	import SelectContent from "../ui/select/select-content.svelte";
 	import SelectItem from "../ui/select/select-item.svelte";
 	import SelectTrigger from "../ui/select/select-trigger.svelte";
 	import Textarea from "../ui/textarea/textarea.svelte";
 
-	let { data = $bindable() }: { data: Partial<PostContent>[] } = $props();
+	let {
+		data = $bindable(),
+		age = $bindable(),
+	}: { data: Partial<PostContent>[]; age: PostAge } = $props();
 
-	let textAreaElementRef = $state<HTMLTextAreaElement | undefined>();
+	let textAreaElementRef = $state<HTMLTextAreaElement | null>(null);
 
 	function deleteData(index: number): void {
 		if (data.length < 2) {
@@ -57,6 +62,19 @@
 </script>
 
 <Card class="max-w-[450px] w-full m-5 border-none">
+	<!-- <CardHeader class="p-0 items-center">
+		<Select type="single" bind:value={age}>
+			<SelectTrigger class="m-x-2 w-fit gap-5 border-none">
+				<SelectValue placeholder="Age: 12+" />
+			</SelectTrigger>
+			<SelectContent>
+				<SelectItem value="3+">Age: 3+</SelectItem>
+				<SelectItem value="12+">Age: 12+</SelectItem>
+				<SelectItem value="16+">Age: 16+</SelectItem>
+				<SelectItem value="18+">Age: 18+</SelectItem>
+			</SelectContent>
+		</Select>
+	</CardHeader> -->
 	<CardContent class="p-0 border-2">
 		<div
 			class="inline-flex w-full overflow-x-scroll overflow-y-hidden scroll-smooth snap-x snap-mandatory max-h-[70vh]"
@@ -74,20 +92,25 @@
 						>
 							{#if content.type === "IMG"}
 								<Select
-									selected={{
-										value: content.privacy,
-									}}
-									onSelectedChange={(v) => {
+									type="single"
+									value={content.privacy as string}
+									onValueChange={(v) => {
 										if (!v) {
 											return;
 										}
-										content.privacy = v?.value;
+										content.privacy =
+											v as PostContentPrivacy;
 									}}
 								>
 									<SelectTrigger
-										class="m-x-2 w-fit gap-3 border-none"
+										class="m-x-2 w-fit gap-3 border-none focus:ring-transparent"
 									>
-										<SelectValue placeholder="Public" />
+										{(content.privacy
+											?.slice(0, 1)
+											?.toUpperCase() || "P") +
+											(content?.privacy
+												?.slice(1)
+												.toLowerCase() || "ublic")}
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value="PUBLIC"
@@ -163,7 +186,7 @@
 						{:else if content.type === "TEXT"}
 							<div class="flex-1 flex p-2">
 								<Textarea
-									bind:inputRef={textAreaElementRef}
+									bind:ref={textAreaElementRef}
 									bind:value={content.data}
 									class={"flex-1 w-full p-3 font-mono text-base resize-none" +
 										textAlignClass(content.align)}
@@ -196,42 +219,58 @@
 			{/each}
 		</div>
 	</CardContent>
-	<CardFooter class="p-3 flex justify-center w-full flex-wrap">
-		{#each data as _, i}
+	<CardFooter class="p-3 flex flex-col">
+		<div class="flex justify-center w-full flex-wrap">
+			{#each data as _, i}
+				<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
+				<span
+					onclick={() => {
+						const id = "content_" + i;
+						const elem = document.getElementById(id);
+						elem?.scrollIntoView({
+							behavior: "smooth",
+							block: "center",
+						});
+					}}
+					class="px-2 w-6 h-6 flex items-center text-xs font-extrabold justify-center hover:bg-slate-500 opacity-50 rounded-full cursor-pointer mx-2"
+				>
+					{i + 1}
+				</span>
+			{/each}
 			<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 			<span
 				onclick={() => {
-					const id = "content_" + i;
-					const elem = document.getElementById(id);
-					elem?.scrollIntoView({
-						behavior: "smooth",
-						block: "center",
+					if (data.length >= POST_MAX_NUMBER_OF_CONTENT) {
+						return;
+					}
+					data.push({});
+					runDelayed(() => {
+						const id = "content_" + (data.length - 1);
+						const elem = document.getElementById(id);
+						elem?.scrollIntoView({
+							behavior: "smooth",
+							block: "center",
+						});
 					});
 				}}
-				class="px-2 w-6 h-6 flex items-center text-xs font-extrabold justify-center hover:bg-slate-500 opacity-50 rounded-full cursor-pointer mx-2"
+				class="border-2 border-primary flex items-center justify-center hover:bg-slate-500 opacity-50 rounded-full cursor-pointer"
 			>
-				{i + 1}
+				<Plus class="w-6 h-6 text-primary" />
 			</span>
-		{/each}
-		<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
-		<span
-			onclick={() => {
-				if (data.length >= POST_MAX_NUMBER_OF_CONTENT) {
-					return;
-				}
-				data.push({});
-				runDelayed(() => {
-					const id = "content_" + (data.length - 1);
-					const elem = document.getElementById(id);
-					elem?.scrollIntoView({
-						behavior: "smooth",
-						block: "center",
-					});
-				});
-			}}
-			class="border-2 border-primary flex items-center justify-center hover:bg-slate-500 opacity-50 rounded-full cursor-pointer"
+		</div>
+		<Select
+			type="single"
+			bind:value={age}
 		>
-			<Plus class="w-6 h-6 text-primary" />
-		</span>
+			<SelectTrigger class="m-x-2 w-fit gap-5 border-none mt-3">
+				Age: {age}
+			</SelectTrigger>
+			<SelectContent>
+				<SelectItem value="3+">Age: 3+</SelectItem>
+				<SelectItem value="12+">Age: 12+</SelectItem>
+				<SelectItem value="16+">Age: 16+</SelectItem>
+				<SelectItem value="18+">Age: 18+</SelectItem>
+			</SelectContent>
+		</Select>
 	</CardFooter>
 </Card>

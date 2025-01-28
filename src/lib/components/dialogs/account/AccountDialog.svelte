@@ -47,10 +47,7 @@
 	}
 </script>
 
-<Dialog
-	bind:open={dialogsState.connectDialog}
-	openFocus={"#connect-dialog-content"}
->
+<Dialog bind:open={dialogsState.connectDialog}>
 	<DialogTrigger
 		class={buttonVariants({ variant: "ghost" }) + " gap-4 hidden md:flex"}
 	>

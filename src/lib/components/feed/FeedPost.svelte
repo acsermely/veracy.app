@@ -32,7 +32,6 @@
 	import CardDescription from "../ui/card/card-description.svelte";
 	import CardFooter from "../ui/card/card-footer.svelte";
 	import CardHeader from "../ui/card/card-header.svelte";
-	import CardTitle from "../ui/card/card-title.svelte";
 	import Card from "../ui/card/card.svelte";
 	import { Input } from "../ui/input";
 	import { Popover, PopoverTrigger } from "../ui/popover";
@@ -179,10 +178,10 @@
 	}
 </script>
 
-<Card class="max-w-[500px] w-full my-10 border-none shadow-none">
+<Card class="max-w-[450px] w-full my-10 border-none shadow-none">
 	<div class="flex w-full">
 		<a
-			class="flex-1 flex p-3 pb-2 pr-0 cursor-pointer items-center"
+			class="flex-1 flex py-2 px-0 cursor-pointer items-center"
 			href={"/p/" + data.uploader}
 			class:pointer-events-none={isPreview}
 			use:link
@@ -195,9 +194,9 @@
 				>
 			</Avatar>
 			<CardHeader class="inline-flex p-3 py-0">
-				{#if data.title}
+				<!-- {#if data.title} TODO PROFILE @HANDLE
 					<CardTitle>{data.title}</CardTitle>
-				{/if}
+				{/if} -->
 				<CardDescription
 					>{data.uploader?.slice(0, 25)}...</CardDescription
 				>
@@ -216,10 +215,13 @@
 				</PopoverContent>
 			</Popover>
 		{/if}
-		{#if txId && isMe && hasPrivateContent(data.content)}
-			<Popover>
-				<PopoverTrigger class="mr-2"><Ellipsis /></PopoverTrigger>
-				<PopoverContent class="w-fit flex flex-col gap-1" side="left">
+		<Popover>
+			<PopoverTrigger class="mr-2"><Ellipsis /></PopoverTrigger>
+			<PopoverContent class="w-fit flex flex-col gap-1" side="left">
+				<div class="text-muted-foreground">
+					Age: <span class="text-primary">{data.age}</span>
+				</div>
+				{#if txId && isMe && hasPrivateContent(data.content)}
 					<Button
 						variant="outline"
 						size="sm"
@@ -232,9 +234,9 @@
 					>
 						Set New Price
 					</Button>
-				</PopoverContent>
-			</Popover>
-		{/if}
+				{/if}
+			</PopoverContent>
+		</Popover>
 	</div>
 
 	<CardContent class="flex p-0 relative">
@@ -452,35 +454,41 @@
 				{/each}
 			</div>
 		{/if}
-		<div class="flex w-full justify-between items-center">
-			<div class="flex">
-				<Button
-					variant="ghost"
-					title="Share"
-					onclick={() => {
-						dialogState.openShareDialog(txId);
-					}}
-				>
-					<Send />
-				</Button>
-				<!-- <Button variant="ghost">
+		{#if !isPreview}
+			<div class="flex w-full justify-between items-center">
+				<div class="flex">
+					<Button
+						variant="ghost"
+						title="Share"
+						onclick={() => {
+							dialogState.openShareDialog(txId);
+						}}
+					>
+						<Send />
+					</Button>
+					<!-- <Button variant="ghost">
 						<Save />
 					</Button> -->
+				</div>
+				<small class="text-muted-foreground text-xs"
+					>{new Date(timestamp).toLocaleDateString()}</small
+				>
+				<Button
+					title="Report"
+					variant="ghost"
+					onclick={() => {
+						nodeState
+							.sendFeedback(
+								"report",
+								`page: ${currentPage}`,
+								txId,
+							)
+							.then(() => toast.success("Reported!"));
+					}}
+				>
+					<MessageSquareWarning />
+				</Button>
 			</div>
-			<small class="text-muted-foreground text-xs"
-				>{new Date(timestamp).toLocaleDateString()}</small
-			>
-			<Button
-				title="Report"
-				variant="ghost"
-				onclick={() => {
-					nodeState
-						.sendFeedback("report", `page: ${currentPage}`, txId)
-						.then(() => toast.success("Reported!"));
-				}}
-			>
-				<MessageSquareWarning />
-			</Button>
-		</div>
+		{/if}
 	</CardFooter>
 </Card>

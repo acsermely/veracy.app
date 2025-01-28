@@ -88,7 +88,7 @@
 	}
 </script>
 
-<Dialog bind:open={dialogsState.buyDialog} openFocus={"#buy-dialog-content"}>
+<Dialog bind:open={dialogsState.buyDialog}>
 	<DialogContent id="buy-dialog-content" class="w-full max-w-[400px]">
 		<DialogHeader>
 			<DialogTitle>Purchase</DialogTitle>
@@ -123,11 +123,6 @@
 					<div class="flex justify-between items-center">
 						<b>Total:</b><b>{totalPrice} AR</b>
 					</div>
-					{#if data.title}
-						<div class="flex justify-between items-center">
-							<small>Title:</small><span>{data.title}</span>
-						</div>
-					{/if}
 				{/if}
 			{/if}
 		</div>

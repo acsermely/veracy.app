@@ -24,10 +24,7 @@
 	}
 </script>
 
-<Dialog
-	bind:open={dialogsState.feedbackDialog}
-	openFocus={"#buy-dialog-content"}
->
+<Dialog bind:open={dialogsState.feedbackDialog}>
 	<DialogContent id="buy-dialog-content" class="w-full max-w-[450px]">
 		<DialogHeader>
 			<DialogTitle>Feedback</DialogTitle>

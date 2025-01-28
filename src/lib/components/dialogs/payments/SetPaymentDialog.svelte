@@ -72,10 +72,7 @@
 	}
 </script>
 
-<Dialog
-	bind:open={dialogState.setPaymentDialog}
-	openFocus={"#buy-dialog-content"}
->
+<Dialog bind:open={dialogState.setPaymentDialog}>
 	<DialogContent id="buy-dialog-content" class="w-full max-w-[350px]">
 		<DialogHeader>
 			<DialogTitle>Transaction</DialogTitle>

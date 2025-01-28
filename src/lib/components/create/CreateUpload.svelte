@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { type Post, type PostContent } from "../../models/post.model";
+	import {
+		type Post,
+		type PostAge,
+		type PostContent,
+	} from "../../models/post.model";
 	import { getWalletState } from "../../state/wallet.svelte";
 	import MainPost from "../feed/FeedPost.svelte";
 
@@ -7,12 +11,12 @@
 
 	const {
 		data,
-		title,
+		age,
 		price,
 		tags,
 	}: {
 		data: Partial<PostContent>[];
-		title?: string;
+		age?: PostAge;
 		price?: string;
 		tags?: string[];
 	} = $props();
@@ -21,7 +25,7 @@
 		id: "",
 		content: data,
 		uploader: walletState.wallet?.address,
-		title,
+		age,
 		price,
 		tags,
 	} as Post);

@@ -21,7 +21,7 @@
 
 <Sheet bind:open={dialogState.shareSheet}>
 	<SheetContent side="bottom" class="flex flex-col items-center">
-		<div class="flex flex-col w-full max-w-[500px] gap-6">
+		<div class="flex flex-col w-full max-w-[450px] gap-6">
 			<h1>Share:</h1>
 			<!-- <h1>Buckets</h1>
 			<div class="flex gap-3">
