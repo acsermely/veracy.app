@@ -258,10 +258,7 @@
 				<Plus class="w-6 h-6 text-primary" />
 			</span>
 		</div>
-		<Select
-			type="single"
-			bind:value={age}
-		>
+		<Select type="single" bind:value={age}>
 			<SelectTrigger class="m-x-2 w-fit gap-5 border-none mt-3">
 				Age: {age}
 			</SelectTrigger>

@@ -1,5 +1,5 @@
 import { getContext, setContext } from "svelte";
-import { STORAGE_NODE_URL } from "../constants";
+import { STORAGE_NODE_URL, STORAGE_TOKEN } from "../constants";
 
 export class ContentNode {
 	public url = $state("https://veracy.app:8080");
@@ -14,8 +14,12 @@ export class ContentNode {
 
 	loginCheck = async (): Promise<Response> => {
 		try {
+			const token = localStorage.getItem(STORAGE_TOKEN);
+			const headers = token
+				? { Authorization: `Bearer ${token}` }
+				: undefined;
 			const response = await fetch(`${this.url}/loginCheck`, {
-				credentials: "include",
+				headers,
 				signal: AbortSignal.timeout(5000),
 			});
 			if (response.status === 200) {
@@ -62,7 +66,6 @@ export class ContentNode {
 		}
 		const response = await fetch(`${this.url}/loginChal`, {
 			method: "POST",
-			credentials: "include",
 			body: JSON.stringify({
 				wallet: walletId,
 				challange: challange,
@@ -70,6 +73,9 @@ export class ContentNode {
 		});
 		if (response.ok) {
 			localStorage.setItem(STORAGE_NODE_URL, this.url);
+			const token = await response.text();
+			console.log("Token: ", token);
+			localStorage.setItem(STORAGE_TOKEN, token);
 			this.isConnected = true;
 			return response;
 		}
@@ -92,7 +98,11 @@ export class ContentNode {
 
 	getImage = async (id: string, tx: string): Promise<string> => {
 		let url = `${this.url}/img?id=${id}&tx=${tx}`;
-		return fetch(url, { credentials: "include" }).then((response) => {
+		const token = localStorage.getItem(STORAGE_TOKEN);
+		const headers = token
+			? { Authorization: `Bearer ${token}` }
+			: undefined;
+		return fetch(url, { headers }).then((response) => {
 			if (response.ok) {
 				return response.text();
 			} else if (response.status == 402) {
@@ -111,10 +121,13 @@ export class ContentNode {
 		formData.append("id", id);
 		formData.append("walletId", walletId);
 		formData.append("image", imageDataURL);
-
+		const token = localStorage.getItem(STORAGE_TOKEN);
+		const headers = token
+			? { Authorization: `Bearer ${token}` }
+			: undefined;
 		return fetch(`${this.url}/upload`, {
 			method: "POST",
-			credentials: "include",
+			headers,
 			body: formData,
 		}).then((response) => {
 			if (response.ok) {
@@ -129,9 +142,13 @@ export class ContentNode {
 		content: string,
 		target?: string,
 	): Promise<Response> => {
+		const token = localStorage.getItem(STORAGE_TOKEN);
+		const headers = token
+			? { Authorization: `Bearer ${token}` }
+			: undefined;
 		return fetch(`${this.url}/feedback`, {
 			method: "POST",
-			credentials: "include",
+			headers,
 			body: JSON.stringify({
 				feedbackType,
 				content,
