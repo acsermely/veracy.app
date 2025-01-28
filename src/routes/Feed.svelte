@@ -16,7 +16,6 @@
 	const feedState = getFeedState();
 	const dialogState = getDialogsState();
 
-	let postIds = $derived(feedState.postIds.map((item) => item.id));
 	let loadingMore = $state(false);
 
 	async function fetchData(id: string): Promise<Post> {
@@ -48,9 +47,9 @@
 		onclick={() => (dialogState.feedbackDialog = true)}
 		>Send Feedback</Button
 	>
-	{#if postIds.length}
-		{#each postIds as id}
-			{#await fetchData(id)}
+	{#if feedState.postIds.length}
+		{#each feedState.postIds as post}
+			{#await fetchData(post.id)}
 				<Card class="max-w-[450px] w-full m-5 border-none">
 					<CardHeader class="flex flex-row pb-3">
 						<Skeleton class="w-40 h-12"></Skeleton>
@@ -61,7 +60,7 @@
 					</CardContent>
 				</Card>
 			{:then data}
-				<FeedPost {data} txId={id} />
+				<FeedPost {data} txId={post.id} timestamp={post.timestamp} />
 			{/await}
 		{/each}
 		<div class="my-3 w-full flex flex-col items-center">

@@ -5,7 +5,9 @@
 		CircleAlert,
 		Ellipsis,
 		Loader,
+		MessageSquareWarning,
 		RefreshCcw,
+		Send,
 		ShoppingCart,
 	} from "lucide-svelte";
 	import { link } from "svelte-routing";
@@ -40,14 +42,15 @@
 		data,
 		txId,
 		isPreview,
-	}: { data: Post; txId?: string; isPreview?: boolean } = $props();
+		timestamp,
+	}: { data: Post; txId?: string; isPreview?: boolean; timestamp?: any } =
+		$props();
 
 	const nodeState = getContentNodeState();
 	const walletState = getWalletState();
 	const dialogState = getDialogsState();
 	const watcherState = getWatcherState();
 
-	const shareUrl = $derived(`${location.origin}/post/${txId}`);
 	const isMe = $derived(data.uploader === walletState.wallet?.address);
 	let buyError = $state("");
 	let postActive = $state(false);
@@ -176,7 +179,7 @@
 	}
 </script>
 
-<Card class="max-w-[500px] w-full my-8 border-none shadow-none">
+<Card class="max-w-[500px] w-full my-10 border-none shadow-none">
 	<div class="flex w-full">
 		<a
 			class="flex-1 flex p-3 pb-2 pr-0 cursor-pointer items-center"
@@ -213,47 +216,22 @@
 				</PopoverContent>
 			</Popover>
 		{/if}
-		{#if txId}
+		{#if txId && isMe && hasPrivateContent(data.content)}
 			<Popover>
 				<PopoverTrigger class="mr-2"><Ellipsis /></PopoverTrigger>
 				<PopoverContent class="w-fit flex flex-col gap-1" side="left">
-					{#if txId}
-						<Button
-							variant="outline"
-							size="sm"
-							onclick={() => {
-								navigator.clipboard.writeText(shareUrl);
-								toast.success("Link Copied");
-							}}>Share</Button
-						>
-						<Button
-							variant="outline"
-							size="sm"
-							onclick={() => {
-								nodeState
-									.sendFeedback(
-										"report",
-										`page: ${currentPage}`,
-										txId,
-									)
-									.then(() => toast.success("Reported!"));
-							}}>Report</Button
-						>
-						{#if isMe && hasPrivateContent(data.content)}
-							<Button
-								variant="outline"
-								size="sm"
-								onclick={() => {
-									dialogState.openSetPaymentDialog(
-										data!.id,
-										undefined,
-									);
-								}}
-							>
-								Set New Price
-							</Button>
-						{/if}
-					{/if}
+					<Button
+						variant="outline"
+						size="sm"
+						onclick={() => {
+							dialogState.openSetPaymentDialog(
+								data!.id,
+								undefined,
+							);
+						}}
+					>
+						Set New Price
+					</Button>
 				</PopoverContent>
 			</Popover>
 		{/if}
@@ -454,23 +432,55 @@
 			{/each}
 		</div>
 	</CardContent>
-	{#if data.content.length > 1}
-		<CardFooter class="p-2 flex justify-center w-full flex-wrap">
-			{#each data.content as _, i}
-				<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
-				<span
-					onclick={() => {
-						scrollToContent(i);
-					}}
-					class="px-2 cursor-pointer"
-					class:opacity-100={currentPage === i}
-					class:opacity-30={currentPage !== i}
-				>
+	<CardFooter class="flex flex-col p-0 pb-6">
+		{#if data.content.length > 1}
+			<div class="p-2 flex justify-center w-full flex-wrap">
+				{#each data.content as _, i}
+					<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 					<span
-						class="w-2 h-2 flex items-center text-xs font-extrabold justify-center bg-slate-500 rounded-full"
-					></span>
-				</span>
-			{/each}
-		</CardFooter>
-	{/if}
+						onclick={() => {
+							scrollToContent(i);
+						}}
+						class="px-2 cursor-pointer"
+						class:opacity-100={currentPage === i}
+						class:opacity-30={currentPage !== i}
+					>
+						<span
+							class="w-2 h-2 flex items-center text-xs font-extrabold justify-center bg-slate-500 rounded-full"
+						></span>
+					</span>
+				{/each}
+			</div>
+		{/if}
+		<div class="flex w-full justify-between items-center">
+			<div class="flex">
+				<Button
+					variant="ghost"
+					title="Share"
+					onclick={() => {
+						dialogState.openShareDialog(txId);
+					}}
+				>
+					<Send />
+				</Button>
+				<!-- <Button variant="ghost">
+						<Save />
+					</Button> -->
+			</div>
+			<small class="text-muted-foreground text-xs"
+				>{new Date(timestamp).toLocaleDateString()}</small
+			>
+			<Button
+				title="Report"
+				variant="ghost"
+				onclick={() => {
+					nodeState
+						.sendFeedback("report", `page: ${currentPage}`, txId)
+						.then(() => toast.success("Reported!"));
+				}}
+			>
+				<MessageSquareWarning />
+			</Button>
+		</div>
+	</CardFooter>
 </Card>

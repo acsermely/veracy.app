@@ -144,12 +144,9 @@ export class ArweaveUtils {
 			data.data.transactions.edges.map((item) => ({
 				id: item.node.id,
 				cursor: item.cursor,
+				timestamp: item.node.timestamp,
 			})),
 		);
-		// return Promise.resolve().then(() => {
-		//   let data: ArQueryResult<ArQueryIds> = JSON.parse(allPostsMock);
-		//   return data.data.transactions.edges.map((item) => item.node.id);
-		// });
 	}
 
 	static async getAllPostsIdForWallet(walletId: string): Promise<string[]> {
@@ -158,12 +155,6 @@ export class ArweaveUtils {
 		).then((data) =>
 			data.data.transactions.edges.map((item) => item.node.id),
 		);
-		// return Promise.resolve().then(() => {
-		//   let data: ArQueryResult<ArQueryNodes> = JSON.parse(allPostsForWallet);
-		//   return data.data.transactions.edges
-		//     .filter((item) => item.node.owner.address === walletId)
-		//     .map((item) => item.node.id);
-		// });
 	}
 
 	static async getPriceForPost(
@@ -292,7 +283,8 @@ export function queryPosts(cursor?: string) {
         {
             edges {
 				node {
-					id
+					id,
+					timestamp
 				},
 				cursor
 			}
@@ -369,7 +361,8 @@ export function queryProfileData(sender: string): { query: string } {
 			{
 				edges {
 					node {
-						id
+						id,
+						timestamp
 					}
 				}
 			}
@@ -402,6 +395,7 @@ export function queryAllUserAddresses(): { query: string } {
 export type ArQueryCursoredIds = {
 	node: {
 		id: string;
+		timestamp: any;
 	};
 	cursor: string;
 };
@@ -429,6 +423,7 @@ export type ArQueryResult<T> = {
 export type ArPostIdResult = {
 	id: string;
 	cursor: string;
+	timestamp: any;
 };
 
 export type ArPaymentResult = {

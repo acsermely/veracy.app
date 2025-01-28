@@ -5,6 +5,11 @@ export class DialogsState {
 
 	public feedbackDialog = $state(false);
 
+	public shareSheet = $state(false);
+	public shareSheetContent = $state<{
+		txId?: string;
+	}>();
+
 	public buyDialog = $state(false);
 	public buyDialogContent = $state<{
 		id: string;
@@ -47,6 +52,16 @@ export class DialogsState {
 		if (this._buyResolver) {
 			this._buyResolver();
 		}
+	}
+
+	public openShareDialog(txId?: string): void {
+		this.shareSheetContent = { txId };
+		this.shareSheet = true;
+	}
+
+	public closeShareDialog(): void {
+		this.shareSheet = false;
+		this.shareSheetContent = undefined;
 	}
 }
 
