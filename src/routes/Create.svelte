@@ -9,6 +9,7 @@
 	import {
 		genPostId,
 		type Post,
+		type PostAge,
 		type PostContent,
 	} from "../lib/models/post.model";
 	import { getDialogsState } from "../lib/state/dialogs.svelte";
@@ -28,7 +29,7 @@
 	const nodeState = getContentNodeState();
 	const dialogsState = getDialogsState();
 
-	let title = $state(undefined);
+	let age = $state<PostAge>("12+");
 	let tags = $state<string[]>([""]);
 	let data = $state<Partial<PostContent>[]>([{}]);
 	let fullPostData = $state<Post>();
@@ -72,8 +73,8 @@
 
 		let postData: Post = {
 			id,
+			age,
 			tags,
-			title,
 			uploader: walletState.wallet.address,
 			content,
 		};
@@ -144,7 +145,7 @@
 		</div>
 	{/if}
 	{#if currentStep == 0}
-		<CreateContent bind:data />
+		<CreateContent bind:data bind:age />
 		<!-- {:else if currentStep == 1}
 		<CreateDetails
 			bind:tags
@@ -153,7 +154,7 @@
 			needPrice={hasPrivateContent(data)}
 		/> -->
 	{:else if currentStep == 1}
-		<CreateUpload {data} {title} {tags} />
+		<CreateUpload {data} {age} {tags} />
 	{:else if currentStep == 2}
 		<CreateFinish
 			bind:data={fullPostData}

@@ -38,7 +38,7 @@
 			pattern="[0-9]"
 			bind:value={pin[index]}
 			onkeyup={(e) => handleKeyDown(index, e)}
-			bind:inputRef={inputRefs[index]}
+			bind:ref={inputRefs[index]}
 			aria-label={`PIN digit 1`}
 		/>
 	{/each}

@@ -68,9 +68,6 @@ export class ArweaveUtils {
 		tx.addTag("Content-Type", TX_APP_CONTENT_TYPE);
 		tx.addTag("Version", TX_APP_VERSION);
 		tx.addTag("Type", TxType.POST);
-		if (data.title) {
-			tx.addTag("Post-Title", data.title);
-		}
 		if (data.tags && data.tags.length > 0) {
 			tx.addTag("Post-Tags", data.tags.join(" "));
 		}
