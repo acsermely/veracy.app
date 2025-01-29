@@ -146,11 +146,16 @@ export class ArweaveUtils {
 		);
 	}
 
-	static async getAllPostsIdForWallet(walletId: string): Promise<string[]> {
+	static async getAllPostsIdForWallet(
+		walletId: string,
+	): Promise<ArPostIdResult[]> {
 		return ArweaveUtils.query<ArQueryResult<ArQueryCursoredIds>>(
 			queryProfileData(walletId),
 		).then((data) =>
-			data.data.transactions.edges.map((item) => item.node.id),
+			data.data.transactions.edges.map((item) => ({
+				id: item.node.id,
+				timestamp: item.node.timestamp,
+			})),
 		);
 	}
 
@@ -400,6 +405,7 @@ export type ArQueryCursoredIds = {
 export type ArQueryIds = {
 	node: {
 		id: string;
+		timestamp?: any;
 	};
 };
 
@@ -419,7 +425,7 @@ export type ArQueryResult<T> = {
 
 export type ArPostIdResult = {
 	id: string;
-	cursor: string;
+	cursor?: string;
 	timestamp: any;
 };
 

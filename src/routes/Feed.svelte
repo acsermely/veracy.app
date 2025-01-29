@@ -9,12 +9,13 @@
 	import Card from "../lib/components/ui/card/card.svelte";
 	import Skeleton from "../lib/components/ui/skeleton/skeleton.svelte";
 	import type { Post } from "../lib/models/post.model";
-	import { getDialogsState } from "../lib/state";
+	import { getDialogsState, getWalletState } from "../lib/state";
 	import { getFeedState } from "../lib/state/feed.svelte";
 	import { ArweaveUtils } from "../lib/utils/arweave.utils";
 
 	const feedState = getFeedState();
 	const dialogState = getDialogsState();
+	const walletState = getWalletState();
 
 	let loadingMore = $state(false);
 
@@ -41,12 +42,19 @@
 	bind:scrollPosition={feedState.scrollPosition}
 >
 	<div id="top" class="w-0 h-0"></div>
-	<Button
-		variant="outline"
-		class="w-full m-3 max-w-[450px]"
-		onclick={() => (dialogState.feedbackDialog = true)}
-		>Send Feedback</Button
-	>
+	{#if !walletState.hasWallet}
+		<Button
+			class="w-full m-3 max-w-[450px]"
+			onclick={() => (dialogState.connectDialog = true)}>Login</Button
+		>
+	{:else}
+		<Button
+			variant="outline"
+			class="w-full m-3 max-w-[450px]"
+			onclick={() => (dialogState.feedbackDialog = true)}
+			>Send Feedback</Button
+		>
+	{/if}
 	{#if feedState.postIds.length}
 		{#each feedState.postIds as post}
 			{#await fetchData(post.id)}

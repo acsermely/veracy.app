@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ChevronLeft, Loader } from "lucide-svelte";
 	import { navigate } from "svelte-routing";
-	import MainPost from "../lib/components/feed/FeedPost.svelte";
+	import FeedPost from "../lib/components/feed/FeedPost.svelte";
 	import { Button } from "../lib/components/ui/button";
 	import type { Post } from "../lib/models/post.model";
 	import { getContentNodeState, getDialogsState } from "../lib/state";
@@ -30,7 +30,7 @@
 			{#await ArweaveUtils.getTxById<Post>(id)}
 				<Loader class="mt-20 size-10 animate-spin" />
 			{:then data}
-				<MainPost {data} txId={id} />
+				<FeedPost {data} txId={id} />
 			{/await}
 		{:else}
 			<Button

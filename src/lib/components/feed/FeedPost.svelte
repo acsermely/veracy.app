@@ -470,9 +470,11 @@
 						<Save />
 					</Button> -->
 				</div>
-				<small class="text-muted-foreground text-xs"
-					>{new Date(timestamp).toLocaleDateString()}</small
-				>
+				{#if timestamp}
+					<small class="text-muted-foreground text-xs"
+						>{new Date(timestamp).toLocaleDateString()}</small
+					>
+				{/if}
 				<Button
 					title="Report"
 					variant="ghost"

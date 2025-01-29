@@ -5,7 +5,7 @@
 		type PostContent,
 	} from "../../models/post.model";
 	import { getWalletState } from "../../state/wallet.svelte";
-	import MainPost from "../feed/FeedPost.svelte";
+	import FeedPost from "../feed/FeedPost.svelte";
 
 	const walletState = getWalletState();
 
@@ -32,5 +32,5 @@
 </script>
 
 <div class="flex-1 flex flex-col items-center w-full max-h-full">
-	<MainPost data={previewPost} isPreview></MainPost>
+	<FeedPost data={previewPost} isPreview />
 </div>

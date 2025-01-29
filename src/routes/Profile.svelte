@@ -13,7 +13,10 @@
 	import type { Post } from "../lib/models/post.model";
 	import { getDialogsState } from "../lib/state/dialogs.svelte";
 	import { getWalletState } from "../lib/state/wallet.svelte";
-	import { ArweaveUtils } from "../lib/utils/arweave.utils";
+	import {
+		ArweaveUtils,
+		type ArPostIdResult,
+	} from "../lib/utils/arweave.utils";
 
 	const { walletId }: { walletId: string } = $props();
 
@@ -25,7 +28,7 @@
 		queryData();
 	});
 
-	let postIds = $state<string[]>();
+	let postIds = $state<ArPostIdResult[]>();
 	let balance = $state<string>();
 	const queryData = async (): Promise<void> => {
 		postIds = await ArweaveUtils.getAllPostsIdForWallet(walletId);
@@ -109,8 +112,8 @@
 	</div>
 	<div class="w-full flex flex-col items-center max-w-[450px]">
 		{#if postIds}
-			{#each postIds as id}
-				{#await fetchData(id)}
+			{#each postIds as post}
+				{#await fetchData(post.id)}
 					<Card class="w-full my-5">
 						<CardHeader class="flex flex-row pb-3">
 							<Skeleton class="w-40 h-12"></Skeleton>
@@ -121,7 +124,11 @@
 						</CardContent>
 					</Card>
 				{:then data}
-					<FeedPost {data} txId={id} />
+					<FeedPost
+						{data}
+						txId={post.id}
+						timestamp={post.timestamp}
+					/>
 				{/await}
 			{/each}
 		{/if}

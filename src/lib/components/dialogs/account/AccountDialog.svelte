@@ -23,18 +23,16 @@
 	const nodeState = getContentNodeState();
 
 	$effect(() => {
-		if (!walletState.wallet) {
+		if (!dialogsState.connectDialog) {
+			currentView = undefined;
+		} else {
+			if (!walletState.wallet) {
 			currentView = "Wallets";
 		} else if (!nodeState.isConnected) {
 			currentView = "Server";
 		} else {
 			currentView = undefined;
 		}
-	});
-
-	$effect(() => {
-		if (!dialogsState.connectDialog) {
-			currentView = undefined;
 		}
 	});
 
