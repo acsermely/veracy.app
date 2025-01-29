@@ -122,7 +122,7 @@
 			></Textarea>
 			{#if createType === "new"}
 				<div>Save your Seedphrase:</div>
-				<div class="flex w-full gap-3">
+				<div class="flex w-full gap-3 items-baseline">
 					<Button
 						class="flex-1"
 						variant="outline"
@@ -134,8 +134,9 @@
 							navigator.clipboard.writeText(mnemonic);
 							toast.success("Passphrase Copied");
 							seedSaved = true;
-						}}>Copy Seedphrase</Button
+						}}>Copy</Button
 					>
+					or
 					<Button
 						class="flex-1"
 						variant="outline"
@@ -147,7 +148,7 @@
 							const fileName = `seedphrase_${mnemonic.slice(0, 3).trim()}.txt`;
 							downloadFile(fileName, mnemonic, "text/plain");
 							seedSaved = true;
-						}}>Download Seedphrase</Button
+						}}>Download</Button
 					>
 				</div>
 			{/if}
@@ -218,13 +219,14 @@
 		{#if walletState.wallet?.address}
 			<div
 				class="flex bg-green-500 border-green-500 bg-opacity-30 border-2 items-center
-						justify-center rounded-md my-1 px-5 h-12
+						justify-evenly rounded-md my-1 px-5 h-12
 						text-primary w-full transition"
 			>
-				{walletState.wallet?.address.slice(0, 15)}...
+				{walletState.wallet?.address.slice(0, 10)}...
 				<Button
 					class="ml-2 hover:bg-opacity-30 cursor-copy"
 					variant="ghost"
+					size="icon"
 					onclick={copyAddress}
 				>
 					<Copy onclick={copyAddress} />
@@ -232,6 +234,7 @@
 				<Button
 					variant="ghost"
 					class="hover:bg-opacity-30 cursor-pointer"
+					size="icon"
 					onclick={downloadJsonKey}
 				>
 					<Download onclick={downloadJsonKey} />
@@ -261,11 +264,15 @@
 							walletState.useWallet(wallet);
 						}}
 					>
-						<Avatar class="mr-3">
-							<AvatarFallback>{wallet.slice(0, 2)}</AvatarFallback
+						<Avatar
+							class="mr-3 bg-gradient-to-bl from-amber-500 via-blue-500 to-teal-500"
+						>
+							<AvatarFallback
+								class="font-extrabold bg-transparent text-white"
+								>{wallet.slice(0, 2)}</AvatarFallback
 							>
 						</Avatar>
-						{wallet.slice(0, 20)}...
+						{wallet.slice(0, 15)}...
 					</Button>
 				{/each}
 			{:catch}

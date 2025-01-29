@@ -27,12 +27,12 @@
 			currentView = undefined;
 		} else {
 			if (!walletState.wallet) {
-			currentView = "Wallets";
-		} else if (!nodeState.isConnected) {
-			currentView = "Server";
-		} else {
-			currentView = undefined;
-		}
+				currentView = "Wallets";
+			} else if (!nodeState.isConnected) {
+				currentView = "Server";
+			} else {
+				currentView = undefined;
+			}
 		}
 	});
 
@@ -99,7 +99,7 @@
 					class:border-yellow-500={!walletState.wallet?.address}
 				>
 					{#if walletState.wallet?.address}
-						Wallet: {walletState.wallet!.address.slice(0, 15)}...
+						Wallet: {walletState.wallet!.address.slice(0, 10)}...
 						<Button
 							class="ml-2 hover:bg-opacity-30 cursor-copy"
 							variant="ghost"

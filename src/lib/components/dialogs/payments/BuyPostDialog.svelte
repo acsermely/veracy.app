@@ -116,12 +116,12 @@
 					<div class="flex justify-between items-center">
 						<small>Fee:</small><small
 							>~{ArweaveUtils.arweave.ar.winstonToAr(fee, {
-								decimals: 6,
+								decimals: 8,
 							})} AR</small
 						>
 					</div>
 					<div class="flex justify-between items-center">
-						<b>Total:</b><b>{totalPrice} AR</b>
+						<b>Total:</b><b>{totalPrice.toFixed(8)} AR</b>
 					</div>
 				{/if}
 			{/if}
