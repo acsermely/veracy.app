@@ -419,7 +419,7 @@
 											>(somehow)</small
 										> -->
 									{:else}
-										Login to see images!
+										Login to see this image!
 										<Button
 											onclick={() =>
 												(dialogState.connectDialog = true)}
