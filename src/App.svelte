@@ -11,9 +11,11 @@
 	import { setWatcherState } from "./lib/state/watcher.svelte";
 	import Create from "./routes/Create.svelte";
 	import Feed from "./routes/Feed.svelte";
+	import PrivacyPolicy from "./routes/PrivacyPolicy.svelte";
 	import Profile from "./routes/Profile.svelte";
 	import Search from "./routes/Search.svelte";
 	import SinglePost from "./routes/SinglePost.svelte";
+	import TermsOfUse from "./routes/TermsOfUse.svelte";
 
 	const feedState = setFeedState();
 	setWalletState();
@@ -63,6 +65,12 @@
 			</Route>
 			<Route path="/search">
 				<Search />
+			</Route>
+			<Route path="/terms-of-use">
+				<TermsOfUse />
+			</Route>
+			<Route path="/privacy-policy">
+				<PrivacyPolicy />
 			</Route>
 		</Router>
 	</div>
