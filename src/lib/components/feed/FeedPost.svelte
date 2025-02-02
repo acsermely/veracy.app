@@ -262,7 +262,7 @@
 		</div>
 		<div
 			class="relative inline-flex w-full overflow-x-scroll overflow-y-hidden scroll-smooth snap-x snap-mandatory max-h-[70dvh]"
-			style="scrollbar-color: rgba(128, 128, 128, .5) rgba(0, 0, 0, 0); scrollbar-width: thin;"
+			style="scrollbar-color: rgba(128, 128, 128, .5) rgba(0, 0, 0, 0); scrollbar-width: none;"
 			onscroll={(event: UIEvent) => {
 				const target = event.target as HTMLElement;
 				if (!target) {

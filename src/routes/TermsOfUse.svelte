@@ -5,7 +5,7 @@
 	const contactEmail = "csermely.a.dev@gmail.com";
 </script>
 
-<div class="max-w-3xl px-4 py-8 text-primary overflow-auto w-full">
+<div class="p-16 text-primary overflow-auto min-w-full">
 	<h1 class="text-5xl font-bold mb-8">Terms of Use</h1>
 
 	<div class="mb-12">
