@@ -4,6 +4,7 @@
 	import type { Post } from "../../models/post.model";
 	import { getDialogsState } from "../../state/dialogs.svelte";
 	import { getFeedState } from "../../state/feed.svelte";
+	import { getWatcherState } from "../../state/watcher.svelte";
 	import { Button, buttonVariants } from "../ui/button";
 	import { Input } from "../ui/input";
 
@@ -21,6 +22,7 @@
 
 	const feedState = getFeedState();
 	const dialogState = getDialogsState();
+	const watcherState = getWatcherState();
 
 	let alreadyPaid = $state(false);
 	let price = $state<number>();
@@ -60,7 +62,12 @@
 				onclick={() => {
 					dialogState
 						.openSetPaymentDialog(data!.id, price!)
-						.then((success) => (alreadyPaid = success));
+						.then((success) => {
+							if (success) {
+								watcherState.add(data!.id, "set-price");
+							}
+							alreadyPaid = success;
+						});
 				}}
 			>
 				{#if price}

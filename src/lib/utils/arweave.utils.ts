@@ -160,13 +160,13 @@ export class ArweaveUtils {
 	}
 
 	static async getPriceForPost(
-		tx: string,
+		postId: string,
 		uploader: string,
 	): Promise<string[]> {
 		return ArweaveUtils.arweave.api
 			.post<ArQueryResult<ArQueryIds>>(
 				"/graphql",
-				queryPriceForTx(tx, uploader),
+				queryPriceForTx(postId, uploader),
 			)
 			.then((response) => response.data)
 			.then((data) =>

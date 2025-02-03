@@ -3,6 +3,7 @@
 		AlignCenterVertical,
 		AlignEndVertical,
 		AlignStartVertical,
+		CircleAlert,
 		Plus,
 		X,
 	} from "lucide-svelte";
@@ -30,6 +31,7 @@
 	}: { data: Partial<PostContent>[]; age: PostAge } = $props();
 
 	let textAreaElementRef = $state<HTMLTextAreaElement | null>(null);
+	let compressing = $state(false);
 
 	function deleteData(index: number): void {
 		if (data.length < 2) {
@@ -56,25 +58,17 @@
 			if (!data[index]) {
 				return;
 			}
-			data[index].data = await compressImageInput(fileList[0]);
+			try {
+				compressing = true;
+				data[index].data = await compressImageInput(fileList[0]);
+			} finally {
+				compressing = false;
+			}
 		}
 	}
 </script>
 
 <Card class="max-w-[450px] w-full m-5 border-none">
-	<!-- <CardHeader class="p-0 items-center">
-		<Select type="single" bind:value={age}>
-			<SelectTrigger class="m-x-2 w-fit gap-5 border-none">
-				<SelectValue placeholder="Age: 12+" />
-			</SelectTrigger>
-			<SelectContent>
-				<SelectItem value="3+">Age: 3+</SelectItem>
-				<SelectItem value="12+">Age: 12+</SelectItem>
-				<SelectItem value="16+">Age: 16+</SelectItem>
-				<SelectItem value="18+">Age: 18+</SelectItem>
-			</SelectContent>
-		</Select>
-	</CardHeader> -->
 	<CardContent class="p-0 border-2">
 		<div
 			class="inline-flex w-full overflow-x-scroll overflow-y-hidden scroll-smooth snap-x snap-mandatory max-h-[70vh]"
@@ -91,36 +85,45 @@
 							class:justify-between={content.type}
 						>
 							{#if content.type === "IMG"}
-								<Select
-									type="single"
-									value={content.privacy as string}
-									onValueChange={(v) => {
-										if (!v) {
-											return;
-										}
-										content.privacy =
-											v as PostContentPrivacy;
-									}}
-								>
-									<SelectTrigger
-										class="m-x-2 w-fit gap-3 border-none focus:ring-transparent"
+								<div class="flex items-center">
+									<Select
+										type="single"
+										value={content.privacy as string}
+										onValueChange={(v) => {
+											if (!v) {
+												return;
+											}
+											content.privacy =
+												v as PostContentPrivacy;
+										}}
 									>
-										{(content.privacy
-											?.slice(0, 1)
-											?.toUpperCase() || "P") +
-											(content?.privacy
-												?.slice(1)
-												.toLowerCase() || "ublic")}
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="PUBLIC"
-											>Public</SelectItem
+										<SelectTrigger
+											class="m-x-2 w-fit gap-3 border-none focus:ring-transparent"
 										>
-										<SelectItem value="PRIVATE"
-											>Private</SelectItem
+											{(content.privacy
+												?.slice(0, 1)
+												?.toUpperCase() || "P") +
+												(content?.privacy
+													?.slice(1)
+													.toLowerCase() || "ublic")}
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="PUBLIC"
+												>Public</SelectItem
+											>
+											<SelectItem value="PRIVATE"
+												>Private</SelectItem
+											>
+										</SelectContent>
+									</Select>
+									{#if content.privacy === "PRIVATE"}
+										<span class="flex items-center text-xs"
+											><CircleAlert
+												class="text-yellow-500 mx-2"
+											/> Activation Payment Required</span
 										>
-									</SelectContent>
-								</Select>
+									{/if}
+								</div>
 							{:else if content.type === "TEXT"}
 								<div>
 									<Button
@@ -196,15 +199,21 @@
 						{:else if content.type === "IMG"}
 							{#if !content.data}
 								<div
-									class=" flex-1 flex items-center justify-center"
+									class="flex-1 flex flex-col items-center justify-center"
 								>
-									<Input
-										class="w-min cursor-pointer before:cursor-pointer hover:border-slate-400"
-										type="file"
-										accept="image/*"
-										onchange={(event: Event) =>
-											mediaSelected(i, event)}
-									/>
+									{#if compressing}
+										<div class="animate-pulse p-5">
+											Processing...
+										</div>
+									{:else}
+										<Input
+											class="w-min cursor-pointer before:cursor-pointer hover:border-slate-400"
+											type="file"
+											accept="image/*"
+											onchange={(event: Event) =>
+												mediaSelected(i, event)}
+										/>
+									{/if}
 								</div>
 							{:else}
 								<img
@@ -263,7 +272,6 @@
 				Age: {age}
 			</SelectTrigger>
 			<SelectContent>
-				<SelectItem value="3+">Age: 3+</SelectItem>
 				<SelectItem value="12+">Age: 12+</SelectItem>
 				<SelectItem value="16+">Age: 16+</SelectItem>
 				<SelectItem value="18+">Age: 18+</SelectItem>

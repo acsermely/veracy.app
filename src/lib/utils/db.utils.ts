@@ -11,7 +11,9 @@ export type DbWalletEntry = {
 
 export type DbWatcherEntry = {
 	id: string;
-	data?: any;
+	data: {
+		type: "set-price" | "payment";
+	};
 };
 
 export class DB {
@@ -137,17 +139,18 @@ export class DB {
 	}
 
 	//Watcher
-	static async addWatcher(id: string, data?: any): Promise<void> {
+	static async addWatcher(
+		id: string,
+		data: { type: "set-price" | "payment" },
+	): Promise<void> {
 		return this.add(DB_STORE_WATCHER, {
 			id,
 			data,
 		});
 	}
 
-	static async getWatcher(id: string): Promise<string> {
-		return this.get<DbWatcherEntry>(DB_STORE_WATCHER, id).then(
-			(data) => data?.id,
-		);
+	static async getWatcher(id: string): Promise<DbWatcherEntry> {
+		return this.get<DbWatcherEntry>(DB_STORE_WATCHER, id);
 	}
 
 	static async getAllWatcher(): Promise<string[]> {

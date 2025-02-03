@@ -1,7 +1,7 @@
 import { getContext, setContext } from "svelte";
 
 export class DialogsState {
-	public connectDialog = $state(true);
+	public connectDialog = $state(false);
 
 	public feedbackDialog = $state(false);
 

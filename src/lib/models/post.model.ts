@@ -1,7 +1,7 @@
 export type PostContentType = "TEXT" | "IMG";
 export type PostContentPrivacy = "PUBLIC" | "PRIVATE";
 export type PostContentAlign = "left" | "center" | "right";
-export type PostAge = "3+" | "12+" | "16+" | "18+";
+export type PostAge = "12+" | "16+" | "18+";
 
 export type Post = {
 	id: string;
@@ -9,7 +9,6 @@ export type Post = {
 	age: PostAge;
 	tags?: string[];
 	uploader: string;
-	// settings?: PostSettings;
 };
 
 export type PostContent = {

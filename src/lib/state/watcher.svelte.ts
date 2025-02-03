@@ -10,7 +10,7 @@ const WATCHER_INTERVAL = 5000;
 export class Watcher {
 	private _interval?: number;
 	private _walletState = getWalletState();
-	private _promiseMap = new Map<string, () => void>();
+	private _promiseMap = new Map<string, (() => void)[]>();
 
 	constructor() {
 		DB.getAllWatcher().then((list) => {
@@ -30,10 +30,19 @@ export class Watcher {
 					return;
 				}
 				for (const id of list) {
-					const tx = await ArweaveUtils.getPaymentForPost(
-						id,
-						this._walletState.wallet.address,
-					);
+					const item = await DB.getWatcher(id);
+					let tx: string[] = [];
+					if (item.data.type === "payment") {
+						tx = await ArweaveUtils.getPaymentForPost(
+							id,
+							this._walletState.wallet.address,
+						).catch(() => []);
+					} else if (item.data.type === "set-price") {
+						tx = await ArweaveUtils.getPriceForPost(
+							id,
+							this._walletState.wallet.address,
+						).catch(() => []);
+					}
 					if (tx.length > 0) {
 						this.remove(id);
 					}
@@ -44,30 +53,38 @@ export class Watcher {
 
 	private remove(id: string): void {
 		DB.removeWatcher(id);
-		const resolver = this._promiseMap.get(id);
-		if (resolver) {
-			resolver();
+		const resolvers = this._promiseMap.get(id);
+		if (resolvers) {
+			resolvers.forEach((resolver) => resolver());
 			this._promiseMap.delete(id);
 		}
-		toast.success("Payment Completed. Go to the Post!", {
-			duration: 4000,
-			action: {
-				label: "Go",
-				onClick: () => navigate("/post/" + id),
-			},
-		});
 	}
 	/**
 	 * Add Post to transaction Watcher
 	 * @param id Post TxId
 	 * @returns Promise that resolves when the tansaction is complete
 	 */
-	public async add(id: string): Promise<void> {
+	public async add(id: string, type: "set-price" | "payment"): Promise<void> {
 		if (!this._interval) {
 			this._startInterval();
 		}
-		DB.addWatcher(id);
-		return new Promise((resolve) => this._promiseMap.set(id, resolve));
+		DB.addWatcher(id, { type });
+		return new Promise((resolve) => {
+			if (this._promiseMap.get(id)) {
+				this._promiseMap.get(id)?.push(resolve);
+			} else {
+				this._promiseMap.set(id, [resolve]);
+			}
+		});
+	}
+
+	public getPromise(id: string): Promise<void> {
+		if (this._promiseMap.get(id)) {
+			return new Promise((resolve) =>
+				this._promiseMap.get(id)?.push(resolve),
+			);
+		}
+		throw "No Id";
 	}
 }
 

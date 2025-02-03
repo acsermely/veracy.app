@@ -32,8 +32,8 @@
 			dialogState.connectDialog = false;
 			return;
 		}
-		nodeState.loginCheck().then(() => {
-			dialogState.connectDialog = false;
+		nodeState.loginCheck().catch(() => {
+			dialogState.connectDialog = true;
 		});
 	});
 

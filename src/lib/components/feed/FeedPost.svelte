@@ -10,7 +10,7 @@
 		Send,
 		ShoppingCart,
 	} from "lucide-svelte";
-	import { link } from "svelte-routing";
+	import { link, navigate } from "svelte-routing";
 	import { toast } from "svelte-sonner";
 	import { SvelteMap } from "svelte/reactivity";
 	import { fade } from "svelte/transition";
@@ -153,21 +153,43 @@
 			return;
 		}
 		await dialogState.openBuyDialog(txId, postPrice);
-		watcherState.add(txId).then(() => {
+		watcherState.add(txId, "payment").then(() => {
 			refreshWatcher();
+			toast.success("Payment Completed. Go to the Post!", {
+				duration: 4000,
+				action: {
+					label: "Go",
+					onClick: () => navigate("/post/" + txId),
+				},
+			});
 		});
 		dataPromises.set(id, getImagePromise(id));
 		refreshWatcher();
 	}
 
 	async function refreshWatcher(): Promise<boolean> {
-		if (!txId) {
-			isWatcherActive = false;
-			return false;
-		}
-		return DB.getWatcher(txId).then((item) => {
-			isWatcherActive = !!item;
-			return !!item;
+		return Promise.all([
+			DB.getWatcher(txId || ""), // Payment watcher
+			DB.getWatcher(data.id || ""), // Set-payment watcher
+		]).then(([itemTx, itemId]) => {
+			if (itemId) {
+				watcherState
+					.getPromise(data.id)
+					.then(() => {
+						checkPrice();
+						refreshWatcher();
+						toast.success("Post activated!", {
+							duration: 4000,
+							action: {
+								label: "Go",
+								onClick: () => navigate("/post/" + txId),
+							},
+						});
+					})
+					.catch();
+			}
+			isWatcherActive = !!itemTx?.id || !!itemId?.id;
+			return isWatcherActive;
 		});
 	}
 
@@ -201,7 +223,7 @@
 					<CardTitle>{data.title}</CardTitle>
 				{/if} -->
 				<CardDescription
-					>{data.uploader?.slice(0, 25)}...</CardDescription
+					>{data.uploader?.slice(0, 20)}...</CardDescription
 				>
 			</CardHeader>
 		</a>
@@ -217,11 +239,16 @@
 					Altered or corrupted content!
 				</PopoverContent>
 			</Popover>
+		{:else if postPrice}
+			<span
+				class="flex text-muted-foreground items-center min-h-full text-sm mr-3"
+				>{postPrice.toFixed(2)} AR</span
+			>
 		{/if}
 		<Popover>
 			<PopoverTrigger class="mr-2"><Ellipsis /></PopoverTrigger>
-			<PopoverContent class="w-fit flex flex-col gap-1" side="left">
-				<div class="text-muted-foreground">
+			<PopoverContent class="w-fit flex flex-col gap-3" side="left">
+				<div class="text-muted-foreground text-center">
 					Age: <span class="text-primary">{data.age}</span>
 				</div>
 				{#if txId && isMe && hasPrivateContent(data.content)}
@@ -229,10 +256,19 @@
 						variant="outline"
 						size="sm"
 						onclick={() => {
-							dialogState.openSetPaymentDialog(
-								data!.id,
-								undefined,
-							);
+							dialogState
+								.openSetPaymentDialog(data!.id, undefined)
+								.then((success) => {
+									if (success) {
+										watcherState
+											.add(data!.id, "set-price")
+											.then(() => {
+												checkPrice();
+												refreshWatcher();
+											});
+										refreshWatcher();
+									}
+								});
 						}}
 					>
 						Set New Price
@@ -331,31 +367,57 @@
 								<div
 									class="flex flex-col justify-center items-center"
 								>
-									<span>Activate your Post!</span>
-									<Input
-										class="my-5"
-										maxlength={4}
-										bind:value={newPrice}
-										type="number"
-										placeholder="Set Price..."
-									/>
-									<Button
-										disabled={!newPrice}
-										onclick={() => {
-											dialogState
-												.openSetPaymentDialog(
-													data.id,
-													newPrice!,
-												)
-												.then(() => checkPrice());
-										}}
-									>
-										{#if newPrice}
-											Send {newPrice} AR
-										{:else}
-											Set Price
-										{/if}
-									</Button>
+									{#if isWatcherActive}
+										<span>Processing Payment!</span>
+										<small>
+											You will be notified when it's done!
+										</small>
+										<Button
+											class="my-5"
+											onclick={() => refreshWatcher()}
+										>
+											<RefreshCcw class="mr-1" />
+										</Button>
+									{:else}
+										<span>Activate your Post!</span>
+										<Input
+											class="my-5"
+											maxlength={4}
+											bind:value={newPrice}
+											type="number"
+											placeholder="Set Price..."
+										/>
+										<Button
+											disabled={!newPrice}
+											onclick={() => {
+												dialogState
+													.openSetPaymentDialog(
+														data.id,
+														newPrice!,
+													)
+													.then((success) => {
+														if (success) {
+															watcherState
+																.add(
+																	data!.id,
+																	"set-price",
+																)
+																.then(() => {
+																	checkPrice();
+																	refreshWatcher();
+																});
+															refreshWatcher();
+														}
+													});
+											}}
+										>
+											{#if newPrice}
+												Send {newPrice} AR
+											{:else}
+												Set Price
+											{/if}
+										</Button>
+									{/if}
 								</div>
 							{:else}
 								<div
