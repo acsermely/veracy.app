@@ -74,7 +74,6 @@ export class ContentNode {
 		if (response.ok) {
 			localStorage.setItem(STORAGE_NODE_URL, this.url);
 			const token = await response.text();
-			console.log("Token: ", token);
 			localStorage.setItem(STORAGE_TOKEN, token);
 			this.isConnected = true;
 			return response;
