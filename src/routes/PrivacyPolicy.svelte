@@ -3,6 +3,13 @@
 	const operatorName = "Attila Csermely";
 	const lastUpdated = "2025-02-02";
 	const contactEmail = "csermely.a.dev@gmail.com";
+
+	$effect(() => {
+		document.title = "Privacy Policy";
+		return () => {
+			document.title = "Veracy";
+		};
+	});
 </script>
 
 <div class="p-16 text-primary overflow-auto w-full">

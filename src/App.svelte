@@ -27,8 +27,14 @@
 	let url = $state("");
 	let installPromt = $state<any>();
 
-	nodeState.loginCheck().then(() => {
-		dialogState.connectDialog = false;
+	$effect(() => {
+		if (["/terms-of-use", "/privacy-policy"].includes(location.pathname)) {
+			dialogState.connectDialog = false;
+			return;
+		}
+		nodeState.loginCheck().then(() => {
+			dialogState.connectDialog = false;
+		});
 	});
 
 	feedState.queryData();

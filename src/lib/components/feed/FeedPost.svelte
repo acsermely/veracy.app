@@ -36,6 +36,7 @@
 	import { Input } from "../ui/input";
 	import { Popover, PopoverTrigger } from "../ui/popover";
 	import PopoverContent from "../ui/popover/popover-content.svelte";
+	import RepostPostDialog from "./RepostPostDialog.svelte";
 
 	const {
 		data,
@@ -57,6 +58,8 @@
 	let newPrice = $state<number>();
 	let isWatcherActive = $state(true);
 	let currentPage = $state(0);
+
+	let openReport = $state(false);
 
 	let hashValid = $state<boolean[]>(data.content.map(() => true));
 	let dataPromises =
@@ -284,7 +287,7 @@
 				>
 					{#if content.type === "TEXT"}
 						<pre
-							class="min-w-full p-5 text-wrap break-words"
+							class="border-y-2 min-w-full p-5 text-wrap break-words"
 							class:text-left={content.align === "left"}
 							class:text-center={content.align === "center"}
 							class:text-right={content.align ===
@@ -478,15 +481,7 @@
 				<Button
 					title="Report"
 					variant="ghost"
-					onclick={() => {
-						nodeState
-							.sendFeedback(
-								"report",
-								`page: ${currentPage}`,
-								txId,
-							)
-							.then(() => toast.success("Reported!"));
-					}}
+					onclick={() => (openReport = true)}
 				>
 					<MessageSquareWarning />
 				</Button>
@@ -494,3 +489,4 @@
 		{/if}
 	</CardFooter>
 </Card>
+<RepostPostDialog bind:open={openReport} {txId} />

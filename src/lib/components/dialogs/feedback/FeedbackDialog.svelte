@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { ThumbsDown, ThumbsUp } from "lucide-svelte";
+	import { toast } from "svelte-sonner";
 	import { getContentNodeState } from "../../../state";
 	import { getDialogsState } from "../../../state/dialogs.svelte";
 	import { Button } from "../../ui/button";
@@ -20,7 +21,15 @@
 	let content = $state("");
 
 	function send(): void {
-		nodeState.sendFeedback("feedback", `${rating}\n\n${content}`);
+		nodeState
+			.sendFeedback("feedback", `${rating}\n\n${content}`)
+			.then(() => {
+				toast.success("Feedback Sent!");
+				rating = undefined;
+				content = "";
+				dialogsState.feedbackDialog = false;
+			})
+			.catch(() => toast.error("Feedback failed!"));
 	}
 </script>
 
@@ -67,7 +76,11 @@
 		<DialogFooter class="gap-3">
 			<Button onclick={() => send()}>Send</Button>
 			<Button
-				onclick={() => (dialogsState.feedbackDialog = false)}
+				onclick={() => {
+					dialogsState.feedbackDialog = false;
+					rating = undefined;
+					content = "";
+				}}
 				variant="secondary">Close</Button
 			>
 		</DialogFooter>

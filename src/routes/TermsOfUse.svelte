@@ -3,6 +3,13 @@
 	const serviceName = "Veracy.app";
 	const lastUpdated = "2025-02-02";
 	const contactEmail = "csermely.a.dev@gmail.com";
+
+	$effect(() => {
+		document.title = "Terms of Use";
+		return () => {
+			document.title = "Veracy";
+		};
+	});
 </script>
 
 <div class="p-16 text-primary overflow-auto min-w-full">

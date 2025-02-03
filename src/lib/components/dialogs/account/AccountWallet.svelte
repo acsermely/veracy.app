@@ -113,6 +113,21 @@
 <div class="flex flex-col gap-3">
 	{#if createNew}
 		{#if createType}
+			{#if createType === "existing"}
+				<input
+					id="keyfileInput"
+					type="file"
+					accept=".json"
+					class="hidden"
+					onchange={handleKeyfileOpen}
+				/>
+				<Button variant="default" onclick={triggerKeyfileOpen}
+					>Import Keyfile</Button
+				>
+				<div class="w-full flex justify-center">
+					<p class="p-2 m-2 border-y-2">or</p>
+				</div>
+			{/if}
 			<Textarea
 				class="resize-none"
 				disabled={createType === "new"}
@@ -165,27 +180,30 @@
 			>
 				{#if loading}
 					<Loader class="animate-spin m-2" />
-				{:else if !seedSaved}
+				{:else if !seedSaved && createType === "new"}
 					Save your Seedphrase!
 				{:else}
 					Register
 				{/if}
 			</Button>
-			{#if createType === "existing"}
-				<div class="w-full flex justify-center">
-					<p class="p-2 m-2 border-y-2">or</p>
-				</div>
-				<input
-					id="keyfileInput"
-					type="file"
-					accept=".json"
-					class="hidden"
-					onchange={handleKeyfileOpen}
-				/>
-				<Button variant="default" onclick={triggerKeyfileOpen}
-					>Import Keyfile</Button
+			<div class="text-xs">
+				By creating an account you agree to the
+				<a
+					target="_blank"
+					class="text-blue-600 hover:underline"
+					href="/terms-of-use"
 				>
-			{/if}
+					Terms of Use
+				</a>
+				and
+				<a
+					target="_blank"
+					class="text-blue-600 hover:underline"
+					href="/privacy-policy"
+				>
+					Privacy Policy
+				</a>.
+			</div>
 		{:else}
 			<div class="flex flex-col h-full gap-5 mb-10 items-center">
 				{#if !walletState.wallet}

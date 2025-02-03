@@ -140,7 +140,7 @@
 				>
 			{/if}
 			<Button onclick={() => nextStep()}>
-				{currentStep > 0 ? "Submit" : "Next"}</Button
+				{currentStep > 0 ? "Submit" : "Preview"}</Button
 			>
 		</div>
 	{/if}
