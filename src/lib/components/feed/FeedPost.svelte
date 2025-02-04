@@ -323,7 +323,7 @@
 				>
 					{#if content.type === "TEXT"}
 						<pre
-							class="border-y-2 min-w-full p-5 text-wrap break-words"
+							class="border-y-2 min-w-full p-5 text-wrap break-words overflow-y-auto"
 							class:text-left={content.align === "left"}
 							class:text-center={content.align === "center"}
 							class:text-right={content.align ===
