@@ -187,7 +187,7 @@
 								>
 							</div>
 						{:else if content.type === "TEXT"}
-							<div class="flex-1 flex p-2">
+							<div class="flex-1 flex p-2 relative">
 								<Textarea
 									bind:ref={textAreaElementRef}
 									bind:value={content.data}
@@ -195,6 +195,10 @@
 										textAlignClass(content.align)}
 									maxlength={350}
 								></Textarea>
+								<span
+									class="absolute bottom-3 right-4 text-muted-foreground text-xs"
+									>{350 - (content.data?.length || 0)}</span
+								>
 							</div>
 						{:else if content.type === "IMG"}
 							{#if !content.data}
@@ -252,7 +256,9 @@
 					if (data.length >= POST_MAX_NUMBER_OF_CONTENT) {
 						return;
 					}
-					data.push({});
+					data.push({
+						align: "center",
+					});
 					runDelayed(() => {
 						const id = "content_" + (data.length - 1);
 						const elem = document.getElementById(id);

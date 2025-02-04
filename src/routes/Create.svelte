@@ -31,7 +31,7 @@
 
 	let age = $state<PostAge>("12+");
 	let tags = $state<string[]>([""]);
-	let data = $state<Partial<PostContent>[]>([{}]);
+	let data = $state<Partial<PostContent>[]>([{ align: "center" }]);
 	let fullPostData = $state<Post>();
 
 	async function uploadPost(): Promise<void> {
@@ -90,6 +90,7 @@
 				toast.error("Add content first!");
 				return;
 			}
+			data = data.filter((item) => item.data);
 		} else if (currentStep == 1) {
 			if (!nodeState.isConnected || !walletState.hasWallet) {
 				toast.error("Login with your Wallet");

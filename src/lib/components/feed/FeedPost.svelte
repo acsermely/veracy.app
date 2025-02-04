@@ -317,13 +317,13 @@
 			{#each data.content as content, i}
 				<div
 					id={data.id + "_" + i}
-					class="min-w-full h-full box-content snap-start inline-flex justify-center min-h-[40dvh]"
+					class="min-w-full h-full box-content snap-start inline-flex justify-center items-center min-h-[40dvh] snap-y"
 					class:border-b-2={!hashValid[i]}
 					class:border-red-500={!hashValid[i]}
 				>
 					{#if content.type === "TEXT"}
 						<pre
-							class="border-y-2 min-w-full p-5 text-wrap break-words overflow-y-auto"
+							class="min-w-full p-5 text-wrap break-words overflow-y-auto h-fit max-h-full snap-start"
 							class:text-left={content.align === "left"}
 							class:text-center={content.align === "center"}
 							class:text-right={content.align ===

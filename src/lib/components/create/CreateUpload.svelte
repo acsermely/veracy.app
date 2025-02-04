@@ -32,5 +32,7 @@
 </script>
 
 <div class="flex-1 flex flex-col items-center w-full max-h-full">
-	<FeedPost data={previewPost} isPreview />
+	<div class="flex justify-center w-full max-w-[450px] h-fit border-b-2">
+		<FeedPost data={previewPost} isPreview />
+	</div>
 </div>
