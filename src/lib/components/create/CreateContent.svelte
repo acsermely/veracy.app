@@ -207,7 +207,7 @@
 										</div>
 									{:else}
 										<Input
-											class="w-min cursor-pointer before:cursor-pointer hover:border-slate-400"
+											class="w-min max-w-[75%] cursor-pointer before:cursor-pointer hover:border-slate-400"
 											type="file"
 											accept="image/*"
 											onchange={(event: Event) =>
