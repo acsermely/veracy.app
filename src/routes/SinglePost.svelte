@@ -26,19 +26,10 @@
 		>
 	</div>
 	<div class="flex-1 flex w-full justify-center">
-		{#if nodeState.isConnected}
-			{#await ArweaveUtils.getTxById<Post>(id)}
-				<Loader class="mt-20 size-10 animate-spin" />
-			{:then data}
-				<FeedPost {data} txId={id} />
-			{/await}
-		{:else}
-			<Button
-				class="max-w-[450px] w-full m-5 mb-0"
-				variant="destructive"
-				onclick={() => (dialogsState.connectDialog = true)}
-				>Login to continue</Button
-			>
-		{/if}
+		{#await ArweaveUtils.getTxById<Post>(id)}
+			<Loader class="mt-20 size-10 animate-spin" />
+		{:then data}
+			<FeedPost {data} txId={id} />
+		{/await}
 	</div>
 </div>

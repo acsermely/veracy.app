@@ -10,6 +10,9 @@ export default defineConfig({
 		svelte(),
 		VitePWA({
 			registerType: "autoUpdate",
+			workbox: {
+				navigateFallbackDenylist: [/landing*/],
+			},
 			manifest: {
 				name: "Veracy",
 				short_name: "Veracy",
