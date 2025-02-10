@@ -78,10 +78,18 @@
 						class="mb-10"
 						disabled={!dialogState.shareSheetContent?.txId}
 						onclick={() => {
-							navigator.clipboard.writeText(shareUrl);
-							toast.success("Link Copied");
+							if (navigator.share) {
+								navigator.share({
+									title: "Veracy",
+									url: shareUrl,
+								});
+								return;
+							} else {
+								navigator.clipboard.writeText(shareUrl);
+								toast.success("Link Copied");
+							}
 							dialogState.closeShareDialog();
-						}}>Copy Link</Button
+						}}>{!!navigator.share ? "Share" : "Copy Link"}</Button
 					>
 				{/if}
 			</div>

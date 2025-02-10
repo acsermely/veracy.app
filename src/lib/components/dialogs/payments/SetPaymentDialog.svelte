@@ -102,7 +102,7 @@
 				>
 			</div>
 			<div class="flex justify-between items-center">
-				<b>Total:</b><b>{totalPrice} AR</b>
+				<b>Total:</b><b>{totalPrice.toFixed(8) || 0} AR</b>
 			</div>
 		</div>
 		<DialogFooter>

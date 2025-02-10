@@ -323,7 +323,7 @@
 				>
 					{#if content.type === "TEXT"}
 						<pre
-							class="min-w-full p-5 text-wrap break-words overflow-y-auto h-fit max-h-full snap-start"
+							class="min-w-full p-5 text-wrap break-words overflow-y-auto overflow-x-hidden h-fit max-h-full snap-start"
 							class:text-left={content.align === "left"}
 							class:text-center={content.align === "center"}
 							class:text-right={content.align ===

@@ -14,11 +14,10 @@ export default defineConfig({
 				navigateFallbackDenylist: [/landing*/],
 			},
 			manifest: {
-				name: "Veracy",
+				name: "Veracy.app",
 				short_name: "Veracy",
 				description:
 					"Veracy is The decentralized social media platform.",
-				theme_color: "#000000",
 				display: "standalone",
 				icons: [
 					{
