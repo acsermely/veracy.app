@@ -3,6 +3,7 @@
 	import { Route, Router } from "svelte-routing";
 	import ActionBar from "./lib/components/common/ActionBar.svelte";
 	import { Toaster } from "./lib/components/ui/sonner";
+	import { setAppState } from "./lib/state/app.svelte";
 	import { setDialogsState } from "./lib/state/dialogs.svelte";
 	import { setFeedState } from "./lib/state/feed.svelte";
 	import { setContentNodeState } from "./lib/state/node.svelte";
@@ -23,9 +24,9 @@
 	const dialogState = setDialogsState();
 	const nodeState = setContentNodeState();
 	setWatcherState();
+	const appState = setAppState();
 
 	let url = $state("");
-	let installPromt = $state<any>();
 
 	$effect(() => {
 		if (["/terms-of-use", "/privacy-policy"].includes(location.pathname)) {
@@ -40,12 +41,12 @@
 	feedState.queryData();
 
 	function beforeInstall(event: any): void {
-		installPromt = event;
+		appState.installPrompt = event;
 	}
 </script>
 
 <ModeWatcher />
-<svelte:window onbeforeinstallprompt={(event: any) => beforeInstall(event)} />
+<svelte:window onbeforeinstallprompt={beforeInstall} />
 
 <div
 	class="bg-inherit flex w-[100dvw] h-[100dvh] flex-col-reverse md:flex-row overflow-hidden"

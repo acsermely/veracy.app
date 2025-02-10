@@ -3,6 +3,7 @@
 	import { toast } from "svelte-sonner";
 	import { Wallet } from "../../../models/wallet.model";
 	import { getContentNodeState, getWalletState } from "../../../state";
+	import { getAppState } from "../../../state/app.svelte";
 	import { downloadFile } from "../../../utils/common.utils";
 	import { DB } from "../../../utils/db.utils";
 	import { getAddressFromKey } from "../../../utils/wallet.utils";
@@ -16,6 +17,7 @@
 
 	const walletState = getWalletState();
 	const nodeState = getContentNodeState();
+	const appState = getAppState();
 
 	let createNew = $state(false);
 	let createType = $state<"new" | "existing">();
@@ -208,6 +210,30 @@
 			<div class="flex flex-col h-full gap-5 mb-10 items-center">
 				{#if !walletState.wallet}
 					<h1 class="text-2xl">Wellcome to Veracy!</h1>
+					{#if appState.installPrompt}
+						<Button
+							class="standalone:hidden ml-2 hover:bg-opacity-30"
+							onclick={() => {
+								console.log(appState.installPrompt);
+								if (!appState.installPrompt) {
+									return;
+								}
+								appState.installPrompt
+									.prompt()
+									.then((result: any) => {
+										console.log(
+											`Install prompt was: ${result.outcome}`,
+										);
+									})
+									.catch((e: any) => {
+										toast.error("Install Failed!");
+										console.error(e);
+									});
+							}}
+						>
+							Install Veracy
+						</Button>
+					{/if}
 					<h3 class="text-sm">Setup your Profile</h3>
 				{:else}
 					<h3 class="text-xl">Add Profile</h3>
