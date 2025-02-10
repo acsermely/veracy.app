@@ -14,7 +14,7 @@ export default defineConfig({
 				navigateFallbackDenylist: [/landing*/],
 			},
 			manifest: {
-				name: "Veracy.app",
+				name: "Veracy",
 				short_name: "Veracy",
 				description:
 					"Veracy is The decentralized social media platform.",
