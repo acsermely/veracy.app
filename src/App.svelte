@@ -9,13 +9,13 @@
 	import { setSearchState } from "./lib/state/search.svelte";
 	import { setWalletState } from "./lib/state/wallet.svelte";
 	import { setWatcherState } from "./lib/state/watcher.svelte";
-	import Create from "./routes/Create.svelte";
-	import Feed from "./routes/Feed.svelte";
-	import PrivacyPolicy from "./routes/PrivacyPolicy.svelte";
-	import Profile from "./routes/Profile.svelte";
-	import Search from "./routes/Search.svelte";
-	import SinglePost from "./routes/SinglePost.svelte";
-	import TermsOfUse from "./routes/TermsOfUse.svelte";
+	import Create from "./lib/components/create/Create.svelte";
+	import Feed from "./lib/components/feed/Feed.svelte";
+	import PrivacyPolicy from "./lib/components/common/PrivacyPolicy.svelte";
+	import Profile from "./lib/components/common/profile/Profile.svelte";
+	import Search from "./lib/components/search/Search.svelte";
+	import SinglePost from "./lib/components/post/SinglePost.svelte";
+	import TermsOfUse from "./lib/components/common/TermsOfUse.svelte";
 	import { setAppState } from "./lib/state";
 
 	const feedState = setFeedState();

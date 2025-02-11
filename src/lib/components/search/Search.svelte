@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { navigate } from "svelte-routing";
-	import { Avatar, AvatarFallback } from "../lib/components/ui/avatar";
-	import Button from "../lib/components/ui/button/button.svelte";
-	import { Input } from "../lib/components/ui/input";
-	import { STORAGE_SEARCH_HISTORY } from "../lib/constants";
-	import { getSearchState } from "../lib/state/search.svelte";
+	import { Avatar, AvatarFallback } from "../ui/avatar";
+	import Button from "../ui/button/button.svelte";
+	import { Input } from "../ui/input";
+	import { STORAGE_SEARCH_HISTORY } from "../../constants";
+	import { getSearchState } from "../../state/search.svelte";
 
 	const searchState = getSearchState();
 

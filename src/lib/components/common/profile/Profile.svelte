@@ -2,21 +2,21 @@
 	import { ChevronLeft, Copy, RefreshCcw, Settings } from "lucide-svelte";
 	import { navigate } from "svelte-routing";
 	import { toast } from "svelte-sonner";
-	import FeedPost from "../lib/components/feed/FeedPost.svelte";
-	import AvatarFallback from "../lib/components/ui/avatar/avatar-fallback.svelte";
-	import Avatar from "../lib/components/ui/avatar/avatar.svelte";
-	import Button from "../lib/components/ui/button/button.svelte";
-	import CardContent from "../lib/components/ui/card/card-content.svelte";
-	import CardHeader from "../lib/components/ui/card/card-header.svelte";
-	import Card from "../lib/components/ui/card/card.svelte";
-	import Skeleton from "../lib/components/ui/skeleton/skeleton.svelte";
-	import type { Post } from "../lib/models/post.model";
-	import { getDialogsState } from "../lib/state/dialogs.svelte";
-	import { getWalletState } from "../lib/state/wallet.svelte";
+	import FeedPost from "../../feed/FeedPost.svelte";
+	import AvatarFallback from "../../ui/avatar/avatar-fallback.svelte";
+	import Avatar from "../../ui/avatar/avatar.svelte";
+	import Button from "../../ui/button/button.svelte";
+	import CardContent from "../../ui/card/card-content.svelte";
+	import CardHeader from "../../ui/card/card-header.svelte";
+	import Card from "../../ui/card/card.svelte";
+	import Skeleton from "../../ui/skeleton/skeleton.svelte";
+	import type { Post } from "../../../models/post.model";
+	import { getDialogsState } from "../../../state/dialogs.svelte";
+	import { getWalletState } from "../../../state/wallet.svelte";
 	import {
 		ArweaveUtils,
 		type ArPostIdResult,
-	} from "../lib/utils/arweave.utils";
+	} from "../../../utils/arweave.utils";
 
 	const { walletId }: { walletId: string } = $props();
 

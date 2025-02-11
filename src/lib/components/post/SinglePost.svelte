@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { ChevronLeft, Loader } from "lucide-svelte";
 	import { navigate } from "svelte-routing";
-	import FeedPost from "../lib/components/feed/FeedPost.svelte";
-	import { Button } from "../lib/components/ui/button";
-	import type { Post } from "../lib/models/post.model";
-	import { getContentNodeState, getDialogsState } from "../lib/state";
-	import { ArweaveUtils } from "../lib/utils/arweave.utils";
+	import FeedPost from "../feed/FeedPost.svelte";
+	import { Button } from "../ui/button";
+	import type { Post } from "../../models/post.model";
+	import { getContentNodeState, getDialogsState } from "../../state";
+	import { ArweaveUtils } from "../../utils/arweave.utils";
 
 	const { id }: { id: string } = $props();
 

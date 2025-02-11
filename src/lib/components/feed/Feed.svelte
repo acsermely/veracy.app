@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { Loader } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
-	import RefreshWrapper from "../lib/components/common/RefreshWrapper.svelte";
-	import FeedPost from "../lib/components/feed/FeedPost.svelte";
-	import Button from "../lib/components/ui/button/button.svelte";
-	import CardContent from "../lib/components/ui/card/card-content.svelte";
-	import CardHeader from "../lib/components/ui/card/card-header.svelte";
-	import Card from "../lib/components/ui/card/card.svelte";
-	import Skeleton from "../lib/components/ui/skeleton/skeleton.svelte";
-	import type { Post } from "../lib/models/post.model";
-	import { getDialogsState, getWalletState } from "../lib/state";
-	import { getFeedState } from "../lib/state/feed.svelte";
-	import { ArweaveUtils } from "../lib/utils/arweave.utils";
+	import RefreshWrapper from "../common/RefreshWrapper.svelte";
+	import FeedPost from "./FeedPost.svelte";
+	import Button from "../ui/button/button.svelte";
+	import CardContent from "../ui/card/card-content.svelte";
+	import CardHeader from "../ui/card/card-header.svelte";
+	import Card from "../ui/card/card.svelte";
+	import Skeleton from "../ui/skeleton/skeleton.svelte";
+	import type { Post } from "../../models/post.model";
+	import { getDialogsState, getWalletState } from "../../state";
+	import { getFeedState } from "../../state/feed.svelte";
+	import { ArweaveUtils } from "../../utils/arweave.utils";
 
 	const feedState = getFeedState();
 	const dialogState = getDialogsState();
