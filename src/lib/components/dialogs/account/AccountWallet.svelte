@@ -311,6 +311,7 @@
 					class="text-xs p-0"
 					onclick={() => {
 						walletState.disconnectWallet();
+						nodeState.logout();
 					}}>Disconnect</Button
 				>
 			</div>

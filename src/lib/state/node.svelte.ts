@@ -12,6 +12,11 @@ export class ContentNode {
 			localStorage.getItem(STORAGE_NODE_URL) || urlHost || this.url;
 	}
 
+	logout = (): void => {
+		this.isConnected = false;
+		return localStorage.removeItem(STORAGE_TOKEN);
+	};
+
 	loginCheck = async (): Promise<Response> => {
 		try {
 			const token = localStorage.getItem(STORAGE_TOKEN);
