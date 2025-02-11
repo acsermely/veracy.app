@@ -1,6 +1,4 @@
 import { getContext, setContext } from "svelte";
-import { navigate } from "svelte-routing";
-import { toast } from "svelte-sonner";
 import { ArweaveUtils } from "../utils/arweave.utils";
 import { DB } from "../utils/db.utils";
 import { getWalletState } from "./wallet.svelte";
@@ -13,7 +11,7 @@ export class Watcher {
 	private _promiseMap = new Map<string, (() => void)[]>();
 
 	constructor() {
-		DB.getAllWatcher().then((list) => {
+		DB.watcher.getAll().then((list) => {
 			if (list.length > 0) {
 				this._startInterval();
 			}
@@ -23,14 +21,14 @@ export class Watcher {
 	private _startInterval(): void {
 		this._interval = window.setInterval(async () => {
 			if (this._walletState.wallet?.address) {
-				const list = await DB.getAllWatcher();
+				const list = await DB.watcher.getAll();
 				if (!list.length) {
 					clearInterval(this._interval);
 					this._interval = undefined;
 					return;
 				}
 				for (const id of list) {
-					const item = await DB.getWatcher(id);
+					const item = await DB.watcher.get(id);
 					let tx: string[] = [];
 					if (item.data.type === "payment") {
 						tx = await ArweaveUtils.getPaymentForPost(
@@ -52,7 +50,7 @@ export class Watcher {
 	}
 
 	private remove(id: string): void {
-		DB.removeWatcher(id);
+		DB.watcher.remove(id);
 		const resolvers = this._promiseMap.get(id);
 		if (resolvers) {
 			resolvers.forEach((resolver) => resolver());
@@ -68,7 +66,7 @@ export class Watcher {
 		if (!this._interval) {
 			this._startInterval();
 		}
-		DB.addWatcher(id, { type });
+		DB.watcher.add(id, { type });
 		return new Promise((resolve) => {
 			if (this._promiseMap.get(id)) {
 				this._promiseMap.get(id)?.push(resolve);

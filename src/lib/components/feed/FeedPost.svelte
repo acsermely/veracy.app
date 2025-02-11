@@ -13,7 +13,6 @@
 	import { link, navigate } from "svelte-routing";
 	import { toast } from "svelte-sonner";
 	import { SvelteMap } from "svelte/reactivity";
-	import { fade } from "svelte/transition";
 	import type { Post } from "../../models/post.model";
 	import { getDialogsState } from "../../state/dialogs.svelte";
 	import { getContentNodeState } from "../../state/node.svelte";
@@ -169,8 +168,8 @@
 
 	async function refreshWatcher(): Promise<boolean> {
 		return Promise.all([
-			DB.getWatcher(txId || ""), // Payment watcher
-			DB.getWatcher(data.id || ""), // Set-payment watcher
+			DB.watcher.get(txId || ""), // Payment watcher
+			DB.watcher.get(data.id || ""), // Set-payment watcher
 		]).then(([itemTx, itemId]) => {
 			if (itemId) {
 				watcherState
@@ -289,8 +288,6 @@
 			/>
 		</div>
 		<div
-			in:fade
-			out:fade
 			class="flex items-center absolute right-0 h-full p-1 opacity-70 z-10"
 			class:hidden={currentPage === data.content.length - 1}
 		>

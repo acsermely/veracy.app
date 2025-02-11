@@ -116,50 +116,53 @@ export class DB {
 		});
 	}
 
-	// Wallet
-	static async addWallet(address: string, key: JsonWebKey): Promise<void> {
-		return this.add(DB_STORE_WALLET, {
-			address,
-			key,
-		});
-	}
+	static wallet = {
+		add: async (address: string, key: JsonWebKey): Promise<void> => {
+			return DB.add(DB_STORE_WALLET, {
+				address,
+				key,
+			});
+		},
 
-	static async getWallet(address: string): Promise<JsonWebKey> {
-		return this.get<DbWalletEntry>(DB_STORE_WALLET, address).then(
-			(data) => data.key,
-		);
-	}
+		get: async (address: string): Promise<JsonWebKey> => {
+			return DB.get<DbWalletEntry>(DB_STORE_WALLET, address).then(
+				(data) => data.key,
+			);
+		},
 
-	static async getAllWalletKey(): Promise<string[]> {
-		return this.getAllKey(DB_STORE_WALLET);
-	}
+		getAll: async (): Promise<string[]> => {
+			return DB.getAllKey(DB_STORE_WALLET);
+		},
 
-	static async removeWallet(address: string): Promise<void> {
-		return this.remove(DB_STORE_WALLET, address);
-	}
+		remove: async (address: string): Promise<void> => {
+			return DB.remove(DB_STORE_WALLET, address);
+		},
+	};
 
 	//Watcher
-	static async addWatcher(
-		id: string,
-		data: { type: "set-price" | "payment" },
-	): Promise<void> {
-		return this.add(DB_STORE_WATCHER, {
-			id,
-			data,
-		});
-	}
+	static watcher = {
+		add: async (
+			id: string,
+			data: { type: "set-price" | "payment" },
+		): Promise<void> => {
+			return this.add(DB_STORE_WATCHER, {
+				id,
+				data,
+			});
+		},
 
-	static async getWatcher(id: string): Promise<DbWatcherEntry> {
-		return this.get<DbWatcherEntry>(DB_STORE_WATCHER, id);
-	}
+		get: async (id: string): Promise<DbWatcherEntry> => {
+			return this.get<DbWatcherEntry>(DB_STORE_WATCHER, id);
+		},
 
-	static async getAllWatcher(): Promise<string[]> {
-		return this.getAllKey(DB_STORE_WATCHER);
-	}
+		getAll: async (): Promise<string[]> => {
+			return DB.getAllKey(DB_STORE_WATCHER);
+		},
 
-	static async removeWatcher(id: string): Promise<void> {
-		return this.remove(DB_STORE_WATCHER, id);
-	}
+		remove: async (id: string): Promise<void> => {
+			return DB.remove(DB_STORE_WATCHER, id);
+		},
+	};
 }
 
 async function initializeDB(): Promise<IDBDatabase> {

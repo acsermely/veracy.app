@@ -36,7 +36,7 @@ export class WalletState {
 	addWallet = async (newWallet: Wallet): Promise<void> => {
 		try {
 			const address = await getAddressFromKey(newWallet.rawKey);
-			await DB.addWallet(address, newWallet.rawKey);
+			await DB.wallet.add(address, newWallet.rawKey);
 			localStorage.setItem(WALLET_LOCAL_ADDRESS, address);
 		} catch {
 			throw "Failed to save wallet data";
@@ -54,7 +54,7 @@ export class WalletState {
 				this.wallet = undefined;
 			}
 			try {
-				const rawKey = await DB.getWallet(addr);
+				const rawKey = await DB.wallet.get(addr);
 				const address = await getAddressFromKey(rawKey);
 				this.wallet = new Wallet(rawKey, address);
 				localStorage.setItem(WALLET_LOCAL_ADDRESS, address);

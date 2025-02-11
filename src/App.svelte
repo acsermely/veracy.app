@@ -3,7 +3,6 @@
 	import { Route, Router } from "svelte-routing";
 	import ActionBar from "./lib/components/common/ActionBar.svelte";
 	import { Toaster } from "./lib/components/ui/sonner";
-	import { setAppState } from "./lib/state/app.svelte";
 	import { setDialogsState } from "./lib/state/dialogs.svelte";
 	import { setFeedState } from "./lib/state/feed.svelte";
 	import { setContentNodeState } from "./lib/state/node.svelte";
@@ -17,6 +16,7 @@
 	import Search from "./routes/Search.svelte";
 	import SinglePost from "./routes/SinglePost.svelte";
 	import TermsOfUse from "./routes/TermsOfUse.svelte";
+	import { setAppState } from "./lib/state";
 
 	const feedState = setFeedState();
 	setWalletState();

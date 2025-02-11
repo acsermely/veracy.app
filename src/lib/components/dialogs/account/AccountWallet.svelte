@@ -2,8 +2,11 @@
 	import { Copy, Download, Loader } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
 	import { Wallet } from "../../../models/wallet.model";
-	import { getContentNodeState, getWalletState } from "../../../state";
-	import { getAppState } from "../../../state/app.svelte";
+	import {
+		getAppState,
+		getContentNodeState,
+		getWalletState,
+	} from "../../../state";
 	import { downloadFile } from "../../../utils/common.utils";
 	import { DB } from "../../../utils/db.utils";
 	import { getAddressFromKey } from "../../../utils/wallet.utils";
@@ -30,7 +33,7 @@
 		Wallet.newMnemonic().then((newMnemonic) => {
 			mnemonic = newMnemonic;
 		});
-		DB.getAllWalletKey().then((list) => {
+		DB.wallet.getAll().then((list) => {
 			savedWallets = list.length;
 		});
 	});
@@ -295,7 +298,7 @@
 					quickRegister = true;
 				}}>+</Button
 			>
-			{#await DB.getAllWalletKey()}
+			{#await DB.wallet.getAll()}
 				<div>loading wallets</div>
 			{:then walletList}
 				{#each walletList as wallet}
