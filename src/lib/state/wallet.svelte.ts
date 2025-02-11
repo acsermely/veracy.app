@@ -22,6 +22,15 @@ export class WalletState {
 		}
 	}
 
+	disconnectWallet = (): void => {
+		localStorage.removeItem(WALLET_LOCAL_ADDRESS);
+		this.wallet = undefined;
+	};
+
+	removeWallet = async (address: string): Promise<void> => {
+		return DB.wallet.remove(address);
+	};
+
 	registerFromMnem = async (mnemonic?: string): Promise<void> => {
 		const newWallet = await Wallet.New(mnemonic);
 		await this.addWallet(newWallet);

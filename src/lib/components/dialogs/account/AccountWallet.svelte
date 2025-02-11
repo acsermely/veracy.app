@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Copy, Download, Loader } from "lucide-svelte";
+	import { Check, Copy, Download, Loader, Trash } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
 	import { Wallet } from "../../../models/wallet.model";
 	import {
@@ -29,6 +29,8 @@
 	let seedSaved = $state(false);
 	let loading = $state(false);
 	let errorMessage = $state();
+	let walletList = $state<string[]>([]);
+
 	$effect(() => {
 		Wallet.newMnemonic().then((newMnemonic) => {
 			mnemonic = newMnemonic;
@@ -52,6 +54,22 @@
 			createNew = true;
 		}
 	});
+
+	$effect(() => {
+		getWallets();
+	});
+
+	function getWallets(): Promise<void> {
+		walletList = [];
+		return DB.wallet
+			.getAll()
+			.then((list) => {
+				walletList = list;
+			})
+			.catch(() => {
+				toast.error("Conldn't load wallets");
+			});
+	}
 
 	function copyAddress(): void {
 		navigator.clipboard.writeText(walletState.wallet!.address);
@@ -264,28 +282,37 @@
 		{/if}
 	{:else}
 		{#if walletState.wallet?.address}
-			<div
-				class="flex bg-green-500 border-green-500 bg-opacity-30 border-2 items-center
+			<div class="flex w-full flex-col gap-0">
+				<div
+					class="flex bg-green-500 border-green-500 bg-opacity-30 border-2 items-center
 						justify-evenly rounded-md my-1 px-5 h-12
 						text-primary w-full transition"
-			>
-				{walletState.wallet?.address.slice(0, 10)}...
-				<Button
-					class="ml-2 hover:bg-opacity-30 cursor-copy"
-					variant="ghost"
-					size="icon"
-					onclick={copyAddress}
 				>
-					<Copy onclick={copyAddress} />
-				</Button>
+					{walletState.wallet?.address.slice(0, 10)}...
+					<Button
+						class="ml-2 hover:bg-opacity-30 cursor-copy"
+						variant="ghost"
+						size="icon"
+						onclick={copyAddress}
+					>
+						<Copy onclick={copyAddress} />
+					</Button>
+					<Button
+						variant="ghost"
+						class="hover:bg-opacity-30 cursor-pointer"
+						size="icon"
+						onclick={downloadJsonKey}
+					>
+						<Download onclick={downloadJsonKey} />
+					</Button>
+				</div>
 				<Button
 					variant="ghost"
-					class="hover:bg-opacity-30 cursor-pointer"
-					size="icon"
-					onclick={downloadJsonKey}
+					class="text-xs p-0"
+					onclick={() => {
+						walletState.disconnectWallet();
+					}}>Disconnect</Button
 				>
-					<Download onclick={downloadJsonKey} />
-				</Button>
 			</div>
 		{/if}
 		<div>Wallets:</div>
@@ -298,33 +325,50 @@
 					quickRegister = true;
 				}}>+</Button
 			>
-			{#await DB.wallet.getAll()}
+			{#if !walletList.length}
 				<div>loading wallets</div>
-			{:then walletList}
+			{:else}
 				{#each walletList as wallet}
-					<Button
-						variant="outline"
-						class="h-fit"
-						onclick={() => {
-							quickRegister = false;
-							nodeState.isConnected = false;
-							walletState.useWallet(wallet);
-						}}
-					>
-						<Avatar
-							class="mr-3 bg-gradient-to-bl from-amber-500 via-blue-500 to-teal-500"
+					<div class="flex w-full items-center">
+						<Button
+							variant="outline"
+							class="h-fit flex-1"
+							disabled={wallet === walletState.wallet?.address}
+							onclick={() => {
+								quickRegister = false;
+								nodeState.isConnected = false;
+								walletState.useWallet(wallet);
+							}}
 						>
-							<AvatarFallback
-								class="font-extrabold bg-transparent text-white"
-								>{wallet.slice(0, 2)}</AvatarFallback
+							<Avatar
+								class="mr-3 bg-gradient-to-bl from-amber-500 via-blue-500 to-teal-500"
 							>
-						</Avatar>
-						{wallet.slice(0, 15)}...
-					</Button>
+								<AvatarFallback
+									class="font-extrabold bg-transparent text-white"
+									>{wallet.slice(0, 2)}</AvatarFallback
+								>
+							</Avatar>
+							{wallet.slice(0, 15)}...
+							{#if wallet === walletState.wallet?.address}
+								<Check class="text-green-500" />
+							{:else}
+								<Button
+									variant="ghost"
+									class="h-full hover:bg-destructive hover:bg-opacity-50"
+									onclick={(e: Event) => {
+										e.stopPropagation();
+										walletState
+											.removeWallet(wallet)
+											.then(getWallets);
+									}}
+								>
+									<Trash />
+								</Button>
+							{/if}
+						</Button>
+					</div>
 				{/each}
-			{:catch}
-				<div>Failed to load wallets</div>
-			{/await}
+			{/if}
 		</div>
 	{/if}
 </div>
