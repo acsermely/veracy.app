@@ -1,17 +1,19 @@
 <script lang="ts">
 	import { Loader } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
+	import { fade, slide } from "svelte/transition";
+	import type { Post } from "../../models/post.model";
+	import { getDialogsState, getWalletState } from "../../state";
+	import { getFeedState } from "../../state/feed.svelte";
+	import { ArweaveUtils } from "../../utils/arweave.utils";
 	import RefreshWrapper from "../common/RefreshWrapper.svelte";
-	import FeedPost from "./FeedPost.svelte";
+	import { Avatar, AvatarFallback } from "../ui/avatar";
 	import Button from "../ui/button/button.svelte";
 	import CardContent from "../ui/card/card-content.svelte";
 	import CardHeader from "../ui/card/card-header.svelte";
 	import Card from "../ui/card/card.svelte";
 	import Skeleton from "../ui/skeleton/skeleton.svelte";
-	import type { Post } from "../../models/post.model";
-	import { getDialogsState, getWalletState } from "../../state";
-	import { getFeedState } from "../../state/feed.svelte";
-	import { ArweaveUtils } from "../../utils/arweave.utils";
+	import FeedPost from "./FeedPost.svelte";
 
 	const feedState = getFeedState();
 	const dialogState = getDialogsState();
@@ -42,20 +44,75 @@
 	bind:scrollPosition={feedState.scrollPosition}
 >
 	<div id="top" class="w-0 h-0"></div>
-	{#if !walletState.hasWallet}
-		<Button
-			class="w-full m-3 max-w-[450px]"
-			onclick={() => (dialogState.connectDialog = true)}>Login</Button
-		>
-	{:else}
-		<Button
-			variant="outline"
-			class="w-full m-3 max-w-[450px]"
-			onclick={() => (dialogState.feedbackDialog = true)}
-			>Send Feedback</Button
-		>
-	{/if}
-	{#if feedState.postIds.length}
+	<div class="flex flex-col w-full max-w-[450px] items-center" in:fade>
+		{#if !walletState.hasWallet}
+			<Button
+				class="w-full m-3 "
+				onclick={() => (dialogState.connectDialog = true)}>Login</Button
+			>
+		{:else}
+			<Button
+				variant="outline"
+				class="w-full m-3"
+				onclick={() => (dialogState.feedbackDialog = true)}
+				>Send Feedback</Button
+			>
+		{/if}
+		<div class="flex w-full gap-4 items-baseline">
+			<button
+				class="flex flex-col items-center cursor-pointer"
+				onclick={() => {
+					feedState.setBucket(undefined);
+					feedState.queryData();
+				}}
+			>
+				<Avatar
+					class={"inline-flex bg-secondary border-2 border-muted" +
+						(feedState.bucket === undefined ? "-foreground" : "")}
+				>
+					<AvatarFallback class="text-sm bg-transparent text-white"
+						>ALL</AvatarFallback
+					>
+				</Avatar>
+				{#if feedState.scrollPosition < 1}
+					<div in:slide out:slide class="text-xs pt-1">All</div>
+				{/if}
+			</button>
+			<button
+				class="flex flex-col items-center cursor-pointer"
+				onclick={() => {
+					feedState.setBucket("");
+					feedState.queryData();
+				}}
+			>
+				<Avatar
+					class={"inline-flex bg-secondary border-2 border-muted" +
+						(feedState.bucket === "" ? "-foreground" : "")}
+				>
+					<AvatarFallback class="text-sm bg-transparent text-white"
+						>FRI</AvatarFallback
+					>
+				</Avatar>
+				{#if feedState.scrollPosition < 1}
+					<div in:slide out:slide class="text-xs pt-1">Friends</div>
+				{/if}
+			</button>
+			<button
+				class="flex flex-col items-center justify-center cursor-pointer"
+			>
+				<Avatar class="inline-flex items-center justify-center">
+					<AvatarFallback class="bg-transparent text-white"
+						>+</AvatarFallback
+					>
+				</Avatar>
+			</button>
+		</div>
+	</div>
+	{#if feedState.postIds === undefined}
+		<div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+			<Loader class="size-8 m-5 animate-spin text-muted-foreground" />
+		</div>
+	{:else if feedState.postIds.length}
 		{#each feedState.postIds as post}
 			{#await fetchData(post.id)}
 				<Card class="max-w-[450px] w-full m-5 border-none">
@@ -85,10 +142,8 @@
 			{/if}
 		</div>
 	{:else}
-		<div
-			class="flex-1 flex w-full h-full items-center transition-all justify-center"
-		>
-			<Loader class="size-8 m-5 animate-spin" />
+		<div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+			No Posts
 		</div>
 	{/if}
 </RefreshWrapper>

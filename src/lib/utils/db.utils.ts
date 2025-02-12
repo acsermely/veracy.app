@@ -23,7 +23,8 @@ export type DbBucketEntry = {
 	name: string;
 	open: boolean;
 	contributors: string[];
-	age: PostAge;
+	age?: PostAge;
+	img?: string;
 };
 
 export type DbFriendEntry = {

@@ -134,9 +134,12 @@ export class ArweaveUtils {
 		return tx;
 	}
 
-	static async getPostsIds(cursor?: string): Promise<ArPostIdResult[]> {
+	static async getPostsIds(
+		cursor?: string,
+		friends?: string[],
+	): Promise<ArPostIdResult[]> {
 		return ArweaveUtils.query<ArQueryResult<ArQueryCursoredIds>>(
-			queryPosts(cursor),
+			queryPosts(cursor, friends),
 		).then((data) =>
 			data.data.transactions.edges.map((item) => ({
 				id: item.node.id,
@@ -268,10 +271,11 @@ export class ArweaveUtils {
 	}
 }
 
-export function queryPosts(cursor?: string) {
+export function queryPosts(cursor?: string, friends?: string[]) {
 	return {
 		query: `{
-        transactions(
+		transactions(
+			${friends?.length ? 'owners: ["' + friends.join('","') + '"],' : ""}
 			order: DESC,
 			limit: 10,
 			timestamp: {from: 1728246095432, to: ${new Date().getTime()}},
