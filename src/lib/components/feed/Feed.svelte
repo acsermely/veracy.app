@@ -68,7 +68,9 @@
 			>
 				<Avatar
 					class={"inline-flex bg-secondary border-2 border-muted" +
-						(feedState.bucket === undefined ? "-foreground" : "")}
+						(feedState.bucket === undefined
+							? " border-primary border-opacity-50"
+							: "")}
 				>
 					<AvatarFallback class="text-sm bg-transparent text-white"
 						>ALL</AvatarFallback
@@ -87,7 +89,9 @@
 			>
 				<Avatar
 					class={"inline-flex bg-secondary border-2 border-muted" +
-						(feedState.bucket === "" ? "-foreground" : "")}
+						(feedState.bucket === ""
+							? " border-primary  border-opacity-50"
+							: "")}
 				>
 					<AvatarFallback class="text-sm bg-transparent text-white"
 						>FRI</AvatarFallback
