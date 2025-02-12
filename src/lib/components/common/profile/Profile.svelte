@@ -2,6 +2,14 @@
 	import { ChevronLeft, Copy, RefreshCcw, Settings } from "lucide-svelte";
 	import { navigate } from "svelte-routing";
 	import { toast } from "svelte-sonner";
+	import type { Post } from "../../../models/post.model";
+	import { getDialogsState } from "../../../state/dialogs.svelte";
+	import { getWalletState } from "../../../state/wallet.svelte";
+	import {
+		ArweaveUtils,
+		type ArPostIdResult,
+	} from "../../../utils/arweave.utils";
+	import { DB } from "../../../utils/db.utils";
 	import FeedPost from "../../feed/FeedPost.svelte";
 	import AvatarFallback from "../../ui/avatar/avatar-fallback.svelte";
 	import Avatar from "../../ui/avatar/avatar.svelte";
@@ -10,13 +18,6 @@
 	import CardHeader from "../../ui/card/card-header.svelte";
 	import Card from "../../ui/card/card.svelte";
 	import Skeleton from "../../ui/skeleton/skeleton.svelte";
-	import type { Post } from "../../../models/post.model";
-	import { getDialogsState } from "../../../state/dialogs.svelte";
-	import { getWalletState } from "../../../state/wallet.svelte";
-	import {
-		ArweaveUtils,
-		type ArPostIdResult,
-	} from "../../../utils/arweave.utils";
 
 	const { walletId }: { walletId: string } = $props();
 
@@ -24,9 +25,22 @@
 
 	let isMe = $derived(walletId === getWalletState().wallet?.address);
 
+	let isFollowing = $state(false);
+
 	$effect(() => {
 		queryData();
+		checkFriends();
 	});
+
+	const checkFriends = () => {
+		return DB.friend.get(walletId).then((item) => {
+			if (!item) {
+				isFollowing = false;
+				return;
+			}
+			isFollowing = true;
+		});
+	};
 
 	let postIds = $state<ArPostIdResult[]>();
 	let balance = $state<string>();
@@ -94,8 +108,15 @@
 					<Button
 						variant="secondary"
 						onclick={() => {
-							toast.warning("Feature is not available yet!");
-						}}>Follow</Button
+							const action = isFollowing
+								? DB.friend.remove(walletId)
+								: DB.friend.add(walletId);
+							action
+								.then(checkFriends)
+								.catch(() =>
+									toast.warning("Failed to Follow!"),
+								);
+						}}>{isFollowing ? "Unfollow" : "Follow"}</Button
 					>
 				{:else}
 					<div class=" flex border-2 rounded-full py-1 px-4 text-sm">

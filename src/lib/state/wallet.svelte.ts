@@ -64,6 +64,10 @@ export class WalletState {
 			}
 			try {
 				const rawKey = await DB.wallet.get(addr);
+				if (!rawKey) {
+					this.disconnectWallet();
+					return;
+				}
 				const address = await getAddressFromKey(rawKey);
 				this.wallet = new Wallet(rawKey, address);
 				localStorage.setItem(WALLET_LOCAL_ADDRESS, address);

@@ -29,6 +29,9 @@ export class Watcher {
 				}
 				for (const id of list) {
 					const item = await DB.watcher.get(id);
+					if (!item) {
+						continue;
+					}
 					let tx: string[] = [];
 					if (item.data.type === "payment") {
 						tx = await ArweaveUtils.getPaymentForPost(
