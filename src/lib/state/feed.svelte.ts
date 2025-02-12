@@ -51,6 +51,7 @@ export class FeedState {
 		if (!friends?.length) {
 			this.postIds = [];
 			this.cursor = undefined;
+			return;
 		}
 		this.postIds = await ArweaveUtils.getPostsIds(undefined, friends);
 		this.cursor = this.postIds[this.postIds.length - 1]?.cursor;
