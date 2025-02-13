@@ -1,11 +1,6 @@
 <script lang="ts">
 	import { link } from "svelte-routing";
 	import { toast } from "svelte-sonner";
-	import CreateContent from "./CreateContent.svelte";
-	import CreateFinish from "./CreateFinish.svelte";
-	import CreateUpload from "./CreateUpload.svelte";
-	import { buttonVariants } from "../ui/button";
-	import Button from "../ui/button/button.svelte";
 	import {
 		genPostId,
 		type Post,
@@ -20,6 +15,11 @@
 		createSHA256Hash,
 		hasPrivateContent,
 	} from "../../utils/common.utils";
+	import { buttonVariants } from "../ui/button";
+	import Button from "../ui/button/button.svelte";
+	import CreateContent from "./CreateContent.svelte";
+	import CreateFinish from "./CreateFinish.svelte";
+	import CreateUpload from "./CreateUpload.svelte";
 
 	let currentStep = $state(0);
 	let uploading = $state(false);
@@ -74,7 +74,6 @@
 		let postData: Post = {
 			id,
 			age,
-			tags,
 			uploader: walletState.wallet.address,
 			content,
 		};

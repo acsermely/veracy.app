@@ -7,7 +7,6 @@ export type Post = {
 	id: string;
 	content: PostContent[];
 	age: PostAge;
-	tags?: string[];
 	uploader: string;
 };
 
