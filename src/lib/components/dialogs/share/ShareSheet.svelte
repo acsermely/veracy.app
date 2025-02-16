@@ -80,7 +80,7 @@
 									: "")}
 						>
 							<AvatarImage src={bucket.img} />
-							<AvatarFallback class="bg-transparent text-white"
+							<AvatarFallback class="bg-transparent text-primary"
 								>{bucket.name.slice(0, 3)}</AvatarFallback
 							>
 						</Avatar>

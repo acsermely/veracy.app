@@ -72,7 +72,7 @@
 								: "")}
 					>
 						<AvatarFallback
-							class="text-sm bg-transparent text-white"
+							class="text-sm bg-transparent text-primary"
 							>ALL</AvatarFallback
 						>
 					</Avatar>
@@ -92,7 +92,7 @@
 								: "")}
 					>
 						<AvatarFallback
-							class="text-sm bg-transparent text-white"
+							class="text-sm bg-transparent text-primary"
 							>FRI</AvatarFallback
 						>
 					</Avatar>
@@ -115,7 +115,7 @@
 									: "")}
 						>
 							<AvatarImage src={bucket.img} />
-							<AvatarFallback class="bg-transparent text-white"
+							<AvatarFallback class="bg-transparent text-primary"
 								>{bucket.name.slice(0, 3)}</AvatarFallback
 							>
 						</Avatar>
@@ -135,7 +135,7 @@
 					<Avatar
 						class="inline-flex items-center justify-center size-14"
 					>
-						<AvatarFallback class="bg-transparent text-white"
+						<AvatarFallback class="bg-transparent text-primary"
 							>+</AvatarFallback
 						>
 					</Avatar>

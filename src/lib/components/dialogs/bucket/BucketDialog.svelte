@@ -377,7 +377,7 @@
 					>
 						<AvatarImage src={newBucket.img} />
 						<AvatarFallback
-							class="text-sm bg-transparent text-white"
+							class="text-sm bg-transparent text-primary"
 							>{newBucket.name.slice(0, 3)}</AvatarFallback
 						>
 					</Avatar>
@@ -471,7 +471,7 @@
 								>
 									<AvatarImage src={bucketFound.img} />
 									<AvatarFallback
-										class="text-sm bg-transparent text-white"
+										class="text-sm bg-transparent text-primary"
 										>{bucketFound.name.slice(
 											0,
 											3,
@@ -510,7 +510,7 @@
 								>
 									<AvatarImage src={bucket.img} />
 									<AvatarFallback
-										class="font-extrabold bg-transparent text-white"
+										class="font-extrabold bg-transparent text-primary"
 										>{bucket.name.slice(
 											0,
 											3,
