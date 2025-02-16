@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Loader } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
-	import { fade, slide } from "svelte/transition";
+	import { fade } from "svelte/transition";
 	import type { Post } from "../../models/post.model";
 	import { getDialogsState, getWalletState } from "../../state";
 	import { getFeedState } from "../../state/feed.svelte";
@@ -57,92 +57,90 @@
 				onclick={() => (dialogState.feedbackDialog = true)}
 				>Send Feedback</Button
 			>
-			{#if feedState.scrollPosition < 1}
-				<div
-					in:slide
-					out:slide
-					class="flex w-full gap-4 items-start overflow-auto"
+			<div class="flex w-full gap-4 items-start overflow-auto">
+				<button
+					class="flex flex-col items-center cursor-pointer"
+					onclick={() => {
+						feedState.setBucket(undefined);
+						feedState.queryData();
+					}}
 				>
-					<button
-						class="flex flex-col items-center cursor-pointer"
-						onclick={() => {
-							feedState.setBucket(undefined);
-							feedState.queryData();
-						}}
+					<Avatar
+						class={"inline-flex bg-secondary border-2 border-muted size-14" +
+							(feedState.bucket === undefined
+								? " border-primary border-opacity-50"
+								: "")}
 					>
-						<Avatar
-							class={"inline-flex bg-secondary border-2 border-muted size-14" +
-								(feedState.bucket === undefined
-									? " border-primary border-opacity-50"
-									: "")}
+						<AvatarFallback
+							class="text-sm bg-transparent text-white"
+							>ALL</AvatarFallback
 						>
-							<AvatarFallback
-								class="text-sm bg-transparent text-white"
-								>ALL</AvatarFallback
-							>
-						</Avatar>
-						<div class="text-xs pt-1">All</div>
-					</button>
-					<button
-						class="flex flex-col items-center cursor-pointer"
-						onclick={() => {
-							feedState.setBucket("");
-							feedState.queryData();
-						}}
+					</Avatar>
+					<div class="text-xs pt-1">All</div>
+				</button>
+				<button
+					class="flex flex-col items-center cursor-pointer"
+					onclick={() => {
+						feedState.setBucket("");
+						feedState.queryData();
+					}}
+				>
+					<Avatar
+						class={"inline-flex bg-secondary border-2 border-muted size-14" +
+							(feedState.bucket === ""
+								? " border-primary  border-opacity-50"
+								: "")}
 					>
-						<Avatar
-							class={"inline-flex bg-secondary border-2 border-muted size-14" +
-								(feedState.bucket === ""
-									? " border-primary  border-opacity-50"
-									: "")}
+						<AvatarFallback
+							class="text-sm bg-transparent text-white"
+							>FRI</AvatarFallback
 						>
-							<AvatarFallback
-								class="text-sm bg-transparent text-white"
-								>FRI</AvatarFallback
-							>
-						</Avatar>
-						<div
-							class="text-xs pt-1 max-w-14 break-words text-center"
-						>
-							Friends
-						</div>
-					</button>
-					{#each feedState.bucketList as bucket}
-						<button
-							class="flex flex-col items-center justify-center cursor-pointer"
-						>
-							<Avatar
-								class="inline-flex items-center justify-center size-14"
-							>
-								<AvatarImage src={bucket.img} />
-								<AvatarFallback
-									class="bg-transparent text-white"
-									>{bucket.name.slice(0, 3)}</AvatarFallback
-								>
-							</Avatar>
-							<div
-								class="text-xs pt-1 max-w-16 break-words text-center"
-							>
-								{bucket.name}
-							</div>
-						</button>
-					{/each}
+					</Avatar>
+					<div class="text-xs pt-1 max-w-14 break-words text-center">
+						Friends
+					</div>
+				</button>
+				{#each feedState.bucketList as bucket}
 					<button
 						class="flex flex-col items-center justify-center cursor-pointer"
 						onclick={() => {
-							dialogState.bucketDialog = true;
+							feedState.setBucket(bucket.name);
+							feedState.queryData();
 						}}
 					>
 						<Avatar
-							class="inline-flex items-center justify-center size-14"
+							class={"inline-flex items-center justify-center size-14" +
+								(feedState.bucket === bucket.name
+									? " border-primary border-2"
+									: "")}
 						>
+							<AvatarImage src={bucket.img} />
 							<AvatarFallback class="bg-transparent text-white"
-								>+</AvatarFallback
+								>{bucket.name.slice(0, 3)}</AvatarFallback
 							>
 						</Avatar>
+						<div
+							class="text-xs pt-1 max-w-16 break-words text-center"
+						>
+							{bucket.name}
+						</div>
 					</button>
-				</div>
-			{/if}
+				{/each}
+				<button
+					class="flex flex-col items-center justify-center cursor-pointer"
+					onclick={() => {
+						dialogState.bucketDialog = true;
+					}}
+				>
+					<Avatar
+						class="inline-flex items-center justify-center size-14"
+					>
+						<AvatarFallback class="bg-transparent text-white"
+							>+</AvatarFallback
+						>
+					</Avatar>
+				</button>
+			</div>
 		{/if}
 	</div>
 	{#if feedState.postIds === undefined}

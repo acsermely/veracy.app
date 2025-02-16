@@ -8,14 +8,16 @@ import {
 	ARWEAVE_URL,
 	BUNDLER_URL,
 	REQUEST_TIMEOUT,
-	TX_APP_CONTENT_TYPE,
+	TX_APP_JSON_CONTENT_TYPE,
 	TX_APP_NAME,
+	TX_APP_TEXT_CONTENT_TYPE,
 	TX_APP_VERSION,
 	TxType,
 } from "../constants";
 import type { Post } from "../models/post.model";
 import type { Wallet } from "../models/wallet.model";
 import type { DbBucketEntry } from "./db.utils";
+import { userCountPerPostProcessor } from "./feed.utils";
 import { getSignKey } from "./wallet.utils";
 
 export class ArweaveUtils {
@@ -69,7 +71,7 @@ export class ArweaveUtils {
 			data: stringData,
 		});
 		tx.addTag("App-Name", TX_APP_NAME);
-		tx.addTag("Content-Type", TX_APP_CONTENT_TYPE);
+		tx.addTag("Content-Type", TX_APP_JSON_CONTENT_TYPE);
 		tx.addTag("Version", TX_APP_VERSION);
 		tx.addTag("Type", TxType.POST);
 		tx.addTag("Age", data.age);
@@ -97,7 +99,7 @@ export class ArweaveUtils {
 			reward: fee,
 		});
 		tx.addTag("App-Name", TX_APP_NAME);
-		tx.addTag("Content-Type", TX_APP_CONTENT_TYPE);
+		tx.addTag("Content-Type", TX_APP_JSON_CONTENT_TYPE);
 		tx.addTag("Version", TX_APP_VERSION);
 		tx.addTag("Type", TxType.PAYMENT);
 		tx.addTag("Target", postId);
@@ -128,7 +130,7 @@ export class ArweaveUtils {
 			reward: fee,
 		});
 		tx.addTag("App-Name", TX_APP_NAME);
-		tx.addTag("Content-Type", TX_APP_CONTENT_TYPE);
+		tx.addTag("Content-Type", TX_APP_JSON_CONTENT_TYPE);
 		tx.addTag("Version", TX_APP_VERSION);
 		tx.addTag("Type", TxType.PRICE);
 		tx.addTag("Target", postId);
@@ -149,10 +151,31 @@ export class ArweaveUtils {
 		});
 
 		tx.addTag("App-Name", TX_APP_NAME);
-		tx.addTag("Content-Type", TX_APP_CONTENT_TYPE);
+		tx.addTag("Content-Type", TX_APP_JSON_CONTENT_TYPE);
 		tx.addTag("Version", TX_APP_VERSION);
 		tx.addTag("Type", TxType.BUCKET);
 		tx.addTag("Bucket", bucket.name);
+		return tx;
+	}
+
+	static async newSendToBucketTx(
+		txId: string,
+		bucketName: string,
+	): Promise<Transaction> {
+		if (!txId || !bucketName) {
+			throw "Missing Parameter";
+		}
+
+		let tx = await this.arweave.createTransaction({
+			data: txId,
+		});
+
+		tx.addTag("App-Name", TX_APP_NAME);
+		tx.addTag("Content-Type", TX_APP_TEXT_CONTENT_TYPE);
+		tx.addTag("Version", TX_APP_VERSION);
+		tx.addTag("Type", TxType.SEND_BUCKET);
+		tx.addTag("Bucket", bucketName);
+		tx.addTag("PostTx", txId);
 		return tx;
 	}
 
@@ -164,6 +187,25 @@ export class ArweaveUtils {
 				? data.data.transactions?.edges[0].node.id
 				: "",
 		);
+	}
+
+	static async getBucketPosts(
+		bucketName: string,
+		cursor?: string,
+		friends?: string[],
+		items = 1000,
+		feedProcessor: (
+			item: ArBucketItems[],
+		) => ArPostIdResult[] = userCountPerPostProcessor,
+	): Promise<ArPostIdResult[]> {
+		return ArweaveUtils.query<ArQueryResult<ArBucketItems>>(
+			queryBucketItems(bucketName, items, cursor, friends),
+		).then((data) => {
+			if (!data.data.transactions) {
+				throw "No Results";
+			}
+			return feedProcessor(data.data.transactions.edges);
+		});
 	}
 
 	static async getPostsIds(
@@ -456,6 +498,71 @@ export function queryBucketByName(bucketName: string): { query: string } {
 	};
 }
 
+export function queryBucketItems(
+	bucketName: string,
+	limit: number,
+	cursor?: string,
+	friends?: string[],
+): { query: string } {
+	return {
+		query: `{
+			transactions(
+				order: ASC,
+				${friends?.length ? 'owners: ["' + friends.join('","') + '"],' : ""}
+				first: ${limit},
+				timestamp: {from: 1728246095432, to: ${new Date().getTime()}},
+				${cursor ? 'after: "' + cursor + '",' : ""}
+				tags: [
+					{ name: "App-Name", values: ["${TX_APP_NAME}"]},
+					{ name: "Version", values: ["${TX_APP_VERSION}"]},
+					{ name: "Type", values: ["${TxType.SEND_BUCKET}"]},
+					{ name: "Bucket", values: ["${bucketName}"]}
+				]
+			)
+			{
+				edges {
+					node {
+						id,
+						address,
+						tags {
+							name,
+							value
+						},
+						timestamp
+					},
+					cursor
+				}
+			}
+		}`,
+	};
+}
+
+// Partial Search
+// https://arweave-search.goldsky.com/graphql
+// query {
+//     transactions(
+//       tags: [
+//         { name: "App-Name", values: "VeracyApp"},
+//         { name: "Type", values: "bucket"},
+//         { name: "Bucket", values: "test*", match: WILDCARD}
+//       ]
+//       first: 10
+//     ) {
+//         edges {
+//             node {
+//                 id
+//               owner {
+//                 address
+//               }
+//               tags {
+//                 name
+//                 value
+//               }
+//             }
+//         }
+//     }
+// }
+
 export type ArQueryCursoredIds = {
 	node: {
 		id: string;
@@ -494,6 +601,16 @@ export type ArPostIdResult = {
 export type ArPaymentResult = {
 	target: string;
 	price: number;
+};
+
+export type ArBucketItems = {
+	node: {
+		id: string;
+		address: string;
+		tags: Array<{ name: string; value: string }>;
+		timestamp: any;
+	};
+	cursor: string;
 };
 
 /**

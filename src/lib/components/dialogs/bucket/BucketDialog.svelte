@@ -28,6 +28,7 @@
 			searching = false;
 			return;
 		}
+		bucketFound = undefined;
 		ArweaveUtils.getBucketId(name)
 			.then((id) => ArweaveUtils.getTxById<DbBucketEntry>(id))
 			.then((data) => {
@@ -433,6 +434,7 @@
 				<Input
 					class="mb-3"
 					placeholder="Search new..."
+					maxlength={25}
 					bind:value={search}
 				/>
 				{#if searching}

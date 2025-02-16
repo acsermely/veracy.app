@@ -19,6 +19,7 @@ export enum TxType {
 	PRICE = "set-price",
 	PROFILE = "profile",
 	BUCKET = "bucket",
+	SEND_BUCKET = "send-to-bucket",
 }
 
 // GATEWAYS
@@ -38,6 +39,7 @@ export const ACTIVATION_ADDRESS = "8vAopD3Fv7QnEqG00-E6aSyLaL9WKZpHmeTPWyNxs9c";
 // POSTS
 export const TX_APP_NAME = "VeracyApp";
 export const TX_APP_VERSION = "0.0.5";
-export const TX_APP_CONTENT_TYPE = "application/json";
+export const TX_APP_JSON_CONTENT_TYPE = "application/json";
+export const TX_APP_TEXT_CONTENT_TYPE = "text/plain";
 
 export const REQUEST_TIMEOUT = 10000;

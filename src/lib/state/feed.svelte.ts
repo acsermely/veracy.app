@@ -36,39 +36,50 @@ export class FeedState {
 		});
 	};
 
-	queryData = async (): Promise<void> => {
-		if (this.bucket === undefined) {
-			this.queryDataAll();
-		} else if (this.bucket === "") {
-			this.queryDataFriends();
-		}
-	};
-
-	queryDataAll = async (): Promise<void> => {
+	queryData = async (cursor?: string): Promise<void> => {
 		this.postIds = undefined;
 		this.scrollPosition = 0;
-		this.postIds = await ArweaveUtils.getPostsIds();
+
+		if (this.bucket === undefined) {
+			this.postIds = await this.queryDataAll(cursor);
+		} else if (this.bucket === "") {
+			this.postIds = await this.queryDataFriends(cursor);
+		} else {
+			this.postIds = await this.queryDataBuckets(cursor);
+		}
 		this.cursor = this.postIds[this.postIds.length - 1]?.cursor;
 	};
 
-	queryDataFriends = async (): Promise<void> => {
-		this.postIds = undefined;
-		this.scrollPosition = 0;
+	queryDataAll = async (cursor?: string): Promise<ArPostIdResult[]> => {
+		return ArweaveUtils.getPostsIds(cursor);
+	};
+
+	queryDataFriends = async (cursor?: string): Promise<ArPostIdResult[]> => {
 		const friends = await DB.friend.getAllKeys();
 		if (!friends?.length) {
 			this.postIds = [];
 			this.cursor = undefined;
-			return;
+			return [];
 		}
-		this.postIds = await ArweaveUtils.getPostsIds(undefined, friends);
-		this.cursor = this.postIds[this.postIds.length - 1]?.cursor;
+		return ArweaveUtils.getPostsIds(cursor, friends);
+	};
+
+	queryDataBuckets = async (cursor?: string): Promise<ArPostIdResult[]> => {
+		return ArweaveUtils.getBucketPosts(this.bucket!, cursor);
 	};
 
 	moreData = async (): Promise<void> => {
 		if (!this.cursor || !this.postIds) {
 			return;
 		}
-		const newids = await ArweaveUtils.getPostsIds(this.cursor);
+		let newids;
+		if (this.bucket === undefined) {
+			newids = await this.queryDataAll(this.cursor);
+		} else if (this.bucket === "") {
+			newids = await this.queryDataFriends(this.cursor);
+		} else {
+			newids = await this.queryDataBuckets(this.cursor);
+		}
 		if (newids.length < 1) {
 			this.cursor = "";
 			return;
