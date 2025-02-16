@@ -40,3 +40,26 @@ export async function createSHA256Hash(data: string): Promise<string> {
 		.join("");
 	return hashHex;
 }
+
+export function debounce(func: (...args: string[]) => void, wait = 0) {
+	let timeoutId: number | undefined;
+
+	function debounced(...args: string[]) {
+		// Clear any existing timeout
+		window.clearTimeout(timeoutId);
+
+		// Set new timeout
+		timeoutId = window.setTimeout(() => {
+			timeoutId = undefined;
+			func(...args);
+		}, wait);
+	}
+
+	// Add cancelation capability
+	debounced.cancel = () => {
+		clearTimeout(timeoutId);
+		timeoutId = undefined;
+	};
+
+	return debounced;
+}

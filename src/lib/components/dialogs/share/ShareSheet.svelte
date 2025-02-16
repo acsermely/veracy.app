@@ -8,8 +8,8 @@
 
 	const dialogState = getDialogsState();
 
-	let friends = $state(["asd", "dsa"]);
-	let buckets = $state(["ASD", "DSA"]);
+	// let friends = $state(["asd", "dsa"]);
+	// let buckets = $state(["ASD", "DSA"]);
 
 	let selectedFriends = $state(new SvelteSet<string>([]));
 	let selectedBuckets = $state(new SvelteSet<string>([]));
@@ -79,11 +79,11 @@
 						disabled={!dialogState.shareSheetContent?.txId}
 						onclick={() => {
 							if (navigator.share) {
-								navigator.share({
-									title: "Veracy",
-									url: shareUrl,
-								});
-								return;
+								navigator
+									.share({
+										title: "Veracy",
+										url: shareUrl,
+									});
 							} else {
 								navigator.clipboard.writeText(shareUrl);
 								toast.success("Link Copied");

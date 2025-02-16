@@ -15,6 +15,7 @@ import {
 } from "../constants";
 import type { Post } from "../models/post.model";
 import type { Wallet } from "../models/wallet.model";
+import type { DbBucketEntry } from "./db.utils";
 import { getSignKey } from "./wallet.utils";
 
 export class ArweaveUtils {
@@ -49,6 +50,9 @@ export class ArweaveUtils {
 	}
 
 	static async getTxById<T>(txId: string): Promise<T> {
+		if (!txId) {
+			throw "Missing TxId";
+		}
 		const response = await fetch(`${BUNDLER_URL}/${txId}`);
 		return (await response.json().then((data) => {
 			return data;
@@ -130,6 +134,36 @@ export class ArweaveUtils {
 		tx.addTag("Target", postId);
 		tx.addTag("Price", price.toString());
 		return tx;
+	}
+
+	static async newBucketTx(bucket: DbBucketEntry): Promise<Transaction> {
+		if (!bucket.name) {
+			throw "Missing Name";
+		}
+		if (bucket.open === false && !bucket.contributors?.length) {
+			throw "Missing Contributors";
+		}
+
+		let tx = await this.arweave.createTransaction({
+			data: JSON.stringify(bucket),
+		});
+
+		tx.addTag("App-Name", TX_APP_NAME);
+		tx.addTag("Content-Type", TX_APP_CONTENT_TYPE);
+		tx.addTag("Version", TX_APP_VERSION);
+		tx.addTag("Type", TxType.BUCKET);
+		tx.addTag("Bucket", bucket.name);
+		return tx;
+	}
+
+	static async getBucketId(bucketName: string): Promise<string> {
+		return ArweaveUtils.query<ArQueryResult<ArQueryIds>>(
+			queryBucketByName(bucketName),
+		).then((data) =>
+			data.data.transactions?.edges.length
+				? data.data.transactions?.edges[0].node.id
+				: "",
+		);
 	}
 
 	static async getPostsIds(
@@ -389,6 +423,32 @@ export function queryAllUserAddresses(): { query: string } {
 				edges {
 					node {
 						address
+					}
+				}
+			}
+		}`,
+	};
+}
+
+export function queryBucketByName(bucketName: string): { query: string } {
+	return {
+		query: `{
+			transactions(
+				order: ASC,
+				first: 1,
+				timestamp: {from: 1728246095432, to: ${new Date().getTime()}},
+				tags: [
+					{ name: "App-Name", values: ["${TX_APP_NAME}"]},
+					{ name: "Version", values: ["${TX_APP_VERSION}"]},
+					{ name: "Type", values: ["${TxType.BUCKET}"]},
+					{ name: "Bucket", values: ["${bucketName}"]}
+				]
+			)
+			{
+				edges {
+					node {
+						id,
+						timestamp
 					}
 				}
 			}

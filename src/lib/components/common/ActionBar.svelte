@@ -4,6 +4,7 @@
 	import { getFeedState } from "../../state";
 	import { getWalletState } from "../../state/wallet.svelte";
 	import AccountDialog from "../dialogs/account/AccountDialog.svelte";
+	import BucketDialog from "../dialogs/bucket/BucketDialog.svelte";
 	import FeedbackDialog from "../dialogs/feedback/FeedbackDialog.svelte";
 	import BuyPostDialog from "../dialogs/payments/BuyPostDialog.svelte";
 	import SetPaymentDialog from "../dialogs/payments/SetPaymentDialog.svelte";
@@ -64,6 +65,7 @@
 	</a>
 </div>
 <div class="flex flex-col w-full gap-2">
+	<BucketDialog />
 	<AccountDialog />
 	<BuyPostDialog />
 	<FeedbackDialog />

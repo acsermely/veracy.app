@@ -1,10 +1,8 @@
 import { getContext, setContext } from "svelte";
+import { STORAGE_CURRENT_WALLET } from "../constants";
 import { Wallet } from "../models/wallet.model";
 import { DB } from "../utils/db.utils";
 import { getAddressFromKey, getEncryptKey } from "../utils/wallet.utils";
-
-const WALLET_LOCAL_ADDRESS = "WALLET_LOCAL_ADDRESS";
-const WALLET_STATE_KEY = "wallet-state-key";
 
 export class WalletState {
 	wallet = $state<Wallet>();
@@ -12,7 +10,7 @@ export class WalletState {
 	hasWallet = $derived(this.wallet !== undefined);
 
 	constructor() {
-		const address = localStorage.getItem(WALLET_LOCAL_ADDRESS);
+		const address = localStorage.getItem(STORAGE_CURRENT_WALLET);
 		if (address) {
 			try {
 				this.useWallet(address);
@@ -23,7 +21,7 @@ export class WalletState {
 	}
 
 	disconnectWallet = (): void => {
-		localStorage.removeItem(WALLET_LOCAL_ADDRESS);
+		localStorage.removeItem(STORAGE_CURRENT_WALLET);
 		this.wallet = undefined;
 	};
 
@@ -46,7 +44,7 @@ export class WalletState {
 		try {
 			const address = await getAddressFromKey(newWallet.rawKey);
 			await DB.wallet.add(address, newWallet.rawKey);
-			localStorage.setItem(WALLET_LOCAL_ADDRESS, address);
+			localStorage.setItem(STORAGE_CURRENT_WALLET, address);
 		} catch {
 			throw "Failed to save wallet data";
 		}
@@ -56,21 +54,21 @@ export class WalletState {
 
 	useWallet = async (addr?: string): Promise<void> => {
 		if (!addr) {
-			addr = localStorage.getItem(WALLET_LOCAL_ADDRESS) || undefined;
+			addr = localStorage.getItem(STORAGE_CURRENT_WALLET) || undefined;
 		}
 		if (addr) {
 			if (this.wallet) {
 				this.wallet = undefined;
 			}
 			try {
-				const rawKey = await DB.wallet.get(addr);
+				const rawKey = (await DB.wallet.get(addr))?.key;
 				if (!rawKey) {
 					this.disconnectWallet();
 					return;
 				}
 				const address = await getAddressFromKey(rawKey);
 				this.wallet = new Wallet(rawKey, address);
-				localStorage.setItem(WALLET_LOCAL_ADDRESS, address);
+				localStorage.setItem(STORAGE_CURRENT_WALLET, address);
 				return;
 			} catch (e) {
 				console.error(e);
@@ -88,6 +86,8 @@ export class WalletState {
 		return crypto.subtle.exportKey("jwk", encryptKey);
 	};
 }
+
+const WALLET_STATE_KEY = "wallet-state-key";
 
 export function setWalletState(): WalletState {
 	return setContext(WALLET_STATE_KEY, new WalletState());

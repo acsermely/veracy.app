@@ -7,7 +7,7 @@
 	import { getFeedState } from "../../state/feed.svelte";
 	import { ArweaveUtils } from "../../utils/arweave.utils";
 	import RefreshWrapper from "../common/RefreshWrapper.svelte";
-	import { Avatar, AvatarFallback } from "../ui/avatar";
+	import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 	import Button from "../ui/button/button.svelte";
 	import CardContent from "../ui/card/card-content.svelte";
 	import CardHeader from "../ui/card/card-header.svelte";
@@ -57,60 +57,93 @@
 				onclick={() => (dialogState.feedbackDialog = true)}
 				>Send Feedback</Button
 			>
+			{#if feedState.scrollPosition < 1}
+				<div
+					in:slide
+					out:slide
+					class="flex w-full gap-4 items-start overflow-auto"
+				>
+					<button
+						class="flex flex-col items-center cursor-pointer"
+						onclick={() => {
+							feedState.setBucket(undefined);
+							feedState.queryData();
+						}}
+					>
+						<Avatar
+							class={"inline-flex bg-secondary border-2 border-muted size-14" +
+								(feedState.bucket === undefined
+									? " border-primary border-opacity-50"
+									: "")}
+						>
+							<AvatarFallback
+								class="text-sm bg-transparent text-white"
+								>ALL</AvatarFallback
+							>
+						</Avatar>
+						<div class="text-xs pt-1">All</div>
+					</button>
+					<button
+						class="flex flex-col items-center cursor-pointer"
+						onclick={() => {
+							feedState.setBucket("");
+							feedState.queryData();
+						}}
+					>
+						<Avatar
+							class={"inline-flex bg-secondary border-2 border-muted size-14" +
+								(feedState.bucket === ""
+									? " border-primary  border-opacity-50"
+									: "")}
+						>
+							<AvatarFallback
+								class="text-sm bg-transparent text-white"
+								>FRI</AvatarFallback
+							>
+						</Avatar>
+						<div
+							class="text-xs pt-1 max-w-14 break-words text-center"
+						>
+							Friends
+						</div>
+					</button>
+					{#each feedState.bucketList as bucket}
+						<button
+							class="flex flex-col items-center justify-center cursor-pointer"
+						>
+							<Avatar
+								class="inline-flex items-center justify-center size-14"
+							>
+								<AvatarImage src={bucket.img} />
+								<AvatarFallback
+									class="bg-transparent text-white"
+									>{bucket.name.slice(0, 3)}</AvatarFallback
+								>
+							</Avatar>
+							<div
+								class="text-xs pt-1 max-w-16 break-words text-center"
+							>
+								{bucket.name}
+							</div>
+						</button>
+					{/each}
+					<button
+						class="flex flex-col items-center justify-center cursor-pointer"
+						onclick={() => {
+							dialogState.bucketDialog = true;
+						}}
+					>
+						<Avatar
+							class="inline-flex items-center justify-center size-14"
+						>
+							<AvatarFallback class="bg-transparent text-white"
+								>+</AvatarFallback
+							>
+						</Avatar>
+					</button>
+				</div>
+			{/if}
 		{/if}
-		<div class="flex w-full gap-4 items-baseline">
-			<button
-				class="flex flex-col items-center cursor-pointer"
-				onclick={() => {
-					feedState.setBucket(undefined);
-					feedState.queryData();
-				}}
-			>
-				<Avatar
-					class={"inline-flex bg-secondary border-2 border-muted" +
-						(feedState.bucket === undefined
-							? " border-primary border-opacity-50"
-							: "")}
-				>
-					<AvatarFallback class="text-sm bg-transparent text-white"
-						>ALL</AvatarFallback
-					>
-				</Avatar>
-				{#if feedState.scrollPosition < 1}
-					<div in:slide out:slide class="text-xs pt-1">All</div>
-				{/if}
-			</button>
-			<button
-				class="flex flex-col items-center cursor-pointer"
-				onclick={() => {
-					feedState.setBucket("");
-					feedState.queryData();
-				}}
-			>
-				<Avatar
-					class={"inline-flex bg-secondary border-2 border-muted" +
-						(feedState.bucket === ""
-							? " border-primary  border-opacity-50"
-							: "")}
-				>
-					<AvatarFallback class="text-sm bg-transparent text-white"
-						>FRI</AvatarFallback
-					>
-				</Avatar>
-				{#if feedState.scrollPosition < 1}
-					<div in:slide out:slide class="text-xs pt-1">Friends</div>
-				{/if}
-			</button>
-			<button
-				class="flex flex-col items-center justify-center cursor-pointer"
-			>
-				<Avatar class="inline-flex items-center justify-center">
-					<AvatarFallback class="bg-transparent text-white"
-						>+</AvatarFallback
-					>
-				</Avatar>
-			</button>
-		</div>
 	</div>
 	{#if feedState.postIds === undefined}
 		<div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">

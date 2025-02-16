@@ -27,25 +27,24 @@ export class Watcher {
 					this._interval = undefined;
 					return;
 				}
-				for (const id of list) {
-					const item = await DB.watcher.get(id);
+				for (const item of list) {
 					if (!item) {
 						continue;
 					}
 					let tx: string[] = [];
 					if (item.data.type === "payment") {
 						tx = await ArweaveUtils.getPaymentForPost(
-							id,
+							item.id,
 							this._walletState.wallet.address,
 						).catch(() => []);
 					} else if (item.data.type === "set-price") {
 						tx = await ArweaveUtils.getPriceForPost(
-							id,
+							item.id,
 							this._walletState.wallet.address,
 						).catch(() => []);
 					}
 					if (tx.length > 0) {
-						this.remove(id);
+						this.remove(item.id);
 					}
 				}
 			}

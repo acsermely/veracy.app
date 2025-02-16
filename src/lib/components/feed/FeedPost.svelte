@@ -22,6 +22,7 @@
 	import {
 		createSHA256Hash,
 		hasPrivateContent,
+		runDelayed,
 	} from "../../utils/common.utils";
 	import { DB } from "../../utils/db.utils";
 	import AvatarFallback from "../ui/avatar/avatar-fallback.svelte";
@@ -153,7 +154,6 @@
 		}
 		await dialogState.openBuyDialog(txId, postPrice);
 		watcherState.add(txId, "payment").then(() => {
-			refreshWatcher();
 			toast.success("Payment Completed. Go to the Post!", {
 				duration: 4000,
 				action: {
@@ -161,9 +161,14 @@
 					onClick: () => navigate("/post/" + txId),
 				},
 			});
+			runDelayed(() => {
+				dataPromises.set(id, getImagePromise(id));
+				dataPromises.get(id)?.then(() => {
+					refreshWatcher();
+				});
+			}, 300);
 		});
-		dataPromises.set(id, getImagePromise(id));
-		refreshWatcher();
+		runDelayed(refreshWatcher, 100);
 	}
 
 	async function refreshWatcher(): Promise<boolean> {
@@ -175,8 +180,6 @@
 				watcherState
 					.getPromise(data.id)
 					.then(() => {
-						checkPrice();
-						refreshWatcher();
 						toast.success("Post activated!", {
 							duration: 4000,
 							action: {
@@ -184,6 +187,8 @@
 								onClick: () => navigate("/post/" + txId),
 							},
 						});
+						checkPrice();
+						refreshWatcher();
 					})
 					.catch();
 			}
@@ -481,7 +486,8 @@
 											>(somehow)</small
 										> -->
 									{:else}
-										Login to see this image!
+										<span>Private Content</span>
+										<small>You need to Login!</small>
 										<Button
 											onclick={() =>
 												(dialogState.connectDialog = true)}

@@ -3,6 +3,7 @@ export const STORAGE_REG_DONE = "reg_done";
 export const STORAGE_SEARCH_HISTORY = "search_history";
 export const STORAGE_TOKEN = "token";
 export const STORAGE_BUCKET = "bucket";
+export const STORAGE_CURRENT_WALLET = "WALLET_LOCAL_ADDRESS";
 
 export const POST_MAX_NUMBER_OF_CONTENT = 6;
 
@@ -17,6 +18,7 @@ export enum TxType {
 	PAYMENT = "payment",
 	PRICE = "set-price",
 	PROFILE = "profile",
+	BUCKET = "bucket",
 }
 
 // GATEWAYS

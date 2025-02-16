@@ -1,7 +1,7 @@
 import { getContext, setContext } from "svelte";
 import { STORAGE_BUCKET } from "../constants";
 import { ArweaveUtils, type ArPostIdResult } from "../utils/arweave.utils";
-import { DB } from "../utils/db.utils";
+import { DB, type DbBucketEntry } from "../utils/db.utils";
 
 export class FeedState {
 	public postIds = $state<ArPostIdResult[]>();
@@ -11,6 +11,7 @@ export class FeedState {
 	public scrollPosition = $state(0);
 
 	public bucket = $state<string>();
+	public bucketList = $state<DbBucketEntry[]>([]);
 
 	constructor() {
 		const savedBucket = localStorage.getItem(STORAGE_BUCKET);
@@ -27,6 +28,12 @@ export class FeedState {
 		} else {
 			localStorage.setItem(STORAGE_BUCKET, bucket);
 		}
+	};
+
+	refreshBucketList = (): Promise<void> => {
+		return DB.bucket.getAll().then((list) => {
+			this.bucketList = list;
+		});
 	};
 
 	queryData = async (): Promise<void> => {
@@ -47,7 +54,7 @@ export class FeedState {
 	queryDataFriends = async (): Promise<void> => {
 		this.postIds = undefined;
 		this.scrollPosition = 0;
-		const friends = await DB.friend.getAll();
+		const friends = await DB.friend.getAllKeys();
 		if (!friends?.length) {
 			this.postIds = [];
 			this.cursor = undefined;
