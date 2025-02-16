@@ -507,7 +507,7 @@ export function queryBucketItems(
 	return {
 		query: `{
 			transactions(
-				order: ASC,
+				order: DESC,
 				${friends?.length ? 'owners: ["' + friends.join('","') + '"],' : ""}
 				first: ${limit},
 				timestamp: {from: 1728246095432, to: ${new Date().getTime()}},

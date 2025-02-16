@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Loader } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
 	import {
 		getDialogsState,
@@ -16,6 +17,7 @@
 	const walletState = getWalletState();
 
 	let selectedBuckets = $state<string[]>([]);
+	let sending = $state(false);
 
 	const shareUrl = $derived(
 		`${location.origin}/post/${dialogState.shareSheetContent?.txId}`,
@@ -31,6 +33,7 @@
 			toast.error("No Wallet!");
 			return;
 		}
+		sending = true;
 		for (const bucket of selectedBuckets) {
 			try {
 				const tx = await ArweaveUtils.newSendToBucketTx(postTx, bucket);
@@ -39,6 +42,7 @@
 				toast.error("Failed to Send to: " + bucket);
 			}
 		}
+		sending = false;
 		selectedBuckets = [];
 		dialogState.closeShareDialog();
 	}
@@ -115,10 +119,14 @@
 			<div class="flex flex-col w-full">
 				{#if selectedBuckets.length}
 					<Button class="mb-10" onclick={sendSelected}>
-						Send to
-						{selectedBuckets.length
-							? ` ${selectedBuckets.length} Bucket(s)`
-							: ""}
+						{#if sending}
+							<Loader class="animate-spin" />
+						{:else}
+							Send to
+							{selectedBuckets.length
+								? ` ${selectedBuckets.length} Bucket(s)`
+								: ""}
+						{/if}
 					</Button>
 				{:else}
 					<Button
