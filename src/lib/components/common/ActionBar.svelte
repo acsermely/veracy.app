@@ -8,6 +8,7 @@
 	import FeedbackDialog from "../dialogs/feedback/FeedbackDialog.svelte";
 	import BuyPostDialog from "../dialogs/payments/BuyPostDialog.svelte";
 	import SetPaymentDialog from "../dialogs/payments/SetPaymentDialog.svelte";
+	import ProfileDialog from "../dialogs/profile/ProfileDialog.svelte";
 	import ShareSheet from "../dialogs/share/ShareSheet.svelte";
 
 	const walletState = getWalletState();
@@ -71,4 +72,5 @@
 	<FeedbackDialog />
 	<SetPaymentDialog />
 	<ShareSheet />
+	<ProfileDialog />
 </div>

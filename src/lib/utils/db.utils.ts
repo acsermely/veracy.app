@@ -1,9 +1,11 @@
 import { STORAGE_CURRENT_WALLET } from "../constants";
 import type { PostAge } from "../models/post.model";
+import type { ProfileData } from "../models/user.model";
 
 const DB_NAME = "VeracyDB";
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 const DB_STORE_WALLET = "wallet-store";
+const DB_STORE_PROFILE = "profile-store";
 
 export type DbWalletEntry = {
 	address: string;
@@ -30,6 +32,16 @@ export type DbBucketEntry = {
 
 export type DbFriendEntry = {
 	id: string;
+};
+
+export type DbProfileEntry = {
+	address: string;
+	data: {
+		username?: string;
+		img?: string;
+		description?: string;
+	};
+	timestamp: number; // When the profile was cached
 };
 
 export class DB {
@@ -371,6 +383,60 @@ export class DB {
 			});
 		},
 	};
+
+	static profile = {
+		add: async (address: string, data: ProfileData) => {
+			return DB.put<DbProfileEntry>(DB_STORE_PROFILE, {
+				address,
+				data: {
+					username: data.username,
+					img: data.img,
+					description: data.description,
+				},
+				timestamp: Date.now(),
+			});
+		},
+
+		get: async (address: string) => {
+			return DB.get<DbProfileEntry>(DB_STORE_PROFILE, address).then(
+				(entry) => {
+					if (!entry) {
+						return undefined;
+					}
+					// Check if cache is older than 1 day
+					if (Date.now() - entry.timestamp > 24 * 60 * 60 * 1000) {
+						DB.profile.remove(address);
+						return undefined;
+					}
+					return entry.data as ProfileData;
+				},
+			);
+		},
+
+		remove: async (address: string) => {
+			return DB.remove(DB_STORE_PROFILE, address);
+		},
+
+		evictStale: async () => {
+			return DB.getDb().then((db) => {
+				const store = db
+					.transaction([DB_STORE_PROFILE], "readwrite")
+					.objectStore(DB_STORE_PROFILE);
+
+				const request = store.getAll();
+				request.onsuccess = () => {
+					const entries = request.result as DbProfileEntry[];
+					const staleTime = Date.now() - 24 * 60 * 60 * 1000; // 1 day ago
+
+					entries.forEach((entry) => {
+						if (entry.timestamp < staleTime) {
+							store.delete(entry.address);
+						}
+					});
+				};
+			});
+		},
+	};
 }
 
 async function initializeDB(): Promise<IDBDatabase> {
@@ -381,6 +447,11 @@ async function initializeDB(): Promise<IDBDatabase> {
 			const db = request.result;
 			if (!db.objectStoreNames.contains(DB_STORE_WALLET)) {
 				db.createObjectStore(DB_STORE_WALLET, {
+					keyPath: "address",
+				});
+			}
+			if (!db.objectStoreNames.contains(DB_STORE_PROFILE)) {
+				db.createObjectStore(DB_STORE_PROFILE, {
 					keyPath: "address",
 				});
 			}

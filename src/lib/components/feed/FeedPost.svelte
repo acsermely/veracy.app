@@ -14,6 +14,7 @@
 	import { toast } from "svelte-sonner";
 	import { SvelteMap } from "svelte/reactivity";
 	import type { Post } from "../../models/post.model";
+	import type { ProfileData } from "../../models/user.model";
 	import { getDialogsState } from "../../state/dialogs.svelte";
 	import { getContentNodeState } from "../../state/node.svelte";
 	import { getWalletState } from "../../state/wallet.svelte";
@@ -26,6 +27,7 @@
 	} from "../../utils/common.utils";
 	import { DB } from "../../utils/db.utils";
 	import AvatarFallback from "../ui/avatar/avatar-fallback.svelte";
+	import AvatarImage from "../ui/avatar/avatar-image.svelte";
 	import Avatar from "../ui/avatar/avatar.svelte";
 	import Button from "../ui/button/button.svelte";
 	import CardContent from "../ui/card/card-content.svelte";
@@ -36,6 +38,7 @@
 	import { Input } from "../ui/input";
 	import { Popover, PopoverTrigger } from "../ui/popover";
 	import PopoverContent from "../ui/popover/popover-content.svelte";
+	import { Skeleton } from "../ui/skeleton";
 	import RepostPostDialog from "./RepostPostDialog.svelte";
 
 	const {
@@ -65,6 +68,9 @@
 	let dataPromises =
 		$state<SvelteMap<string, Promise<string>>>(initDataPromises());
 
+	let userProfile = $state<ProfileData>();
+	let loadingProfile = $state(true);
+
 	$effect(() => {
 		if (!isPreview) {
 			checkValidationHashes();
@@ -75,6 +81,19 @@
 		}
 		checkPrice();
 		refreshWatcher();
+	});
+
+	$effect(() => {
+		if (!isPreview && data.uploader) {
+			loadingProfile = true;
+			ArweaveUtils.getLatestProfile(data.uploader)
+				.then((profile) => {
+					userProfile = profile;
+				})
+				.finally(() => {
+					loadingProfile = false;
+				});
+		}
 	});
 
 	function initDataPromises(): SvelteMap<string, Promise<string>> {
@@ -215,21 +234,39 @@
 			class:pointer-events-none={isPreview}
 			use:link
 		>
-			<Avatar
-				class="inline-flex bg-gradient-to-bl from-amber-500 via-blue-500 to-teal-500 bg-opacity-50"
-			>
-				<AvatarFallback class="font-extrabold bg-transparent text-white"
-					>{data.uploader?.slice(0, 3)}</AvatarFallback
+			{#if loadingProfile}
+				<Skeleton class="size-10 rounded-full" />
+				<div class="flex flex-col gap-1 ml-3">
+					<Skeleton class="h-4 w-24" />
+					<Skeleton class="h-3 w-32" />
+				</div>
+			{:else}
+				<Avatar
+					class="inline-flex bg-gradient-to-bl from-amber-500 via-blue-500 to-teal-500 bg-opacity-50"
 				>
-			</Avatar>
-			<CardHeader class="inline-flex p-3 py-0">
-				<!-- {#if data.title} TODO PROFILE @HANDLE
-					<CardTitle>{data.title}</CardTitle>
-				{/if} -->
-				<CardDescription
-					>{data.uploader?.slice(0, 20)}...</CardDescription
-				>
-			</CardHeader>
+					<AvatarImage src={userProfile?.img} />
+					<AvatarFallback
+						class="font-extrabold bg-transparent text-white"
+						>{data.uploader?.slice(0, 3)}</AvatarFallback
+					>
+				</Avatar>
+				<CardHeader class="inline-flex p-3 py-0">
+					{#if userProfile?.username}
+						<div class="flex flex-col">
+							<span class="text-sm font-medium"
+								>{userProfile.username}</span
+							>
+							<CardDescription class="text-xs">
+								{data.uploader?.slice(0, 20)}...
+							</CardDescription>
+						</div>
+					{:else}
+						<CardDescription>
+							{data.uploader?.slice(0, 20)}...
+						</CardDescription>
+					{/if}
+				</CardHeader>
+			{/if}
 		</a>
 		{#if hashValid.includes(false)}
 			<Popover>

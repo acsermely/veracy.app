@@ -2,21 +2,23 @@
 	import { ModeWatcher } from "mode-watcher";
 	import { Route, Router } from "svelte-routing";
 	import ActionBar from "./lib/components/common/ActionBar.svelte";
+	import PrivacyPolicy from "./lib/components/common/PrivacyPolicy.svelte";
+	import Profile from "./lib/components/common/profile/Profile.svelte";
+	import TermsOfUse from "./lib/components/common/TermsOfUse.svelte";
+	import Create from "./lib/components/create/Create.svelte";
+	import Feed from "./lib/components/feed/Feed.svelte";
+	import SinglePost from "./lib/components/post/SinglePost.svelte";
+	import Search from "./lib/components/search/Search.svelte";
 	import { Toaster } from "./lib/components/ui/sonner";
+	import { setAppState } from "./lib/state";
 	import { setDialogsState } from "./lib/state/dialogs.svelte";
 	import { setFeedState } from "./lib/state/feed.svelte";
 	import { setContentNodeState } from "./lib/state/node.svelte";
 	import { setSearchState } from "./lib/state/search.svelte";
 	import { setWalletState } from "./lib/state/wallet.svelte";
 	import { setWatcherState } from "./lib/state/watcher.svelte";
-	import Create from "./lib/components/create/Create.svelte";
-	import Feed from "./lib/components/feed/Feed.svelte";
-	import PrivacyPolicy from "./lib/components/common/PrivacyPolicy.svelte";
-	import Profile from "./lib/components/common/profile/Profile.svelte";
-	import Search from "./lib/components/search/Search.svelte";
-	import SinglePost from "./lib/components/post/SinglePost.svelte";
-	import TermsOfUse from "./lib/components/common/TermsOfUse.svelte";
-	import { setAppState } from "./lib/state";
+	import { runDelayed } from "./lib/utils/common.utils";
+	import { DB } from "./lib/utils/db.utils";
 
 	const feedState = setFeedState();
 	setWalletState();
@@ -43,6 +45,13 @@
 	function beforeInstall(event: any): void {
 		appState.installPrompt = event;
 	}
+
+	// Run profile cache eviction after 10s
+	runDelayed(() => {
+		DB.profile.evictStale().catch((e) => {
+			console.error("Failed to evict stale profiles:", e);
+		});
+	}, 10000);
 </script>
 
 <ModeWatcher />

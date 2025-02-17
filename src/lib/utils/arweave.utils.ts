@@ -15,8 +15,10 @@ import {
 	TxType,
 } from "../constants";
 import type { Post } from "../models/post.model";
+import type { ProfileData } from "../models/user.model";
 import type { Wallet } from "../models/wallet.model";
 import type { DbBucketEntry } from "./db.utils";
+import { DB } from "./db.utils";
 import { userCountPerPostProcessor } from "./feed.utils";
 import { getSignKey } from "./wallet.utils";
 
@@ -365,6 +367,53 @@ export class ArweaveUtils {
 			return Array.from(bucketSet);
 		});
 	}
+
+	static async newProfileTx(profile: ProfileData): Promise<Transaction> {
+		let tx = await this.arweave.createTransaction({
+			data: JSON.stringify(profile),
+		});
+
+		tx.addTag("App-Name", TX_APP_NAME);
+		tx.addTag("Content-Type", TX_APP_JSON_CONTENT_TYPE);
+		tx.addTag("Version", TX_APP_VERSION);
+		tx.addTag("Type", TxType.PROFILE);
+		tx.addTag("Username", profile.username);
+		return tx;
+	}
+
+	static async checkUsernameExists(username: string): Promise<boolean> {
+		return ArweaveUtils.query<ArQueryResult<ArQueryIds>>(
+			queryUsernameExists(username),
+		).then((data) => {
+			return data.data.transactions.edges.length > 0;
+		});
+	}
+
+	static async getLatestProfile(
+		walletId: string,
+	): Promise<ProfileData | undefined> {
+		// Try to get from cache first
+		const cached = await DB.profile.get(walletId);
+		if (cached) {
+			return cached;
+		}
+
+		// If not in cache, query Arweave
+		return ArweaveUtils.query<ArQueryResult<ArQueryIds>>(
+			queryLatestProfile(walletId),
+		).then((data) => {
+			if (!data.data.transactions.edges.length) {
+				return undefined;
+			}
+			const profileId = data.data.transactions.edges[0].node.id;
+			return ArweaveUtils.getTxById<ProfileData>(profileId).then(
+				(profile) => {
+					DB.profile.add(walletId, profile);
+					return profile;
+				},
+			);
+		});
+	}
 }
 
 export function queryPosts(cursor?: string, friends?: string[]) {
@@ -581,6 +630,53 @@ export function queryRecentBuckets(): { query: string } {
 							name,
 							value
 						}
+					}
+				}
+			}
+		}`,
+	};
+}
+
+export function queryUsernameExists(username: string): { query: string } {
+	return {
+		query: `{
+			transactions(
+				first: 1,
+				tags: [
+					{ name: "App-Name", values: ["${TX_APP_NAME}"]},
+					{ name: "Version", values: ["${TX_APP_VERSION}"]},
+					{ name: "Type", values: ["${TxType.PROFILE}"]},
+					{ name: "Username", values: ["${username}"]}
+				]
+			)
+			{
+				edges {
+					node {
+						id
+					}
+				}
+			}
+		}`,
+	};
+}
+
+export function queryLatestProfile(walletId: string): { query: string } {
+	return {
+		query: `{
+			transactions(
+				owners: ["${walletId}"],
+				order: DESC,
+				first: 1,
+				tags: [
+					{ name: "App-Name", values: ["${TX_APP_NAME}"]},
+					{ name: "Version", values: ["${TX_APP_VERSION}"]},
+					{ name: "Type", values: ["${TxType.PROFILE}"]}
+				]
+			)
+			{
+				edges {
+					node {
+						id
 					}
 				}
 			}

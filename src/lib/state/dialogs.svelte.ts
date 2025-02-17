@@ -65,6 +65,8 @@ export class DialogsState {
 		this.shareSheet = false;
 		this.shareSheetContent = undefined;
 	}
+
+	public profileDialog = $state(false);
 }
 
 const DIALOGS_STATE_KEY = "dialogs-state-key";

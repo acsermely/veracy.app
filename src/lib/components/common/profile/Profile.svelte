@@ -3,6 +3,7 @@
 	import { navigate } from "svelte-routing";
 	import { toast } from "svelte-sonner";
 	import type { Post } from "../../../models/post.model";
+	import type { ProfileData } from "../../../models/user.model";
 	import { getDialogsState } from "../../../state/dialogs.svelte";
 	import { getWalletState } from "../../../state/wallet.svelte";
 	import {
@@ -12,6 +13,7 @@
 	import { DB } from "../../../utils/db.utils";
 	import FeedPost from "../../feed/FeedPost.svelte";
 	import AvatarFallback from "../../ui/avatar/avatar-fallback.svelte";
+	import AvatarImage from "../../ui/avatar/avatar-image.svelte";
 	import Avatar from "../../ui/avatar/avatar.svelte";
 	import Button from "../../ui/button/button.svelte";
 	import CardContent from "../../ui/card/card-content.svelte";
@@ -26,6 +28,8 @@
 	let isMe = $derived(walletId === getWalletState().wallet?.address);
 
 	let isFollowing = $state(false);
+
+	let loadingProfile = $state(true);
 
 	$effect(() => {
 		queryData();
@@ -44,9 +48,18 @@
 
 	let postIds = $state<ArPostIdResult[]>();
 	let balance = $state<string>();
+
+	let userProfile = $state<ProfileData>();
+
 	const queryData = async (): Promise<void> => {
-		postIds = await ArweaveUtils.getAllPostsIdForWallet(walletId);
-		balance = await ArweaveUtils.getBalance(walletId);
+		loadingProfile = true;
+		try {
+			postIds = await ArweaveUtils.getAllPostsIdForWallet(walletId);
+			balance = await ArweaveUtils.getBalance(walletId);
+			userProfile = await ArweaveUtils.getLatestProfile(walletId);
+		} finally {
+			loadingProfile = false;
+		}
 	};
 
 	const fetchData = async (id: string): Promise<Post> => {
@@ -83,27 +96,40 @@
 	</div>
 	<div class="w-full px-3 md:px-0 max-w-[450px]">
 		<Card class="w-full">
-			<CardHeader class="flex items-center">
-				<Avatar
-					class="inline-flex bg-gradient-to-bl from-amber-500 via-blue-500 to-teal-500 bg-opacity-50"
-				>
-					<AvatarFallback
-						class="font-extrabold bg-transparent text-white"
-						>{walletId.slice(0, 3)}</AvatarFallback
+			<CardHeader class={"flex items-center"}>
+				{#if loadingProfile}
+					<Skeleton class="size-14 rounded-full mb-2" />
+					<Skeleton class="h-5 w-32 mb-2" />
+					<Skeleton class="h-4 w-48" />
+				{:else}
+					<Avatar
+						class="inline-flex bg-gradient-to-bl from-amber-500 via-blue-500 to-teal-500 bg-opacity-50 size-14"
 					>
-				</Avatar>
+						<AvatarImage src={userProfile?.img} />
+						<AvatarFallback
+							class="font-extrabold bg-transparent text-white"
+							>{walletId.slice(0, 3)}</AvatarFallback
+						>
+					</Avatar>
+					{#if userProfile?.username}
+						<span class="mt-2 text-lg font-medium">
+							{userProfile.username}
+						</span>
+					{/if}
+					<button
+						class="flex items-center cursor-pointer"
+						class:text-xs={userProfile?.username}
+						onclick={() => {
+							navigator.clipboard.writeText(walletId);
+							toast.success("Address Copied");
+						}}
+						>{walletId.slice(0, 20)}... <Copy class="h-4" /></button
+					>
+				{/if}
 			</CardHeader>
 			<CardContent
 				class="flex justify-center items-center gap-3 flex-col"
 			>
-				<Button
-					variant="link"
-					class="flex items-center cursor-pointer"
-					onclick={() => {
-						navigator.clipboard.writeText(walletId);
-						toast.success("Address Copied");
-					}}>{walletId.slice(0, 20)}... <Copy class="h-4" /></Button
-				>
 				{#if !isMe}
 					<Button
 						variant="secondary"
@@ -127,6 +153,15 @@
 							{Number.parseFloat(balance!).toFixed(4)} AR
 						{/if}
 					</div>
+					{#if !userProfile}
+						<Button
+							variant="secondary"
+							size="sm"
+							onclick={() => (dialogsState.profileDialog = true)}
+						>
+							Setup Your Profile
+						</Button>
+					{/if}
 				{/if}
 			</CardContent>
 		</Card>
