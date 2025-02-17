@@ -6,6 +6,7 @@
 	import { getWalletState } from "../../../state/wallet.svelte";
 	import { ArweaveUtils } from "../../../utils/arweave.utils";
 	import { debounce } from "../../../utils/common.utils";
+	import { DB } from "../../../utils/db.utils";
 	import { compressImageInput } from "../../../utils/image.utils";
 	import { Button } from "../../ui/button";
 	import { Dialog } from "../../ui/dialog";
@@ -25,11 +26,28 @@
 	let uploading = $state(false);
 	let usernameExists = $state(false);
 	let checkingUsername = $state(false);
+	let originalUsername = $state<string>();
+
+	// Load existing profile when dialog opens
+	$effect(() => {
+		if (dialogsState.profileDialog && walletState.wallet?.address) {
+			ArweaveUtils.getLatestProfile(walletState.wallet.address).then(
+				(existingProfile) => {
+					if (existingProfile) {
+						profile = existingProfile;
+						originalUsername = existingProfile.username;
+					}
+				},
+			);
+		}
+	});
 
 	const checkUsernameExists = debounce((username) => {
-		if (!username) {
+		if (!username || username === originalUsername) {
+			usernameExists = false;
 			return;
 		}
+		checkingUsername = true;
 		ArweaveUtils.checkUsernameExists(username)
 			.then((exists) => {
 				usernameExists = exists;
@@ -42,6 +60,9 @@
 	$effect(() => {
 		usernameExists = false;
 		if (!profile.username) {
+			return;
+		}
+		if (profile.username === originalUsername) {
 			return;
 		}
 		checkingUsername = true;
@@ -72,6 +93,7 @@
 		try {
 			const profileTx = await ArweaveUtils.newProfileTx(profile);
 			await ArweaveUtils.dispatch(walletState.wallet, profileTx);
+			await DB.profile.remove(walletState.wallet.address);
 			dialogsState.profileDialog = false;
 			toast.success("Profile updated!");
 		} catch (e) {
@@ -90,16 +112,22 @@
 			profile = {
 				username: "",
 			};
+			originalUsername = undefined;
 			usernameExists = false;
 			checkingUsername = false;
 		}
 	}}
 >
-	<DialogContent class="transition-transform w-full max-w-[450px]">
+	<DialogContent
+		class="transition-transform w-full max-w-[450px]"
+		onOpenAutoFocus={(e) => {
+			e.preventDefault();
+		}}
+	>
 		<DialogHeader>
-			<DialogTitle>Create Profile</DialogTitle>
+			<DialogTitle>Edit Profile</DialogTitle>
 			<DialogDescription
-				>Set up your profile information</DialogDescription
+				>Update your profile information</DialogDescription
 			>
 		</DialogHeader>
 
@@ -138,7 +166,8 @@
 			<div class="flex flex-col w-full relative">
 				<Input
 					id="username"
-					class={usernameExists || !profile.username
+					class={usernameExists &&
+					profile.username !== originalUsername
 						? "border-destructive border-2"
 						: ""}
 					placeholder="Enter username..."
@@ -149,7 +178,7 @@
 					class="absolute -bottom-6 right-2 text-muted-foreground text-xs"
 					class:animate-pulse={checkingUsername}
 				>
-					{#if usernameExists}
+					{#if usernameExists && profile.username !== originalUsername}
 						Username Already Taken
 					{:else if checkingUsername}
 						Checking...
@@ -162,7 +191,7 @@
 			class="mt-3"
 			disabled={!profile.username ||
 				!profile.img ||
-				usernameExists ||
+				(usernameExists && profile.username !== originalUsername) ||
 				checkingUsername}
 			onclick={submitProfile}
 		>

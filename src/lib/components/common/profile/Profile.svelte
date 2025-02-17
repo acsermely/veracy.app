@@ -20,6 +20,7 @@
 	import CardHeader from "../../ui/card/card-header.svelte";
 	import Card from "../../ui/card/card.svelte";
 	import Skeleton from "../../ui/skeleton/skeleton.svelte";
+	import RefreshWrapper from "../RefreshWrapper.svelte";
 
 	const { walletId }: { walletId: string } = $props();
 
@@ -65,128 +66,157 @@
 	const fetchData = async (id: string): Promise<Post> => {
 		return ArweaveUtils.getTxById<Post>(id);
 	};
+
+	async function onRefresh(): Promise<void> {
+		queryData();
+	}
 </script>
 
-<div
-	class="flex flex-col w-full items-center overflow-y-auto no-scrollbar no-scrollbar::-webkit-scrollbar"
->
+<RefreshWrapper {onRefresh}>
 	<div
-		class="flex p-3 md:px-0 w-full max-w-[450px] justify-between items-baseline"
+		class="flex flex-col w-full items-center overflow-y-auto no-scrollbar no-scrollbar::-webkit-scrollbar"
 	>
-		<Button
-			variant="outline"
-			size="icon"
-			onclick={() => {
-				if (history.length > 2) {
-					history.back();
-				} else {
-					navigate("/", { replace: true });
-				}
-			}}><ChevronLeft /></Button
+		<div
+			class="flex p-3 md:px-0 w-full max-w-[450px] justify-between items-baseline"
 		>
-		{#if isMe}
 			<Button
 				variant="outline"
 				size="icon"
-				onclick={() => (dialogsState.connectDialog = true)}
+				onclick={() => {
+					if (history.length > 2) {
+						history.back();
+					} else {
+						navigate("/", { replace: true });
+					}
+				}}><ChevronLeft /></Button
 			>
-				<Settings />
-			</Button>
-		{/if}
-	</div>
-	<div class="w-full px-3 md:px-0 max-w-[450px]">
-		<Card class="w-full">
-			<CardHeader class={"flex items-center"}>
-				{#if loadingProfile}
-					<Skeleton class="size-14 rounded-full mb-2" />
-					<Skeleton class="h-5 w-32 mb-2" />
-					<Skeleton class="h-4 w-48" />
-				{:else}
-					<Avatar
-						class="inline-flex bg-gradient-to-bl from-amber-500 via-blue-500 to-teal-500 bg-opacity-50 size-14"
-					>
-						<AvatarImage src={userProfile?.img} />
-						<AvatarFallback
-							class="font-extrabold bg-transparent text-white"
-							>{walletId.slice(0, 3)}</AvatarFallback
-						>
-					</Avatar>
-					{#if userProfile?.username}
-						<span class="mt-2 text-lg font-medium">
-							{userProfile.username}
-						</span>
-					{/if}
-					<button
-						class="flex items-center cursor-pointer"
-						class:text-xs={userProfile?.username}
-						onclick={() => {
-							navigator.clipboard.writeText(walletId);
-							toast.success("Address Copied");
-						}}
-						>{walletId.slice(0, 20)}... <Copy class="h-4" /></button
-					>
-				{/if}
-			</CardHeader>
-			<CardContent
-				class="flex justify-center items-center gap-3 flex-col"
-			>
-				{#if !isMe}
-					<Button
-						variant="secondary"
-						onclick={() => {
-							const action = isFollowing
-								? DB.friend.remove(walletId)
-								: DB.friend.add(walletId);
-							action
-								.then(checkFriends)
-								.catch(() =>
-									toast.warning("Failed to Follow!"),
-								);
-						}}>{isFollowing ? "Unfollow" : "Follow"}</Button
-					>
-				{:else}
-					<div class=" flex border-2 rounded-full py-1 px-4 text-sm">
-						Balance:
-						{#if balance === undefined}
-							<RefreshCcw class="animate-spin h-5 ml-3" />
+			{#if isMe}
+				<Button
+					variant="outline"
+					size="icon"
+					onclick={() => (dialogsState.connectDialog = true)}
+				>
+					<Settings />
+				</Button>
+			{/if}
+		</div>
+		<div class="w-full px-3 md:px-0 max-w-[450px]">
+			<Card class="w-full">
+				<CardHeader class={"flex items-center"}>
+					{#if loadingProfile}
+						<Skeleton class="size-14 rounded-full mb-2" />
+						<Skeleton class="h-5 w-32 mb-2" />
+						<Skeleton class="h-4 w-48" />
+					{:else}
+						{#if isMe}
+							<button
+								class="rounded-full cursor-pointer hover:opacity-80 transition-opacity"
+								onclick={() =>
+									(dialogsState.profileDialog = true)}
+							>
+								<Avatar
+									class="inline-flex bg-gradient-to-bl from-amber-500 via-blue-500 to-teal-500 bg-opacity-50 size-14"
+								>
+									<AvatarImage src={userProfile?.img} />
+									<AvatarFallback
+										class="font-extrabold bg-transparent text-white"
+										>{walletId.slice(0, 3)}</AvatarFallback
+									>
+								</Avatar>
+							</button>
 						{:else}
-							{Number.parseFloat(balance!).toFixed(4)} AR
+							<Avatar
+								class="inline-flex bg-gradient-to-bl from-amber-500 via-blue-500 to-teal-500 bg-opacity-50 size-14"
+							>
+								<AvatarImage src={userProfile?.img} />
+								<AvatarFallback
+									class="font-extrabold bg-transparent text-white"
+									>{walletId.slice(0, 3)}</AvatarFallback
+								>
+							</Avatar>
 						{/if}
-					</div>
-					{#if !userProfile}
+						{#if userProfile?.username}
+							<span class="mt-2 text-lg font-medium">
+								{userProfile.username}
+							</span>
+						{/if}
+						<button
+							class="flex items-center cursor-pointer"
+							class:text-xs={userProfile?.username}
+							onclick={() => {
+								navigator.clipboard.writeText(walletId);
+								toast.success("Address Copied");
+							}}
+							>{walletId.slice(0, 20)}... <Copy
+								class="h-4"
+							/></button
+						>
+					{/if}
+				</CardHeader>
+				<CardContent
+					class="flex justify-center items-center gap-3 flex-col"
+				>
+					{#if !isMe}
 						<Button
 							variant="secondary"
-							size="sm"
-							onclick={() => (dialogsState.profileDialog = true)}
+							onclick={() => {
+								const action = isFollowing
+									? DB.friend.remove(walletId)
+									: DB.friend.add(walletId);
+								action
+									.then(checkFriends)
+									.catch(() =>
+										toast.warning("Failed to Follow!"),
+									);
+							}}>{isFollowing ? "Unfollow" : "Follow"}</Button
 						>
-							Setup Your Profile
-						</Button>
+					{:else}
+						<div
+							class=" flex border-2 rounded-full py-1 px-4 text-sm"
+						>
+							Balance:
+							{#if balance === undefined}
+								<RefreshCcw class="animate-spin h-5 ml-3" />
+							{:else}
+								{Number.parseFloat(balance!).toFixed(4)} AR
+							{/if}
+						</div>
+						{#if !userProfile}
+							<Button
+								variant="secondary"
+								size="sm"
+								onclick={() =>
+									(dialogsState.profileDialog = true)}
+							>
+								Setup Your Profile
+							</Button>
+						{/if}
 					{/if}
-				{/if}
-			</CardContent>
-		</Card>
+				</CardContent>
+			</Card>
+		</div>
+		<div class="w-full flex flex-col items-center max-w-[450px]">
+			{#if postIds}
+				{#each postIds as post}
+					{#await fetchData(post.id)}
+						<Card class="w-full my-5">
+							<CardHeader class="flex flex-row pb-3">
+								<Skeleton class="w-40 h-12"></Skeleton>
+							</CardHeader>
+							<CardContent>
+								<Skeleton class="w-full h-60"></Skeleton>
+								<Skeleton class="w-40 h-6 mt-3"></Skeleton>
+							</CardContent>
+						</Card>
+					{:then data}
+						<FeedPost
+							{data}
+							txId={post.id}
+							timestamp={post.timestamp}
+						/>
+					{/await}
+				{/each}
+			{/if}
+		</div>
 	</div>
-	<div class="w-full flex flex-col items-center max-w-[450px]">
-		{#if postIds}
-			{#each postIds as post}
-				{#await fetchData(post.id)}
-					<Card class="w-full my-5">
-						<CardHeader class="flex flex-row pb-3">
-							<Skeleton class="w-40 h-12"></Skeleton>
-						</CardHeader>
-						<CardContent>
-							<Skeleton class="w-full h-60"></Skeleton>
-							<Skeleton class="w-40 h-6 mt-3"></Skeleton>
-						</CardContent>
-					</Card>
-				{:then data}
-					<FeedPost
-						{data}
-						txId={post.id}
-						timestamp={post.timestamp}
-					/>
-				{/await}
-			{/each}
-		{/if}
-	</div>
-</div>
+</RefreshWrapper>
