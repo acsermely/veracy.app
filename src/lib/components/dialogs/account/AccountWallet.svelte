@@ -5,6 +5,7 @@
 	import {
 		getAppState,
 		getContentNodeState,
+		getFeedState,
 		getWalletState,
 	} from "../../../state";
 	import { downloadFile } from "../../../utils/common.utils";
@@ -21,6 +22,7 @@
 	const walletState = getWalletState();
 	const nodeState = getContentNodeState();
 	const appState = getAppState();
+	const feedState = getFeedState();
 
 	let createNew = $state(false);
 	let createType = $state<"new" | "existing">();
@@ -125,6 +127,7 @@
 			errorMessage = "Couldn't create wallet";
 			return;
 		} finally {
+			feedState.refreshBucketList();
 			nodeState.isConnected = false;
 			mnemonic = "";
 			loading = false;

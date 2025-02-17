@@ -169,10 +169,31 @@ export class DB {
 
 	static wallet = {
 		add: async (address: string, key: JsonWebKey) => {
-			return DB.add(DB_STORE_WALLET, {
+			await DB.add(DB_STORE_WALLET, {
 				address,
 				key,
 			});
+
+			const DEFAULT_BUCKETS: DbBucketEntry[] = [
+				{
+					contributors: [],
+					name: "Cat",
+					open: true,
+					img: (
+						await import("../components/common/files/cat.img.json")
+					).default,
+					age: [],
+				},
+				{
+					contributors: [],
+					name: "Funny Privacy Violations",
+					open: true,
+					age: ["12+", "16+"],
+				},
+			];
+			for (const bucket of DEFAULT_BUCKETS) {
+				await DB.bucket.add(bucket, address);
+			}
 		},
 
 		get: async (address?: string) => {
@@ -322,8 +343,8 @@ export class DB {
 
 	// Bucket
 	static bucket = {
-		add: async (bucket: DbBucketEntry) => {
-			return DB.wallet.get().then((wallet) => {
+		add: async (bucket: DbBucketEntry, address?: string) => {
+			return DB.wallet.get(address).then((wallet) => {
 				if (!wallet) {
 					throw "Missing Wallet";
 				}
