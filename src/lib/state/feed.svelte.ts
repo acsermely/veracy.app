@@ -65,7 +65,19 @@ export class FeedState {
 	};
 
 	queryDataBuckets = async (cursor?: string): Promise<ArPostIdResult[]> => {
-		return ArweaveUtils.getBucketPosts(this.bucket!, cursor);
+		const bucket = await DB.bucket.get(this.bucket!);
+		if (!bucket) {
+			throw "Bucket not found";
+		}
+
+		const friends = !bucket.open ? bucket.contributors : undefined;
+
+		return ArweaveUtils.getBucketPosts(
+			this.bucket!,
+			cursor,
+			friends,
+			bucket.age,
+		);
 	};
 
 	moreData = async (): Promise<void> => {

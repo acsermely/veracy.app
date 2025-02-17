@@ -193,13 +193,14 @@ export class ArweaveUtils {
 		bucketName: string,
 		cursor?: string,
 		friends?: string[],
+		ages?: string[],
 		items = 1000,
 		feedProcessor: (
 			item: ArBucketItems[],
 		) => ArPostIdResult[] = userCountPerPostProcessor,
 	): Promise<ArPostIdResult[]> {
 		return ArweaveUtils.query<ArQueryResult<ArBucketItems>>(
-			queryBucketItems(bucketName, items, cursor, friends),
+			queryBucketItems(bucketName, items, cursor, friends, ages),
 		).then((data) => {
 			if (!data.data.transactions) {
 				throw "No Results";
@@ -342,6 +343,27 @@ export class ArweaveUtils {
 			return dispatchResult;
 		}
 		throw "Dispatch Error";
+	}
+
+	static async getRecentBuckets(): Promise<string[]> {
+		return ArweaveUtils.query<
+			ArQueryResult<{
+				node: {
+					tags: Array<{ name: string; value: string }>;
+				};
+			}>
+		>(queryRecentBuckets()).then((data) => {
+			const bucketSet = new Set<string>();
+			data.data.transactions.edges.forEach((edge) => {
+				const bucketTag = edge.node.tags.find(
+					(tag) => tag.name === "Bucket",
+				);
+				if (bucketTag) {
+					bucketSet.add(bucketTag.value);
+				}
+			});
+			return Array.from(bucketSet);
+		});
 	}
 }
 
@@ -503,6 +525,7 @@ export function queryBucketItems(
 	limit: number,
 	cursor?: string,
 	friends?: string[],
+	ages?: string[],
 ): { query: string } {
 	return {
 		query: `{
@@ -516,7 +539,8 @@ export function queryBucketItems(
 					{ name: "App-Name", values: ["${TX_APP_NAME}"]},
 					{ name: "Version", values: ["${TX_APP_VERSION}"]},
 					{ name: "Type", values: ["${TxType.SEND_BUCKET}"]},
-					{ name: "Bucket", values: ["${bucketName}"]}
+					{ name: "Bucket", values: ["${bucketName}"]},
+					${ages?.length ? '{ name: "Age", values: ["' + ages.join('","') + '"]}' : ""}
 				]
 			)
 			{
@@ -531,6 +555,33 @@ export function queryBucketItems(
 						timestamp
 					},
 					cursor
+				}
+			}
+		}`,
+	};
+}
+
+export function queryRecentBuckets(): { query: string } {
+	return {
+		query: `{
+			transactions(
+				order: DESC,
+				first: 1000,
+				timestamp: {from: 1728246095432, to: ${new Date().getTime()}},
+				tags: [
+					{ name: "App-Name", values: ["${TX_APP_NAME}"]},
+					{ name: "Version", values: ["${TX_APP_VERSION}"]},
+					{ name: "Type", values: ["${TxType.SEND_BUCKET}"]}
+				]
+			)
+			{
+				edges {
+					node {
+						tags {
+							name,
+							value
+						}
+					}
 				}
 			}
 		}`,

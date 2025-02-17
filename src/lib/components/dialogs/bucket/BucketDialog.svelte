@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Loader, Trash } from "lucide-svelte";
 	import { toast } from "svelte-sonner";
-	import { scale, slide } from "svelte/transition";
+	import { fade, scale } from "svelte/transition";
 	import { getFeedState, getWalletState } from "../../../state";
 	import { getDialogsState } from "../../../state/dialogs.svelte";
 	import { ArweaveUtils } from "../../../utils/arweave.utils";
@@ -61,6 +61,10 @@
 			.finally(() => (checkingBucket = false));
 	}, 500);
 	let uploading = $state(false);
+
+	let view = $state<"create" | "finish" | "recent" | undefined>();
+	let loadingRecent = $state(false);
+	let recentBucketsData = $state<DbBucketEntry[]>([]);
 
 	$effect(() => {
 		refreshBucketList();
@@ -150,7 +154,32 @@
 		return;
 	}
 
-	let view = $state<"create" | "finish" | undefined>();
+	async function loadRecentBuckets(): Promise<void> {
+		loadingRecent = true;
+		try {
+			const bucketNames = await ArweaveUtils.getRecentBuckets();
+			recentBucketsData = await Promise.all(
+				bucketNames.map(async (name) => {
+					try {
+						const id = await ArweaveUtils.getBucketId(name);
+						return await ArweaveUtils.getTxById<DbBucketEntry>(id);
+					} catch (e) {
+						console.error(e);
+						return null;
+					}
+				}),
+			).then((results) =>
+				results.filter(
+					(bucket): bucket is DbBucketEntry => bucket !== null,
+				),
+			);
+		} catch (e) {
+			console.error(e);
+			toast.error("Failed to load recent buckets!");
+		} finally {
+			loadingRecent = false;
+		}
+	}
 </script>
 
 <Dialog
@@ -163,6 +192,7 @@
 				name: "",
 				open: true,
 			};
+			view = undefined;
 		}
 	}}
 >
@@ -286,8 +316,6 @@
 			{#if !newBucket.open}
 				<div
 					class="flex flex-col w-full gap-3 max-h-[30dvh] overflow-auto"
-					in:slide
-					out:slide
 				>
 					<span class="mx-3">Contributors:</span>
 					<div class="flex flex-col w-full px-3 gap-3">
@@ -425,12 +453,100 @@
 					{/if}
 				</Button>
 			</div>
+		{:else if view === "recent"}
+			<div in:fade>
+				<DialogHeader>
+					<DialogTitle>Recent Buckets</DialogTitle>
+					<DialogDescription>Recently used buckets</DialogDescription>
+				</DialogHeader>
+
+				<div
+					class="flex flex-col gap-3 max-h-[50vh] overflow-scroll p-3"
+				>
+					{#if loadingRecent}
+						<div class="flex justify-center items-center p-4">
+							<Loader class="animate-spin" />
+						</div>
+					{:else if recentBucketsData.length}
+						{#each recentBucketsData as bucket}
+							<div class="flex w-full items-center">
+								<Button
+									variant="outline"
+									class="h-fit flex-1 max-w-full flex justify-between items-center"
+									onclick={() => {
+										DB.bucket
+											.add($state.snapshot(bucket))
+											.then(() => {
+												refreshBucketList();
+												view = undefined;
+											});
+									}}
+								>
+									<div
+										class="flex w-full justify-center items-center gap-3"
+									>
+										<Avatar
+											class="inline-flex bg-secondary border-2 border-muted size-14"
+										>
+											<AvatarImage src={bucket.img} />
+											<AvatarFallback
+												class="text-sm bg-transparent text-primary"
+												>{bucket.name.slice(
+													0,
+													3,
+												)}</AvatarFallback
+											>
+										</Avatar>
+										<div
+											class="flex flex-col break-words items-start"
+										>
+											<div>{bucket.name}</div>
+											<div class="text-xs">
+												{bucket.open
+													? "Public"
+													: "Private"}
+												{#if bucket.age}
+													, {bucket.age.join(", ")}
+												{/if}
+											</div>
+										</div>
+									</div>
+								</Button>
+							</div>
+						{/each}
+					{:else}
+						<div
+							class="flex w-full justify-center text-muted-foreground"
+						>
+							No Recent Buckets Found
+						</div>
+					{/if}
+				</div>
+
+				<Button
+					variant="secondary"
+					class="mt-3"
+					onclick={() => (view = undefined)}
+				>
+					Back
+				</Button>
+			</div>
 		{:else}
 			<DialogHeader>
 				<DialogTitle>Buckets</DialogTitle>
 				<DialogDescription>Manage your Bucket list</DialogDescription>
 			</DialogHeader>
 			<div class="flex flex-col gap-3 max-h-[50vh] overflow-scroll p-3">
+				<Button
+					variant="secondary"
+					class="flex-1"
+					onclick={() => {
+						loadRecentBuckets();
+						view = "recent";
+					}}
+				>
+					Browse Buckets
+				</Button>
 				<Input
 					class="mb-3"
 					placeholder="Search new..."
@@ -505,23 +621,35 @@
 								variant="outline"
 								class="h-fit flex-1 max-w-full flex justify-between items-center"
 							>
-								<Avatar
-									class="mr-3 bg-gradient-to-bl from-amber-500 via-blue-500 to-teal-500"
-								>
-									<AvatarImage src={bucket.img} />
-									<AvatarFallback
-										class="font-extrabold bg-transparent text-primary"
-										>{bucket.name.slice(
-											0,
-											3,
-										)}</AvatarFallback
+								<div class="flex items-center flex-1">
+									<Avatar
+										class="mr-3 inline-flex bg-secondary border-2 border-muted size-14"
 									>
-								</Avatar>
-								<span
-									class="overflow-hidden text-ellipsis flex-1"
-								>
-									{bucket.name}
-								</span>
+										<AvatarImage src={bucket.img} />
+										<AvatarFallback
+											class="text-sm bg-transparent text-primary"
+											>{bucket.name.slice(
+												0,
+												3,
+											)}</AvatarFallback
+										>
+									</Avatar>
+									<div class="flex flex-col items-start">
+										<span
+											class="overflow-hidden text-ellipsis"
+										>
+											{bucket.name}
+										</span>
+										<span
+											class="text-xs text-muted-foreground"
+										>
+											{bucket.open ? "Public" : "Private"}
+											{#if bucket.age?.length}
+												, {bucket.age.join(", ")}
+											{/if}
+										</span>
+									</div>
+								</div>
 								<Button
 									variant="ghost"
 									class="h-full hover:bg-destructive hover:bg-opacity-50"
@@ -547,11 +675,15 @@
 					</div>
 				{/if}
 			</div>
-			<Button
-				variant="secondary"
-				class="mt-3"
-				onclick={() => (view = "create")}>Create New Bucket</Button
-			>
+			<div class="flex gap-3 mt-3">
+				<Button
+					variant="secondary"
+					class="flex-1"
+					onclick={() => (view = "create")}
+				>
+					Create New Bucket
+				</Button>
+			</div>
 		{/if}
 	</DialogContent>
 </Dialog>
