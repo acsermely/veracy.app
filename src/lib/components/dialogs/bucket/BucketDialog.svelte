@@ -538,7 +538,7 @@
 			</DialogHeader>
 			<div class="flex flex-col gap-3 max-h-[50vh] overflow-scroll p-3">
 				<Button
-					variant="secondary"
+					variant="ghost"
 					class="flex-1"
 					onclick={() => {
 						loadRecentBuckets();
@@ -620,6 +620,10 @@
 							<Button
 								variant="outline"
 								class="h-fit flex-1 max-w-full flex justify-between items-center"
+								onclick={() => {
+									feedState.setBucket(bucket.name);
+									dialogsState.bucketDialog = false;
+								}}
 							>
 								<div class="flex items-center flex-1">
 									<Avatar
@@ -653,7 +657,8 @@
 								<Button
 									variant="ghost"
 									class="h-full hover:bg-destructive hover:bg-opacity-50"
-									onclick={() => {
+									onclick={(e) => {
+										e.stopPropagation(); // Prevent parent button click
 										DB.bucket
 											.remove(bucket.name)
 											.then(refreshBucketList)

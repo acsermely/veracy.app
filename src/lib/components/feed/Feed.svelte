@@ -62,7 +62,6 @@
 					class="flex flex-col items-center cursor-pointer"
 					onclick={() => {
 						feedState.setBucket(undefined);
-						feedState.queryData();
 					}}
 				>
 					<Avatar
@@ -82,7 +81,6 @@
 					class="flex flex-col items-center cursor-pointer"
 					onclick={() => {
 						feedState.setBucket("");
-						feedState.queryData();
 					}}
 				>
 					<Avatar
@@ -105,7 +103,6 @@
 						class="flex flex-col items-center justify-center cursor-pointer"
 						onclick={() => {
 							feedState.setBucket(bucket.name);
-							feedState.queryData();
 						}}
 					>
 						<Avatar

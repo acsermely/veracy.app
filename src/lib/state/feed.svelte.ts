@@ -76,7 +76,7 @@ export class FeedState {
 			this.bucket!,
 			cursor,
 			friends,
-			bucket.age,
+			undefined, // TODO: undefined -> bucket.age, when age is apearing consistently
 		);
 	};
 
