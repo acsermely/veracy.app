@@ -538,7 +538,7 @@
 			</DialogHeader>
 			<div class="flex flex-col gap-3 max-h-[50vh] overflow-scroll p-3">
 				<Button
-					variant="ghost"
+					variant="outline"
 					class="flex-1"
 					onclick={() => {
 						loadRecentBuckets();
@@ -549,7 +549,7 @@
 				</Button>
 				<Input
 					class="mb-3"
-					placeholder="Search new..."
+					placeholder="Search bucket..."
 					maxlength={25}
 					bind:value={search}
 				/>
