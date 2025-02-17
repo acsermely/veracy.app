@@ -506,7 +506,7 @@
 													? "Public"
 													: "Private"}
 												{#if bucket.age?.length}
-													, {bucket.age.join(", ")}
+													| {bucket.age.join(", ")}
 												{/if}
 											</div>
 										</div>
@@ -603,7 +603,7 @@
 											? "Public"
 											: "Private"}
 										{#if bucketFound.age?.length}
-											, {bucketFound.age.join(", ")}
+											| {bucketFound.age.join(", ")}
 										{/if}
 									</div>
 								</div>
@@ -649,7 +649,7 @@
 										>
 											{bucket.open ? "Public" : "Private"}
 											{#if bucket.age?.length}
-												, {bucket.age.join(", ")}
+												| {bucket.age.join(", ")}
 											{/if}
 										</span>
 									</div>
