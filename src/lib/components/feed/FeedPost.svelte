@@ -84,16 +84,14 @@
 	});
 
 	$effect(() => {
-		if (!isPreview && data.uploader) {
-			loadingProfile = true;
-			ArweaveUtils.getLatestProfile(data.uploader)
-				.then((profile) => {
-					userProfile = profile;
-				})
-				.finally(() => {
-					loadingProfile = false;
-				});
-		}
+		loadingProfile = true;
+		ArweaveUtils.getLatestProfile(data.uploader)
+			.then((profile) => {
+				userProfile = profile;
+			})
+			.finally(() => {
+				loadingProfile = false;
+			});
 	});
 
 	function initDataPromises(): SvelteMap<string, Promise<string>> {
