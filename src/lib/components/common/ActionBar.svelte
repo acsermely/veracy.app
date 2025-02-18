@@ -23,6 +23,7 @@
 		href="/"
 		use:link
 		onclick={() => {
+			feedState.scrollPosition = 0;
 			const elem = document.getElementById("top");
 			elem?.scrollIntoView({
 				behavior: "smooth",

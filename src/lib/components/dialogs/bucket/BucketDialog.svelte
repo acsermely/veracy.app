@@ -37,7 +37,6 @@
 			.finally(() => (searching = false));
 	}, 500);
 
-	let bucketList = $state<DbBucketEntry[]>([]);
 	let search = $state("");
 	let searching = $state(false);
 	let bucketFound = $state<DbBucketEntry>();
@@ -65,10 +64,6 @@
 	let view = $state<"create" | "finish" | "recent" | undefined>();
 	let loadingRecent = $state(false);
 	let recentBucketsData = $state<DbBucketEntry[]>([]);
-
-	$effect(() => {
-		refreshBucketList();
-	});
 
 	$effect(() => {
 		if (!search) {
@@ -99,15 +94,6 @@
 			newBucket.contributors.push(walletState.wallet.address);
 		}
 	});
-
-	async function refreshBucketList(): Promise<void> {
-		return DB.bucket
-			.getAll()
-			.then((list) => {
-				bucketList = list;
-			})
-			.then(feedState.refreshBucketList);
-	}
 
 	async function mediaSelected(event: Event): Promise<void> {
 		const fileList: FileList | null = (event.target as HTMLInputElement)
@@ -143,7 +129,7 @@
 				name: "",
 				open: true,
 			};
-			refreshBucketList();
+			feedState.refreshBucketList();
 			view = undefined;
 		} catch (e) {
 			console.error(e);
@@ -477,7 +463,7 @@
 										DB.bucket
 											.add($state.snapshot(bucket))
 											.then(() => {
-												refreshBucketList();
+												feedState.refreshBucketList();
 												view = undefined;
 											});
 									}}
@@ -577,7 +563,7 @@
 									DB.bucket
 										.add($state.snapshot(bucketFound))
 										.then(() => {
-											refreshBucketList();
+											feedState.refreshBucketList();
 											search = "";
 										});
 								}}
@@ -614,8 +600,8 @@
 					</div>
 				{/if}
 				<p class="text-xs">My Buckets:</p>
-				{#if bucketList.length}
-					{#each bucketList as bucket}
+				{#if feedState.bucketList.length}
+					{#each feedState.bucketList as bucket}
 						<div class="flex w-full items-center">
 							<Button
 								variant="outline"
@@ -661,7 +647,7 @@
 										e.stopPropagation(); // Prevent parent button click
 										DB.bucket
 											.remove(bucket.name)
-											.then(refreshBucketList)
+											.then(feedState.refreshBucketList)
 											.catch((e) => {
 												console.error(e);
 											});
