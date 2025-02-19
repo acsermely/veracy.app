@@ -289,7 +289,7 @@ export class ArweaveUtils {
 
 	static async getAllUserAddresses(): Promise<Set<string>> {
 		return ArweaveUtils.query<ArQueryResult<ArQueryAddresses>>(
-			queryAllUsernames(),
+			queryAllUserAddresses(),
 		).then(
 			(data) =>
 				new Set(
