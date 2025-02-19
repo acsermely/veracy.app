@@ -1,22 +1,50 @@
 import { getContext, setContext } from "svelte";
 import { ArweaveUtils } from "../utils/arweave.utils";
 
+export type SearchResult = {
+	address: string;
+	username?: string;
+};
+
 export class SearchState {
-	public allUsers?: Set<string>;
+	public userProfiles = $state<Map<string, string>>(new Map());
 
 	constructor() {
-		ArweaveUtils.getAllUserAddresses().then(
-			(addresses) => (this.allUsers = addresses),
-		);
+		Promise.all([
+			ArweaveUtils.getAllUserProfiles(),
+			ArweaveUtils.getAllUserAddresses(),
+		]).then(([profiles, addresses]) => {
+			this.userProfiles = new Map(profiles);
+			// Add addresses that don't have profiles yet
+			addresses.forEach((address) => {
+				if (!this.userProfiles.has(address)) {
+					this.userProfiles.set(address, "");
+				}
+			});
+		});
 	}
 
-	public search = (idSlice: string): string[] => {
-		if (!this.allUsers || !idSlice) {
+	public search = (query: string): SearchResult[] => {
+		if (!this.userProfiles || !query) {
 			return [];
 		}
-		return Array.from(this.allUsers).filter((item) =>
-			item.toLocaleLowerCase().includes(idSlice.toLocaleLowerCase()),
-		);
+
+		query = query.toLowerCase();
+		const results: SearchResult[] = [];
+
+		this.userProfiles.forEach((username, address) => {
+			if (
+				address.toLowerCase().includes(query) ||
+				username.toLowerCase().includes(query)
+			) {
+				results.push({
+					address,
+					username,
+				});
+			}
+		});
+
+		return results;
 	};
 }
 

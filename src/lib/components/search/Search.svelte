@@ -1,10 +1,16 @@
 <script lang="ts">
 	import { navigate } from "svelte-routing";
+	import { STORAGE_SEARCH_HISTORY } from "../../constants";
+	import type { ProfileData } from "../../models/user.model";
+	import {
+		getSearchState,
+		type SearchResult,
+	} from "../../state/search.svelte";
+	import { ArweaveUtils } from "../../utils/arweave.utils";
 	import { Avatar, AvatarFallback } from "../ui/avatar";
+	import AvatarImage from "../ui/avatar/avatar-image.svelte";
 	import Button from "../ui/button/button.svelte";
 	import { Input } from "../ui/input";
-	import { STORAGE_SEARCH_HISTORY } from "../../constants";
-	import { getSearchState } from "../../state/search.svelte";
 
 	const searchState = getSearchState();
 
@@ -19,11 +25,17 @@
 		);
 	}
 
-	let searchResults = $state<string[]>([]);
+	let searchResults = $state<SearchResult[]>([]);
 	let searchInput = $state("");
 	let searchHistory = $state<string[]>(
 		localStorage.getItem(STORAGE_SEARCH_HISTORY)?.split(" ") || [],
 	);
+
+	async function getProfile(
+		address: string,
+	): Promise<ProfileData | undefined> {
+		return ArweaveUtils.getLatestProfile(address);
+	}
 </script>
 
 <div class="flex-1 flex flex-col items-center w-full p-3">
@@ -39,7 +51,7 @@
 		{#if searchResults.length}
 			{#each searchResults as result}
 				<li class="w-full">
-					{@render Item(result)}
+					{@render Item(result.address, result.username)}
 				</li>
 			{/each}
 		{:else if searchHistory.length}
@@ -57,7 +69,7 @@
 	</ul>
 </div>
 
-{#snippet Item(id: string)}
+{#snippet Item(id: string, username?: string)}
 	<Button
 		variant="outline"
 		class="w-full max-w-[450px] my-2 p-2 h-auto"
@@ -69,12 +81,43 @@
 		<Avatar
 			class="inline-flex bg-gradient-to-bl from-amber-500 via-blue-500 to-teal-500 bg-opacity-50"
 		>
-			<AvatarFallback class="font-extrabold bg-transparent text-white"
-				>{id.slice(0, 2)}</AvatarFallback
-			>
+			{#await getProfile(id)}
+				<AvatarFallback
+					class="font-extrabold bg-transparent text-white"
+				>
+					{id.slice(0, 2)}
+				</AvatarFallback>
+			{:then profile}
+				{#if profile?.img}
+					<AvatarImage src={profile.img} />
+				{:else}
+					<AvatarFallback
+						class="font-extrabold bg-transparent text-white"
+					>
+						{id.slice(0, 2)}
+					</AvatarFallback>
+				{/if}
+			{/await}
 		</Avatar>
-		<p class="whitespace-nowrap overflow-hidden text-ellipsis p-3 w-full">
-			{id}
-		</p>
+		<div class="flex flex-col items-start p-3 w-full overflow-hidden">
+			{#if username}
+				<span
+					class="whitespace-nowrap overflow-hidden text-ellipsis w-full text-start"
+				>
+					{username}
+				</span>
+				<span
+					class="text-xs text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis w-full text-start"
+				>
+					{id}
+				</span>
+			{:else}
+				<span
+					class="whitespace-nowrap overflow-hidden text-ellipsis w-full text-start"
+				>
+					{id}
+				</span>
+			{/if}
+		</div>
 	</Button>
 {/snippet}

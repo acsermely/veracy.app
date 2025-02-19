@@ -269,9 +269,27 @@ export class ArweaveUtils {
 			);
 	}
 
+	static async getAllUserProfiles(): Promise<Map<string, string>> {
+		return ArweaveUtils.query<ArQueryResult<ArQueryUserProfile>>(
+			queryAllUsernames(),
+		).then((data) => {
+			const userMap = new Map<string, string>();
+			data.data.transactions.edges.forEach((edge: ArQueryUserProfile) => {
+				const address = edge.node.address;
+				const usernameTag = edge.node.tags.find(
+					(tag) => tag.name === "Username",
+				);
+				if (usernameTag) {
+					userMap.set(address, usernameTag.value);
+				}
+			});
+			return userMap;
+		});
+	}
+
 	static async getAllUserAddresses(): Promise<Set<string>> {
 		return ArweaveUtils.query<ArQueryResult<ArQueryAddresses>>(
-			queryAllUserAddresses(),
+			queryAllUsernames(),
 		).then(
 			(data) =>
 				new Set(
@@ -521,6 +539,33 @@ export function queryProfileData(sender: string): { query: string } {
 	};
 }
 
+export function queryAllUsernames(): { query: string } {
+	return {
+		query: `{
+			transactions(
+				order: DESC,
+				timestamp: {from: 1728246095432, to: ${new Date().getTime()}},
+				tags: [
+					{ name: "App-Name", values: ["${TX_APP_NAME}"]},
+					{ name: "Version", values: ["${TX_APP_VERSION}"]},
+					{ name: "Type", values: ["${TxType.PROFILE}"]}
+				]
+			)
+			{
+				edges {
+					node {
+						address,
+						tags {
+							name,
+							value
+						}
+					}
+				}
+			}
+		}`,
+	};
+}
+
 export function queryAllUserAddresses(): { query: string } {
 	return {
 		query: `{
@@ -722,6 +767,13 @@ export type ArQueryIds = {
 	node: {
 		id: string;
 		timestamp?: any;
+	};
+};
+
+export type ArQueryUserProfile = {
+	node: {
+		address: string;
+		tags: Array<{ name: string; value: string }>;
 	};
 };
 
