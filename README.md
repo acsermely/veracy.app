@@ -1,33 +1,33 @@
 # Veracy App
 
-> Veracy is a privacy focused socila platform bulit with decentalized technologies.
+> Veracy is a privacy focused social platform built with decentralized technologies.
 
-## Permanent
+## Features
 
-Veracy uses Arweave under the hood to store your posts and prevent censorship. For media content the platform has its own decentralized content distribution newtork.
+### Permanent Storage
 
-## 100% Profit
+Veracy uses Arweave under the hood to store your posts and prevent censorship. For media content the platform has its own decentralized content distribution network.
 
-Pay a one-time registration fee and take 100% of the profits. Veracy uses peer-to-peer transactions on Arweave for content monetzation.
+### 100% Profit
 
-## Privacy
+Pay a one-time registration fee and take 100% of the profits. Veracy uses peer-to-peer transactions on Arweave for content monetization.
 
-You only need a crypto wallet to use all the features on Veracy. No personal data is collected and user related data is stored primarily on-device.
+### Privacy
 
-## Decentralized
+You only need a crypto wallet to use all the features on Veracy. No personal data is collected and user related data is stored primarily on-device. (Exceptions are Images, Feedback and Public Keys for authentication)
+
+### Decentralized
 
 Everyone can run a [Veracy Content Node](https://github.com/acsermely/veracy.server) and connect to the existing network. You can store your media content on your own server, or use a node you trust.
 
-# Setup
-
-Run locally:
+## Development
 
 ```sh
 npm i
 npm run dev
 ```
 
-## Run everyting locally:
+### Run everyting locally:
 
 1. Clone [Veracy Content Node](https://github.com/acsermely/veracy.server) and [test-arlocal-node](https://github.com/acsermely/test-arlocal-node)
 
@@ -79,4 +79,4 @@ npm run dev
 
 **In-progress**
 
-The Dashboard helps you manage your server. You can monitor all the media you store store and deal with malicious actors.
+The Dashboard helps you manage your server. You can monitor all the media you store and deal with malicious actors.
