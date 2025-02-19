@@ -95,6 +95,10 @@
 		}
 	});
 
+	$effect(() => {
+		feedState.refreshBucketList();
+	});
+
 	async function mediaSelected(event: Event): Promise<void> {
 		const fileList: FileList | null = (event.target as HTMLInputElement)
 			.files;
@@ -462,7 +466,7 @@
 									onclick={() => {
 										DB.bucket
 											.add($state.snapshot(bucket))
-											.then(() => {
+											.finally(() => {
 												feedState.refreshBucketList();
 												view = undefined;
 											});
@@ -650,6 +654,9 @@
 											.then(feedState.refreshBucketList)
 											.catch((e) => {
 												console.error(e);
+												toast.error(
+													"Failed to remove bucket!",
+												);
 											});
 									}}
 								>

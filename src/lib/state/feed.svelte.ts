@@ -18,6 +18,7 @@ export class FeedState {
 		if (savedBucket !== null) {
 			this.bucket = savedBucket;
 		}
+		this.refreshBucketList();
 	}
 
 	setBucket = (bucket?: string) => {
