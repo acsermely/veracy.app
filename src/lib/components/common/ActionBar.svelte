@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { Home, PlusCircle, Search, User } from "lucide-svelte";
+	import {
+		Home,
+		MessageSquare,
+		PlusCircle,
+		Search,
+		User,
+	} from "lucide-svelte";
 	import { link } from "svelte-routing";
 	import { getFeedState } from "../../state";
 	import { getWalletState } from "../../state/wallet.svelte";
@@ -47,10 +53,6 @@
 		<Home size="28" />
 		<span class="hidden md:block">Home</span>
 	</a>
-	<a href="/create" use:link class="flex md:gap-4 md:p-5">
-		<PlusCircle size="28" />
-		<span class="hidden md:block">New</span>
-	</a>
 	{#if walletState.wallet?.address}
 		<a
 			href={"/p/" + walletState.wallet.address}
@@ -61,10 +63,20 @@
 			<span class="hidden md:block">Profile</span>
 		</a>
 	{/if}
+	<a href="/create" use:link class="flex md:gap-4 md:p-5">
+		<PlusCircle size="28" />
+		<span class="hidden md:block">New</span>
+	</a>
 	<a href="/search" use:link class="flex md:gap-4 md:p-5">
 		<Search size="28" />
 		<span class="hidden md:block">Search</span>
 	</a>
+	{#if walletState.wallet?.address}
+		<a href="/chat" use:link class="flex md:gap-4 md:p-5">
+			<MessageSquare size="28" />
+			<span class="hidden md:block">Chat</span>
+		</a>
+	{/if}
 </div>
 <div class="flex flex-col w-full gap-2">
 	<BucketDialog />

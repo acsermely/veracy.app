@@ -1,5 +1,6 @@
 import { getContext, setContext } from "svelte";
 import { STORAGE_NODE_URL, STORAGE_TOKEN } from "../constants";
+import type { InboxMessage, NodeInfo } from "../models/node.model";
 
 export class ContentNode {
 	public url = $state("https://veracy.app:8080");
@@ -17,19 +18,19 @@ export class ContentNode {
 		return localStorage.removeItem(STORAGE_TOKEN);
 	};
 
-	loginCheck = async (): Promise<Response> => {
+	getNodeInfo = async (): Promise<NodeInfo> => {
 		try {
 			const token = localStorage.getItem(STORAGE_TOKEN);
 			const headers = token
 				? { Authorization: `Bearer ${token}` }
 				: undefined;
-			const response = await fetch(`${this.url}/loginCheck`, {
+			const response = await fetch(`${this.url}/getInfo`, {
 				headers,
 				signal: AbortSignal.timeout(5000),
 			});
 			if (response.status === 200) {
 				this.isConnected = true;
-				return response;
+				return response.json() as Promise<NodeInfo>;
 			}
 			throw response.statusText;
 		} catch (e) {
@@ -163,6 +164,67 @@ export class ContentNode {
 				return response;
 			}
 			throw new Error("Failed to send feedback.");
+		});
+	};
+
+	getMessages = async (): Promise<Array<InboxMessage>> => {
+		const token = localStorage.getItem(STORAGE_TOKEN);
+		const headers = token
+			? { Authorization: `Bearer ${token}` }
+			: undefined;
+		return fetch(`${this.url}/messages`, {
+			headers,
+		})
+			.then((response) => {
+				if (response.ok) {
+					return response.json();
+				}
+				throw new Error("Failed to get messages.");
+			})
+			.then((data) => data.messages as Array<InboxMessage>);
+	};
+
+	sendMessage = async (
+		recipient: string,
+		message: string,
+	): Promise<Response> => {
+		const token = localStorage.getItem(STORAGE_TOKEN);
+		const headers = {
+			"Content-Type": "application/json",
+			...(token ? { Authorization: `Bearer ${token}` } : {}),
+		};
+		return fetch(`${this.url}/sendMessage`, {
+			method: "POST",
+			headers,
+			body: JSON.stringify({
+				recipient,
+				message,
+			}),
+		}).then((response) => {
+			if (response.ok) {
+				return response;
+			}
+			throw new Error("Failed to send message.");
+		});
+	};
+
+	markMessagesAsSaved = async (timestamps: string[]): Promise<Response> => {
+		const token = localStorage.getItem(STORAGE_TOKEN);
+		const headers = {
+			"Content-Type": "application/json",
+			...(token ? { Authorization: `Bearer ${token}` } : {}),
+		};
+		return fetch(`${this.url}/savedMessages`, {
+			method: "POST",
+			headers,
+			body: JSON.stringify({
+				timestamps,
+			}),
+		}).then((response) => {
+			if (response.ok) {
+				return response;
+			}
+			throw new Error("Failed to mark messages as saved.");
 		});
 	};
 }

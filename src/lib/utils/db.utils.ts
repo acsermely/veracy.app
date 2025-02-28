@@ -7,12 +7,24 @@ const DB_VERSION = 4;
 const DB_STORE_WALLET = "wallet-store";
 const DB_STORE_PROFILE = "profile-store";
 
+export type DbChatMessage = {
+	fromId: string;
+	message: string;
+	timestamp: number;
+};
+
+export type DbChatRoom = {
+	userId: string; // The other user's address
+	messages: DbChatMessage[];
+};
+
 export type DbWalletEntry = {
 	address: string;
 	key: JsonWebKey;
 	friends?: DbFriendEntry[];
 	buckets?: DbBucketEntry[];
 	watchers?: DbWatcherEntry[];
+	chats?: DbChatRoom[]; // Added chat rooms to wallet entry
 };
 
 export type DbWatcherEntry = {
@@ -455,6 +467,106 @@ export class DB {
 						}
 					});
 				};
+			});
+		},
+	};
+
+	// Chat
+	static chat = {
+		add: async (
+			message: string,
+			roomId: string,
+			fromId: string,
+		): Promise<void> => {
+			return DB.wallet.get().then(async (wallet) => {
+				if (!wallet) {
+					throw "Missing Wallet";
+				}
+				if (!wallet.chats) {
+					wallet.chats = [];
+				}
+
+				const chatRoom = wallet.chats.find(
+					(room) => room.userId === roomId,
+				);
+				const newMessage: DbChatMessage = {
+					fromId,
+					message,
+					timestamp: Date.now(),
+				};
+
+				if (chatRoom) {
+					chatRoom.messages.push(newMessage);
+				} else {
+					wallet.chats.push({
+						userId: roomId,
+						messages: [newMessage],
+					});
+				}
+
+				return DB.wallet.put(wallet);
+			});
+		},
+
+		get: async (userId: string): Promise<DbChatMessage[]> => {
+			return DB.wallet.get().then((wallet) => {
+				if (!wallet?.chats) {
+					return [];
+				}
+				const chatRoom = wallet.chats.find(
+					(room) => room.userId === userId,
+				);
+				return (
+					chatRoom?.messages.sort(
+						(a, b) => a.timestamp - b.timestamp,
+					) || []
+				);
+			});
+		},
+
+		getAll: async (): Promise<DbChatRoom[]> => {
+			return DB.wallet.get().then((wallet) => {
+				return wallet?.chats || [];
+			});
+		},
+
+		getRecent: async (
+			room: string,
+			limit: number = 10,
+			cursor?: string,
+		): Promise<{ messages: DbChatMessage[]; nextCursor?: string }> => {
+			return DB.wallet.get().then((wallet) => {
+				if (!wallet?.chats) {
+					return { messages: [] };
+				}
+
+				const messages =
+					wallet.chats.find((r) => r.userId === room)?.messages || [];
+				const sortedMessages = messages
+					.map((msg) => ({ ...msg }))
+					.sort((a, b) => b.timestamp - a.timestamp);
+
+				let startIndex = 0;
+				if (cursor) {
+					const cursorTimestamp = parseInt(cursor);
+					startIndex = sortedMessages.findIndex(
+						(msg) => msg.timestamp < cursorTimestamp,
+					);
+					if (startIndex === -1) startIndex = sortedMessages.length;
+				}
+
+				const paginatedMessages = sortedMessages.slice(
+					startIndex,
+					startIndex + limit,
+				);
+				const nextCursor =
+					paginatedMessages.length === limit
+						? paginatedMessages[
+								paginatedMessages.length - 1
+							].timestamp.toString()
+						: undefined;
+
+				return { messages: paginatedMessages, nextCursor };
 			});
 		},
 	};

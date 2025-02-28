@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ModeWatcher } from "mode-watcher";
 	import { Route, Router } from "svelte-routing";
+	import Chat from "./lib/components/chat/Chat.svelte";
 	import ActionBar from "./lib/components/common/ActionBar.svelte";
 	import PrivacyPolicy from "./lib/components/common/PrivacyPolicy.svelte";
 	import Profile from "./lib/components/common/profile/Profile.svelte";
@@ -11,6 +12,7 @@
 	import Search from "./lib/components/search/Search.svelte";
 	import { Toaster } from "./lib/components/ui/sonner";
 	import { setAppState } from "./lib/state";
+	import { setChatState } from "./lib/state/chat.svelte";
 	import { setDialogsState } from "./lib/state/dialogs.svelte";
 	import { setFeedState } from "./lib/state/feed.svelte";
 	import { setContentNodeState } from "./lib/state/node.svelte";
@@ -27,6 +29,7 @@
 	const nodeState = setContentNodeState();
 	setWatcherState();
 	const appState = setAppState();
+	const chatState = setChatState();
 
 	let url = $state("");
 
@@ -35,9 +38,16 @@
 			dialogState.connectDialog = false;
 			return;
 		}
-		nodeState.loginCheck().catch(() => {
-			dialogState.connectDialog = true;
-		});
+		nodeState
+			.getNodeInfo()
+			.then((data) => {
+				appState.imageSize = data.imageSize;
+				appState.imageWidth = data.imageWidth;
+				chatState.setInboxCount(data.inboxCount || 0);
+			})
+			.catch(() => {
+				dialogState.connectDialog = true;
+			});
 	});
 
 	feedState.queryData();
@@ -81,6 +91,12 @@
 			</Route>
 			<Route path="/search">
 				<Search />
+			</Route>
+			<Route path="/chat">
+				<Chat />
+			</Route>
+			<Route path="/chat/:id" let:params>
+				<Chat id={params.id} />
 			</Route>
 			<Route path="/terms-of-use">
 				<TermsOfUse />

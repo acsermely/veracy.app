@@ -2,6 +2,8 @@ import { getContext, setContext } from "svelte";
 
 export class AppState {
 	public installPrompt = $state<any>();
+	public imageSize = $state<number>(200);
+	public imageWidth = $state<number>(1000);
 }
 
 const APP_STATE_KEY = "app-state-key";
