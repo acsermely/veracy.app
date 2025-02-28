@@ -1,5 +1,5 @@
 import { getContext, setContext } from "svelte";
-import { SvelteMap } from "svelte/reactivity";
+import { SvelteMap, SvelteSet } from "svelte/reactivity";
 import type { InboxMessage } from "../models/node.model";
 import type { DbChatMessage } from "../utils/db.utils";
 import { DB } from "../utils/db.utils";
@@ -9,9 +9,46 @@ export class ChatState {
 	private cursors = new SvelteMap<string, string>();
 	private loading = new SvelteMap<string, boolean>();
 	public inboxCount = $state(0);
+	public chatRooms = $state<string[]>([]);
+	public unreadRooms = new SvelteSet<string>();
 
 	setInboxCount(count: number) {
 		this.inboxCount = count;
+		this.refreshChatRooms();
+	}
+
+	async refreshChatRooms() {
+		try {
+			const rooms = await DB.chat.getAll();
+			this.chatRooms = rooms.map((room) => room.userId);
+		} catch (error) {
+			console.error("Failed to refresh chat rooms:", error);
+		}
+	}
+
+	async addNewMessage(
+		message: string,
+		roomId: string,
+		fromId: string,
+	): Promise<void> {
+		try {
+			// Add to database
+			await DB.chat.add(message, roomId, fromId);
+
+			// Update UI
+			const currentMessages = this.messages.get(roomId) || [];
+			this.messages.set(roomId, [
+				...currentMessages,
+				{
+					fromId,
+					message,
+					timestamp: Date.now(),
+				},
+			]);
+		} catch (error) {
+			console.error("Failed to add new message:", error);
+			throw error; // Re-throw to handle in the component
+		}
 	}
 
 	async addMessagesFromInbox(
@@ -39,6 +76,9 @@ export class ChatState {
 					// Add message to the sender's chat room, with sender as fromId
 					await DB.chat.add(msg.message, sender, sender);
 				}
+				// Add to unread rooms
+				this.unreadRooms.add(sender);
+
 				// Reload messages in the UI if we're viewing this sender's chat
 				if (this.messages.has(sender)) {
 					await this.loadMessages(sender);
@@ -98,6 +138,10 @@ export class ChatState {
 
 	isLoading(roomId: string): boolean {
 		return this.loading.get(roomId) || false;
+	}
+
+	markRoomAsRead(roomId: string) {
+		this.unreadRooms.delete(roomId);
 	}
 }
 

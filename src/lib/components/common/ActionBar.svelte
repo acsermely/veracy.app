@@ -8,6 +8,7 @@
 	} from "lucide-svelte";
 	import { link } from "svelte-routing";
 	import { getFeedState } from "../../state";
+	import { getChatState } from "../../state/chat.svelte";
 	import { getWalletState } from "../../state/wallet.svelte";
 	import AccountDialog from "../dialogs/account/AccountDialog.svelte";
 	import BucketDialog from "../dialogs/bucket/BucketDialog.svelte";
@@ -19,6 +20,7 @@
 
 	const walletState = getWalletState();
 	const feedState = getFeedState();
+	const chatState = getChatState();
 </script>
 
 <div
@@ -73,7 +75,18 @@
 	</a>
 	{#if walletState.wallet?.address}
 		<a href="/chat" use:link class="flex md:gap-4 md:p-5">
-			<MessageSquare size="28" />
+			<div class="relative">
+				<MessageSquare size="28" />
+				{#if chatState.inboxCount > 0}
+					<div
+						class="absolute pr-[2px] p-[1px] -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-fit h-fit min-w-5 min-h-5 flex items-center justify-center"
+					>
+						{chatState.inboxCount > 99
+							? "99+"
+							: chatState.inboxCount}
+					</div>
+				{/if}
+			</div>
 			<span class="hidden md:block">Chat</span>
 		</a>
 	{/if}

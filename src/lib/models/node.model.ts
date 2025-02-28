@@ -6,6 +6,7 @@ export type NodeInfo = {
 };
 
 export type InboxMessage = {
+	id: number;
 	user: string;
 	sender: string;
 	message: string;

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ModeWatcher } from "mode-watcher";
 	import { Route, Router } from "svelte-routing";
+	import { toast } from "svelte-sonner";
 	import Chat from "./lib/components/chat/Chat.svelte";
 	import ActionBar from "./lib/components/common/ActionBar.svelte";
 	import PrivacyPolicy from "./lib/components/common/PrivacyPolicy.svelte";
@@ -32,6 +33,28 @@
 	const chatState = setChatState();
 
 	let url = $state("");
+	let pollInterval: number | undefined;
+
+	$effect(() => {
+		// Start polling every minute
+		pollInterval = window.setInterval(() => {
+			nodeState.getNodeInfo().then((data) => {
+				const newCount = data.inboxCount || 0;
+				if (newCount > chatState.inboxCount) {
+					toast.success(`You have ${newCount} new messages`);
+				}
+				chatState.setInboxCount(newCount);
+			});
+		}, 30000);
+
+		// Cleanup on destroy
+		return () => {
+			if (pollInterval) {
+				clearInterval(pollInterval);
+				pollInterval = undefined;
+			}
+		};
+	});
 
 	$effect(() => {
 		if (["/terms-of-use", "/privacy-policy"].includes(location.pathname)) {
@@ -43,7 +66,11 @@
 			.then((data) => {
 				appState.imageSize = data.imageSize;
 				appState.imageWidth = data.imageWidth;
-				chatState.setInboxCount(data.inboxCount || 0);
+				const newCount = data.inboxCount || 0;
+				if (newCount > 0) {
+					toast.success(`You have ${newCount} new messages`);
+				}
+				chatState.setInboxCount(newCount);
 			})
 			.catch(() => {
 				dialogState.connectDialog = true;

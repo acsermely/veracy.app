@@ -17,7 +17,26 @@
 
 	let userProfile = $state<{ username?: string; img?: string }>();
 	let loadingProfile = $state(true);
-	let sidebarOpen = $state(false);
+	let sidebarOpen = $state(!id);
+	let pollInterval: number | undefined;
+
+	// Setup polling interval
+	$effect(() => {
+		// Start polling
+		pollInterval = window.setInterval(() => {
+			nodeState.getNodeInfo().then((data) => {
+				chatState.setInboxCount(data.inboxCount || 0);
+			});
+		}, 5000);
+
+		// Cleanup on destroy
+		return () => {
+			if (pollInterval) {
+				clearInterval(pollInterval);
+				pollInterval = undefined;
+			}
+		};
+	});
 
 	$effect(() => {
 		if (id) {
@@ -30,6 +49,10 @@
 				.finally(() => {
 					loadingProfile = false;
 				});
+			// Mark room as read when opened
+			chatState.markRoomAsRead(id);
+		} else {
+			sidebarOpen = true;
 		}
 	});
 
@@ -38,7 +61,7 @@
 			nodeState.getMessages().then((messages) =>
 				chatState.addMessagesFromInbox(messages).then(() => {
 					nodeState.markMessagesAsSaved(
-						messages.map((message) => message.timestamp),
+						messages.map((message) => message.id),
 					);
 				}),
 			);
@@ -76,7 +99,7 @@
 	<!-- Chat Area -->
 	{#if id}
 		<div class="flex-1 flex flex-col p-4 gap-4 overflow-hidden lg:pl-4">
-			<div class="flex items-center mt-12 lg:mt-0">
+			<div class="flex items-center ml-12 lg:mt-0">
 				{#if loadingProfile}
 					<Skeleton class="size-10 rounded-full" />
 					<div class="flex flex-col gap-1 ml-3">
@@ -113,7 +136,9 @@
 			<ChatRoom roomId={id} />
 		</div>
 	{:else}
-		<div class="flex-1 flex items-center justify-center text-secondary">
+		<div
+			class="flex-1 flex items-center justify-center text-muted-foreground"
+		>
 			Select a user to start chatting
 		</div>
 	{/if}

@@ -157,19 +157,27 @@
 					class="flex justify-center items-center gap-3 flex-col"
 				>
 					{#if !isMe}
-						<Button
-							variant="secondary"
-							onclick={() => {
-								const action = isFollowing
-									? DB.friend.remove(walletId)
-									: DB.friend.add(walletId);
-								action
-									.then(checkFriends)
-									.catch(() =>
-										toast.warning("Failed to Follow!"),
-									);
-							}}>{isFollowing ? "Unfollow" : "Follow"}</Button
-						>
+						<div class="flex flex-col gap-2">
+							<Button
+								variant="secondary"
+								onclick={() => {
+									const action = isFollowing
+										? DB.friend.remove(walletId)
+										: DB.friend.add(walletId);
+									action
+										.then(checkFriends)
+										.catch(() =>
+											toast.warning("Failed to Follow!"),
+										);
+								}}>{isFollowing ? "Unfollow" : "Follow"}</Button
+							>
+							<Button
+								variant="outline"
+								onclick={() => {
+									navigate(`/chat/${walletId}`);
+								}}>Message</Button
+							>
+						</div>
 					{:else}
 						<div
 							class=" flex border-2 rounded-full py-1 px-4 text-sm"

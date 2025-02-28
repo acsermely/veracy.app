@@ -566,7 +566,12 @@ export class DB {
 							].timestamp.toString()
 						: undefined;
 
-				return { messages: paginatedMessages, nextCursor };
+				return {
+					messages: paginatedMessages.sort(
+						(a, b) => a.timestamp - b.timestamp,
+					),
+					nextCursor,
+				};
 			});
 		},
 	};

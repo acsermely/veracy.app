@@ -193,7 +193,7 @@ export class ContentNode {
 			"Content-Type": "application/json",
 			...(token ? { Authorization: `Bearer ${token}` } : {}),
 		};
-		return fetch(`${this.url}/sendMessage`, {
+		return fetch(`${this.url}/sendMessages`, {
 			method: "POST",
 			headers,
 			body: JSON.stringify({
@@ -208,17 +208,18 @@ export class ContentNode {
 		});
 	};
 
-	markMessagesAsSaved = async (timestamps: string[]): Promise<Response> => {
+	markMessagesAsSaved = async (messageIds: number[]): Promise<Response> => {
 		const token = localStorage.getItem(STORAGE_TOKEN);
 		const headers = {
 			"Content-Type": "application/json",
 			...(token ? { Authorization: `Bearer ${token}` } : {}),
 		};
+
 		return fetch(`${this.url}/savedMessages`, {
 			method: "POST",
 			headers,
 			body: JSON.stringify({
-				timestamps,
+				messageIds,
 			}),
 		}).then((response) => {
 			if (response.ok) {
