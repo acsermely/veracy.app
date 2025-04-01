@@ -11,7 +11,7 @@ export default defineConfig({
 		VitePWA({
 			registerType: "autoUpdate",
 			workbox: {
-				navigateFallbackDenylist: [/landing*/],
+				navigateFallbackDenylist: [/landing*/, /v2-test*/],
 			},
 			manifest: {
 				name: "Veracy",
